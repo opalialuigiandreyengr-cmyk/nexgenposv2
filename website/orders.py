@@ -563,6 +563,14 @@ def get_table_order_counts():
 @orders.route("/stream_orders")
 @login_required
 def stream_orders():
+    # Cloud web servers (PythonAnywhere WSGI) do not support 5-minute persistent socket streaming
+    if os.environ.get("PYTHONANYWHERE_DOMAIN"):
+        def cloud_stream():
+            yield "data: sse_disabled_cloud\n\n"
+        resp = Response(cloud_stream(), mimetype="text/event-stream")
+        resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
     def event_stream():
         # Create a queue for this client
         client_queue = []
@@ -577,7 +585,6 @@ def stream_orders():
             
             while True:
                 # Check for pending messages without holding the lock while yielding.
-                # Holding the lock across a streaming yield can delay new order notifications.
                 with sse_lock:
                     if client_queue:
                         message = client_queue.pop(0)
@@ -585,8 +592,9 @@ def stream_orders():
                         message = "heartbeat"
 
                 yield f"data: {message}\n\n"
-                 
                 time.sleep(1)
+        except (OSError, GeneratorExit, IOError, Exception):
+            pass
         finally:
             # Remove client when disconnected
             with sse_lock:
