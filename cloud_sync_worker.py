@@ -139,6 +139,11 @@ def _worker_loop(app):
 
 def start_cloud_sync_worker(app) -> None:
     """Start the cloud sync daemon thread if not already running."""
+    import os
+    if os.environ.get("PYTHONANYWHERE_DOMAIN") or os.environ.get("DISABLE_CLOUD_SYNC_WORKER") == "1":
+        logger.info("[CloudSync] Cloud environment detected. Sync worker daemon skipped.")
+        return
+
     global _worker_thread
     if _worker_thread is not None and _worker_thread.is_alive():
         return

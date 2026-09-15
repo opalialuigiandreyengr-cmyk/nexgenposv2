@@ -839,24 +839,37 @@ def create_app():
             
             # Configure RLC files directory for rlc_apps module
             try:
+            except Exception as e:
+                logger.error(f"Error creating database tables: {e}")
+    
+    # Initialize the app
+    try:
+        with app.app_context():
+            init_db()
+            
+            # Configure RLC files directory for rlc_apps module
+            try:
                 from rlc_apps import set_rlc_files_directory
                 set_rlc_files_directory(app.config['RLC_FILES_FOLDER'])
                 logger.info(f"RLC files directory configured: {app.config['RLC_FILES_FOLDER']}")
             except Exception as e:
                 logger.warning(f"Could not configure RLC files directory: {e}")
             
-            # Start background queue processor
-            try:
-                import sys
-                from pathlib import Path
-                project_root = Path(__file__).parent.parent
-                sys.path.insert(0, str(project_root))
-                
-                from unified_background_processor import init_processor
-                init_processor(app, check_interval=20)  # Check every 20 seconds for testing
-                logger.info("Background queue processor started")
-            except Exception as e:
-                logger.warning(f"Could not start background processor: {e}")
+            # Start background queue processor (local POS terminals only, skip on PythonAnywhere / cloud web hosts)
+            if not os.environ.get("PYTHONANYWHERE_DOMAIN") and os.environ.get("DISABLE_BACKGROUND_PROCESSOR") != "1":
+                try:
+                    import sys
+                    from pathlib import Path
+                    project_root = Path(__file__).parent.parent
+                    sys.path.insert(0, str(project_root))
+                    
+                    from unified_background_processor import init_processor
+                    init_processor(app, check_interval=20)
+                    logger.info("Background queue processor started")
+                except Exception as e:
+                    logger.warning(f"Could not start background processor: {e}")
+            else:
+                logger.info("Cloud environment detected: skipping local background queue processor")
                 
         logger.info("Application initialized successfully")
     except Exception as e:
