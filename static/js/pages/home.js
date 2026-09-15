@@ -135,9 +135,11 @@ function pollPrinter(role) {
       }
     })
     .catch((error) => {
-      console.error('Error checking printer status:', error);
+      if (error && error.name !== 'AbortError') {
+        console.warn('Printer status check unavailable:', error.message || error);
+      }
       state.lastStatus = 'disconnected';
-      setPrinterState(role, 'disconnected', `${role === 'kitchen' ? 'Kitchen' : 'Cashier'} Printer: Status check failed`);
+      setPrinterState(role, 'disconnected', `${role === 'kitchen' ? 'Kitchen' : 'Cashier'} Printer: Offline`);
     })
     .finally(() => {
       window.clearTimeout(timeoutId);

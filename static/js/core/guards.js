@@ -37,7 +37,9 @@ export function guardPrinter() {
           .then(() => resolve(false));
       })
       .catch((error) => {
-        console.error('Error checking printer status:', error);
+        if (error && error.name !== 'AbortError') {
+          console.warn('Printer connection check unavailable:', error.message || error);
+        }
         modal
           .error('Printer Connection Required', 'Please ensure your printer is connected and ready.', {
             confirmLabel: 'I understand',
