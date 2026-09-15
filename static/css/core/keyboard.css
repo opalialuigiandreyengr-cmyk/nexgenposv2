@@ -1,0 +1,408 @@
+/* =============================================================================
+   css/core/keyboard.css — on-screen keyboard (core/keyboard.js)
+   -----------------------------------------------------------------------------
+   Loaded by every view that opens the keyboard (register, settlement).
+   The modal is a dark instrument chip in BOTH themes (design invariant,
+   like the navbar and the Operational Ticker): keys are --nav-bg family,
+   numerals are mono, the sole warm accent is the amber OK / active shift.
+   ========================================================================== */
+.keyboard-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) ease;
+}
+
+.keyboard-modal:not(.active),
+.keyboard-modal.closing {
+  opacity: 0;
+  pointer-events: none !important;
+  display: none !important;
+}
+
+.keyboard-modal.active {
+  opacity: 1;
+  pointer-events: auto !important;
+  display: flex !important;
+}
+
+.keyboard-content {
+  width: min(500px, calc(100vw - 2rem));
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* --- Display --------------------------------------------------------------- */
+.keyboard-display {
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  color: var(--text-main);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.keyboard-display-value {
+  color: var(--text-main);
+}
+.keyboard-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.25em;
+  background: var(--color-accent);
+  animation: kb-cursor-blink 1s steps(1) infinite;
+}
+@keyframes kb-cursor-blink {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+/* --- Key rows (full layout) ------------------------------------------------ */
+.keyboard-keys {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.375rem;
+}
+.keyboard-key {
+  min-height: 2.75rem;
+  padding: 0 0.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease;
+}
+.keyboard-key:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+.keyboard-key:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+.keyboard-key.wide {
+  grid-column: span 2;
+}
+.keyboard-key.space {
+  grid-column: span 4;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+}
+.keyboard-key.shift-key,
+.keyboard-key.shift-key.active {
+  background: var(--color-accent);
+  color: #FFFFFF;
+  border-color: transparent;
+  font-weight: 600;
+}
+.keyboard-key.enter-key {
+  background: var(--color-primary);
+  color: #FFFFFF;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+/* --- User picker ----------------------------------------------------------- */
+.keyboard-user-results {
+  max-height: 220px;
+  overflow-y: auto;
+  display: none;
+  padding: 0.25rem 0;
+}
+.keyboard-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  margin-bottom: 0.375rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-inset);
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) ease, background var(--dur-fast) ease;
+}
+.keyboard-user-btn:hover {
+  border-color: var(--color-primary);
+  background: var(--bg-hover);
+}
+.keyboard-user-avatar {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: #06251f;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+.keyboard-user-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.keyboard-user-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.keyboard-user-role {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+  font-family: var(--font-mono);
+}
+.keyboard-user-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 1.25rem;
+  font-size: 0.85rem;
+}
+
+/* --- Actions (full layout) ------------------------------------------------- */
+.keyboard-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.keyboard-btn {
+  min-width: 7rem;
+  min-height: 2.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease;
+}
+.keyboard-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+.keyboard-cancel {
+  background: transparent;
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+.keyboard-cancel:hover {
+  background: var(--bg-inset);
+}
+.keyboard-ok {
+  background: var(--color-primary);
+  color: #FFFFFF;
+}
+.keyboard-ok:hover {
+  background: color-mix(in srgb, var(--color-primary) 88%, #000);
+}
+
+/* --- Cash / numeric layout ------------------------------------------------- */
+.keyboard-cash-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1rem;
+}
+.keyboard-cash-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-width: 0;
+}
+.keyboard-cash-display-box {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+.keyboard-cash-display-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.keyboard-cash-display-value-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  min-height: 2.4rem;
+}
+.keyboard-cash-display-value {
+  font-family: var(--font-mono);
+  font-size: 1.9rem;
+  color: var(--text-main);
+}
+.keyboard-cash-numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.375rem;
+}
+.keyboard-cash-numpad-key {
+  min-height: 2.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease;
+}
+.keyboard-cash-numpad-key:hover {
+  background: var(--bg-hover);
+}
+.keyboard-cash-numpad-key.cash-clear-key {
+  color: var(--color-error);
+  font-weight: 600;
+}
+.keyboard-cash-numpad-key.cash-backspace-key {
+  color: #FFFFFF;
+  background: var(--color-error);
+  font-weight: 600;
+}
+.keyboard-cash-numpad-key.cash-backspace-key:hover {
+  background: color-mix(in srgb, var(--color-error) 85%, #000);
+}
+.keyboard-cash-section-title {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.keyboard-cash-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.375rem;
+}
+.keyboard-cash-preset-btn {
+  min-height: 2.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) ease, background var(--dur-fast) ease;
+}
+.keyboard-cash-preset-btn:hover {
+  border-color: var(--color-primary);
+  background: var(--bg-inset);
+}
+.keyboard-cash-action-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.keyboard-cash-ok-cancel-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.keyboard-cash-ok-cancel-row .keyboard-cash-action-btn {
+  flex: 1;
+}
+
+.keyboard-cash-exact-btn {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border: 1px solid #2563EB;
+  border-radius: var(--radius-md);
+  background: #2563EB;
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease;
+}
+.keyboard-cash-exact-btn:hover {
+  background: #1D4ED8;
+}
+.keyboard-cash-action-btn {
+  flex: 1;
+  min-height: 2.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease;
+}
+.keyboard-cash-action-btn.btn-exact-amount {
+  background: var(--bg-inset);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+.keyboard-cash-action-btn.btn-exact-amount:hover {
+  border-color: var(--color-accent);
+  background: var(--bg-hover);
+}
+.keyboard-cash-action-btn.btn-cash-ok {
+  background: var(--color-primary);
+  color: #FFFFFF;
+}
+.keyboard-cash-action-btn.btn-cash-ok:hover {
+  background: color-mix(in srgb, var(--color-primary) 88%, #000);
+}
+.keyboard-cash-action-btn.btn-cash-cancel {
+  background: transparent;
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+.keyboard-cash-action-btn.btn-cash-cancel:hover {
+  background: var(--bg-inset);
+}
+
+@media (max-width: 639px) {
+  .keyboard-cash-layout {
+    grid-template-columns: 1fr;
+  }
+  .keyboard-keys {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .keyboard-key.space {
+    grid-column: span 3;
+  }
+  .keyboard-content {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+  }
+}

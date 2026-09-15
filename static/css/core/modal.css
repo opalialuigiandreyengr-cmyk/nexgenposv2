@@ -1,0 +1,579 @@
+/* ==========================================================================
+   core/modal.css — global error modal theme
+   ---------------------------------------------------------------------------
+   Themed error modal (radius-lg, no close button, error palette).
+   Loaded via shell.html / pos_shell.html so every page can use modal.error().
+   ========================================================================== */
+
+/* Preserve root scroll container so sticky sidebar remains sticky when modal opens */
+body:has(.lib-modal-overlay.open) {
+  overscroll-behavior: contain;
+}
+html:has(.lib-modal-overlay.open) {
+  overscroll-behavior: contain;
+}
+
+/* Host element for all dynamic modals */
+#modal-host {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99990 !important;
+  pointer-events: none !important;
+}
+
+#modal-host > * {
+  pointer-events: auto;
+}
+
+#modal-host > *:not(.open):not(.active) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Base modal overlay styling & flex centering */
+.lib-modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99995 !important;
+  display: flex;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  overflow: hidden !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lib-modal-overlay:not(.open),
+.lib-modal-overlay.d-none,
+.lib-modal-overlay[hidden],
+.lib-modal-overlay.is-hidden,
+.d-none {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.lib-modal-overlay::-webkit-scrollbar {
+  display: none;
+}
+
+.lib-modal-box {
+  margin: auto !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  background: var(--bg-card, #151515) !important;
+  color: var(--text-primary, #e2e8f0) !important;
+  border: 1px solid var(--border-color, #2a2a3e) !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75) !important;
+}
+
+.lib-modal-title {
+  color: var(--text-primary, #ffffff) !important;
+}
+
+/* ==========================================================================
+   Custom Auto-Hiding Scrollbars for Modals (Error, Warning & Custom)
+   ========================================================================== */
+.lib-modal-box,
+.lib-modal-error-text,
+.lib-modal-warning-text,
+.od-timeline-modal-body,
+.auth-panel {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.lib-modal-box:hover,
+.lib-modal-box:focus-within,
+.lib-modal-error-text:hover,
+.lib-modal-warning-text:hover,
+.od-timeline-modal-body:hover,
+.auth-panel:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.lib-modal-box::-webkit-scrollbar,
+.lib-modal-error-text::-webkit-scrollbar,
+.lib-modal-warning-text::-webkit-scrollbar,
+.od-timeline-modal-body::-webkit-scrollbar,
+.auth-panel::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.lib-modal-box::-webkit-scrollbar-track,
+.lib-modal-error-text::-webkit-scrollbar-track,
+.lib-modal-warning-text::-webkit-scrollbar-track,
+.od-timeline-modal-body::-webkit-scrollbar-track,
+.auth-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lib-modal-box::-webkit-scrollbar-thumb,
+.lib-modal-error-text::-webkit-scrollbar-thumb,
+.lib-modal-warning-text::-webkit-scrollbar-thumb,
+.od-timeline-modal-body::-webkit-scrollbar-thumb,
+.auth-panel::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+  transition: background 0.3s ease;
+}
+
+.lib-modal-box:hover::-webkit-scrollbar-thumb,
+.lib-modal-box:focus-within::-webkit-scrollbar-thumb,
+.lib-modal-error-text:hover::-webkit-scrollbar-thumb,
+.lib-modal-warning-text:hover::-webkit-scrollbar-thumb,
+.od-timeline-modal-body:hover::-webkit-scrollbar-thumb,
+.auth-panel:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.lib-modal-box::-webkit-scrollbar-thumb:hover,
+.lib-modal-error-text::-webkit-scrollbar-thumb:hover,
+.lib-modal-warning-text::-webkit-scrollbar-thumb:hover,
+.od-timeline-modal-body::-webkit-scrollbar-thumb:hover,
+.auth-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary, #3b82f6);
+}
+
+/* Override njx themed overlay — use default dark overlay instead of red */
+.lib-modal-overlay:has(.lib-modal-box.is-error) {
+  background: #000000a6;
+  z-index: 99998 !important;
+  overflow: hidden;
+}
+
+.lib-modal-error {
+  width: 420px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-error);
+  background: var(--bg-card, var(--color-dark-secondary, #151515));
+  overflow: hidden;
+  position: relative;
+  z-index: 99999;
+}
+
+.lib-modal-error-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--color-error);
+}
+
+.lib-modal-error-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-error-100, rgba(212, 57, 57, 0.12));
+  color: var(--color-error);
+}
+
+.lib-modal-error-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.lib-modal-error-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  overflow-y: auto;
+  max-height: 50vh;
+}
+
+/* Hide close (X) button when error modal is present */
+.lib-modal-error .lib-modal-close {
+  display: none;
+}
+
+/* Error-themed OK button — full width */
+.lib-modal-error .btn-error {
+  width: 100%;
+  background: var(--color-error);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.lib-modal-error .btn-error:hover {
+  background: color-mix(in srgb, var(--color-error) 85%, #000);
+}
+
+.lib-modal-error .btn-error:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* ==========================================================================
+   Warning Modal — themed for auth prompts, confirmations, info warnings
+   ========================================================================== */
+
+/* Override njx themed overlay — use default dark overlay */
+.lib-modal-overlay:has(.lib-modal-box.is-warning) {
+  background: #000000a6;
+}
+
+.lib-modal-warning {
+  width: 420px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-warning);
+  background: var(--bg-card, var(--color-dark-secondary, #151515));
+  overflow: hidden;
+}
+
+.lib-modal-warning-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--color-warning);
+}
+
+.lib-modal-warning-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 221, 0, 0.12);
+  color: var(--color-warning);
+}
+
+.lib-modal-warning-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.lib-modal-warning-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+/* Hide close (X) button */
+.lib-modal-warning .lib-modal-close {
+  display: none;
+}
+
+/* Warning modal actions — confirm + cancel side by side */
+.lib-modal-warning-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.lib-modal-warning-actions .btn-warning {
+  flex: 1;
+  background: var(--color-warning);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.lib-modal-warning-actions .btn-warning:hover {
+  background: color-mix(in srgb, var(--color-warning) 85%, #000);
+}
+
+.lib-modal-warning-actions .btn-warning:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.lib-modal-warning-cancel {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  padding: 0.65rem 1.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.lib-modal-warning-cancel:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lib-modal-warning-cancel:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* ==========================================================================
+   Success Modal — themed for positive confirmations (item cancelled, printed)
+   ========================================================================== */
+
+/* Override overlay — use default dark overlay */
+.lib-modal-overlay:has(.lib-modal-box.is-success) {
+  background: #000000a6;
+  z-index: 99998 !important;
+  overflow: hidden;
+}
+
+.lib-modal-success {
+  width: 420px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-success, #22c55e);
+  background: var(--bg-card, var(--color-dark-secondary, #151515));
+  overflow: hidden;
+  position: relative;
+  z-index: 99999;
+}
+
+.lib-modal-success-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--color-success, #22c55e);
+}
+
+.lib-modal-success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--color-success, #22c55e);
+}
+
+.lib-modal-success-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.lib-modal-success-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  overflow-y: auto;
+  max-height: 50vh;
+  white-space: pre-line;
+}
+
+/* Hide close (X) button */
+.lib-modal-success .lib-modal-close {
+  display: none;
+}
+
+/* Success-themed OK button — full width */
+.lib-modal-success .btn-success-modal {
+  width: 100%;
+  background: var(--color-success, #22c55e);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--dur-fast, 150ms) var(--ease-out, ease);
+}
+
+.lib-modal-success .btn-success-modal:hover {
+  background: color-mix(in srgb, var(--color-success, #22c55e) 85%, #000);
+}
+
+.lib-modal-success .btn-success-modal:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+}
+
+/* Scrollbar tint for success text */
+.lib-modal-success-text {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+.lib-modal-success-text:hover {
+  scrollbar-color: rgba(34, 197, 94, 0.25) transparent;
+}
+.lib-modal-success-text::-webkit-scrollbar { width: 5px; }
+.lib-modal-success-text::-webkit-scrollbar-track { background: transparent; }
+.lib-modal-success-text::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+}
+.lib-modal-success-text:hover::-webkit-scrollbar-thumb {
+  background: rgba(34, 197, 94, 0.25);
+}
+
+
+/* ==========================================================================
+   Auth Modal — tabs, credential form, swipe panel (used by PAX unlock, etc.)
+   ========================================================================== */
+
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-top: 0.6rem;
+  margin-bottom: 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.auth-tab:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.auth-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.auth-panel {
+  margin-top: 0.65rem;
+}
+
+.auth-swipe-waiting {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.auth-swipe-hint {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.auth-field label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.auth-field input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: var(--bg-card, rgba(255,255,255,0.04));
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.auth-field input:focus {
+  border-color: var(--color-warning);
+}
+
+.auth-field input::placeholder {
+  color: var(--color-muted);
+}
+
+/* ==========================================================================
+   Global Cancel / Secondary Button Border System
+   ========================================================================== */
+.btn-ghost,
+.btn-secondary,
+.btn-cancel,
+.lib-modal-warning-cancel,
+.lib-modal-actions .btn-ghost,
+.lib-modal-actions .btn-secondary,
+[data-action="cancel"] {
+  border: 1px solid var(--border-default, var(--border-color, rgba(255, 255, 255, 0.18))) !important;
+}
+
+.btn-ghost:hover,
+.btn-secondary:hover,
+.btn-cancel:hover,
+.lib-modal-warning-cancel:hover {
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.35)) !important;
+  background: var(--surface-hover, rgba(255, 255, 255, 0.08)) !important;
+}

@@ -1,0 +1,657 @@
+/* ============================================================================
+   end_of_day.css — Compact & Modern Cashier EOD Dashboard (POS_V2, Phase 7)
+   ============================================================================ */
+
+.eod-spacious-container {
+  width: 100%;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 0.85rem 1rem 1.5rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--text-main);
+  background: var(--bg-main);
+  box-sizing: border-box;
+}
+
+/* Header Bar */
+.eod-spacious-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.eod-spacious-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  display: block;
+  margin-bottom: 0.1rem;
+}
+
+.eod-spacious-title {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.eod-spacious-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.eod-meta-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.7rem;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.eod-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.eod-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.eod-btn-back:hover {
+  background: var(--bg-card);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Grid Layout */
+.eod-spacious-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .eod-spacious-container {
+    max-width: 100%;
+    padding: 0.85rem 1rem 0;
+  }
+
+  .eod-spacious-grid {
+    grid-template-columns: 300px 1fr;
+    gap: 0.85rem;
+  }
+}
+
+@media (max-width: 991px) {
+  .eod-spacious-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.eod-col-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Cards (Paddings matching orders.css) */
+.eod-clean-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.eod-card-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.eod-card-head-title {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.eod-card-head-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0.1rem 0 0 0;
+}
+
+/* Status Pills */
+.eod-pill {
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.eod-pill.pill-ready {
+  background: color-mix(in srgb, #10b981 15%, transparent);
+  color: #10b981;
+  border: 1px solid color-mix(in srgb, #10b981 35%, transparent);
+}
+
+/* Metric Display */
+.eod-metric-row {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 0.55rem;
+}
+
+.eod-metric-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.eod-metric-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0.1rem 0;
+  line-height: 1.1;
+}
+
+.eod-metric-caption {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Quick Print Buttons Stack */
+.eod-quick-print-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.eod-print-row-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--dur-fast) var(--ease-out);
+  width: 100%;
+}
+
+.eod-print-row-btn:hover {
+  background: var(--bg-card);
+  transform: translateX(3px);
+  border-color: var(--color-primary);
+}
+
+.eod-print-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eod-print-icon.icon-amber {
+  background: color-mix(in srgb, #f59e0b 15%, transparent);
+  color: #d97706;
+}
+
+.eod-print-icon.icon-teal {
+  background: color-mix(in srgb, #0d9488 15%, transparent);
+  color: #0d9488;
+}
+
+.eod-print-icon.icon-emerald {
+  background: color-mix(in srgb, #10b981 15%, transparent);
+  color: #059669;
+}
+
+.eod-print-icon.icon-slate {
+  background: color-mix(in srgb, #64748b 15%, transparent);
+  color: #475569;
+}
+
+.eod-print-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.eod-print-title {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.eod-print-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Primary Action Card */
+.eod-clean-card.card-primary-action {
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--bg-card));
+  border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
+
+.eod-primary-buttons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .eod-primary-buttons-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.eod-big-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--dur-fast) var(--ease-out);
+  width: 100%;
+}
+
+.eod-btn-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eod-big-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.eod-big-action-btn.btn-danger-action {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.eod-big-action-btn.btn-danger-action:hover {
+  background: #dc2626;
+}
+
+.eod-big-action-btn.btn-success-action {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.eod-big-action-btn.btn-success-action:hover {
+  background: #059669;
+}
+
+.eod-big-btn-title {
+  display: block;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.eod-big-btn-sub {
+  display: block;
+  font-size: 0.71rem;
+  opacity: 0.9;
+  line-height: 1.2;
+  margin-top: 0.1rem;
+}
+
+/* Archive Viewer Controls & Box */
+.eod-archive-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.eod-date-field {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.eod-date-field label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.eod-date-input {
+  padding: 0.3rem 0.55rem;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-size: 0.78rem;
+}
+
+.eod-btn-load {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.eod-archive-display {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  min-height: 140px;
+  max-height: 190px;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  color: var(--text-main);
+}
+
+.eod-archive-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.eod-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.eod-btn-outline:hover {
+  background: var(--bg-card);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+body.modal-open,
+body.modal-open .shell,
+body.modal-open .shell-main {
+  overflow: hidden !important;
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  overflow-y: auto;
+  padding: 1.5rem 1rem;
+  box-sizing: border-box;
+}
+
+.eod-spacious-modal {
+  width: 100%;
+  max-width: 480px;
+  margin: auto;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  box-shadow: var(--shadow-lg);
+  box-sizing: border-box;
+}
+
+.eod-modal-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.eod-modal-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eod-modal-icon-wrap.icon-red {
+  background: color-mix(in srgb, #ef4444 15%, transparent);
+  color: #ef4444;
+}
+
+.eod-modal-icon-wrap.icon-emerald {
+  background: color-mix(in srgb, #10b981 15%, transparent);
+  color: #10b981;
+}
+
+.eod-modal-icon-wrap.icon-blue {
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+}
+
+.eod-modal-h3 {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.1rem 0;
+}
+
+.eod-modal-p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.eod-modal-x {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.eod-modal-info {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.78rem;
+}
+
+.eod-input-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.eod-input-sub {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin: 0.3rem 0 0 0;
+}
+
+.eod-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.eod-btn-action-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.eod-btn-action-primary.btn-red {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.eod-btn-action-primary.btn-red:hover {
+  background: #dc2626;
+}
+
+.eod-btn-action-primary.btn-emerald {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.eod-btn-action-primary.btn-emerald:hover {
+  background: #059669;
+}
+
+.eod-btn-action-primary.btn-blue {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.eod-btn-action-primary.btn-blue:hover {
+  filter: brightness(1.1);
+}
+
+.eod-btn-action-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.eod-progress-track {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--bg-main);
+  border-radius: var(--radius-md);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.eod-step-item {
+  color: var(--text-muted);
+}
+
+.eod-step-item.active {
+  color: var(--color-primary);
+}
+
+.eod-progress-log {
+  padding: 0.75rem;
+  background: var(--bg-main);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  margin-bottom: 0.85rem;
+}
+
+/* EOD Global Modal Container Polish — fixed, non-scrollable shell */
+#confirmEndOfDayModal .lib-modal-box,
+#progressModal .lib-modal-box,
+#dailyBundleModal .lib-modal-box {
+  max-width: 440px !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}

@@ -1,0 +1,295 @@
+/* =============================================================================
+   css/pages/cashier_accountability.css — Cashier Accountability (Phase 6, Milestone 6.2)
+   ============================================================================= */
+
+.ca-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0;
+  width: 100%;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.ca-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.ca-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.ca-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.ca-back-link:hover {
+  color: var(--color-primary);
+}
+
+.ca-breadcrumb-sep {
+  color: var(--border-color);
+}
+
+.ca-breadcrumb-cur {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.ca-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem 0;
+}
+
+.ca-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 680px;
+  line-height: 1.45;
+}
+
+.ca-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.ca-date-input {
+  height: 38px;
+  padding: 0 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+}
+
+.ca-btn-today {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 38px;
+  padding: 0 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  background: var(--bg-elev);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.ca-btn-today:hover {
+  background: var(--bg-hover);
+  border-color: var(--color-primary);
+}
+
+.ca-btn-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 38px;
+  padding: 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: #ffffff;
+  cursor: pointer;
+  transition: filter var(--dur-fast) var(--ease-out);
+}
+
+.ca-btn-print:hover {
+  filter: brightness(1.12);
+}
+
+/* ── KPI Grid ───────────────────────────────────────────────────────────── */
+.ca-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.ca-kpi-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.15rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.ca-kpi-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.ca-kpi-val {
+  font-family: var(--font-mono);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.ca-kpi-sub {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.text-amber { color: #f59e0b !important; }
+.text-emerald { color: #10b981 !important; }
+.text-blue { color: #3b82f6 !important; }
+
+/* ── Sheet Container ─────────────────────────────────────────────────────── */
+.ca-sheet-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.ca-sheet {
+  max-width: 820px;
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.25rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.ca-sheet-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  border-bottom: 2px dashed var(--border-color);
+  padding-bottom: 1.25rem;
+}
+
+.ca-store-title {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--text-main);
+  letter-spacing: 0.05em;
+}
+
+.ca-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem 1.5rem;
+  font-size: 0.84rem;
+  color: var(--text-main);
+}
+
+.ca-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ca-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ca-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.ca-table th {
+  padding: 0.55rem 0.65rem;
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ca-table td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.ca-total-row td {
+  border-top: 1px solid var(--text-main);
+  border-bottom: 2px solid var(--text-main);
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.font-mono { font-family: var(--font-mono); }
+
+/* ── Signatures ─────────────────────────────────────────────────────────── */
+.ca-sign-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--border-color);
+}
+
+.ca-sign-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ca-sign-line {
+  width: 80%;
+  height: 1px;
+  background: var(--border-color);
+  margin-bottom: 0.25rem;
+}
+
+.ca-sign-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}

@@ -1,0 +1,309 @@
+/* =============================================================================
+   css/pos/shell.css — POS-only shell layout (no sidebar, compact top bar)
+   -----------------------------------------------------------------------------
+   Loaded by pos_shell.html after njx.min.css + tokens.css. This is the
+   persistent parent frame for POS pages: skip link, slim top bar (brand +
+   role-based nav + theme toggle + user chip), full-width view outlet.
+   No sidebar, no footer — maximum viewport for shift-critical work.
+
+   The register (pos.html) hides the top bar via pos-register-active on <html>
+   (pos.css rule set) so the instrument owns the whole viewport.
+   ========================================================================== */
+
+html,
+body {
+  height: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* Skip link — visually hidden until focused (WCAG 2.4.1) */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9600;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 var(--radius-md, 8px) 0;
+  background: var(--color-primary);
+  color: var(--color-light);
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+/* Shell frame — single column, no sidebar, locked to viewport */
+.pos-shell-frame {
+  height: 100vh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-main);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pos-shell-frame::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* --- Top bar ---------------------------------------------------------------
+   Slim (48px), dark in both themes (design invariant — same as admin sidebar
+   and admin topbar). Brand left, nav links center-left, actions right. */
+.pos-topbar {
+  flex: none;
+  flex-shrink: 0;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
+}
+
+/* Brand — logo + wordmark */
+.pos-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  flex: none;
+  margin-right: 4px;
+}
+.pos-topbar-logo {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm, 4px);
+  flex: none;
+}
+.pos-topbar-word {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #F8FAFC;
+  white-space: nowrap;
+}
+
+/* Nav links — icon + label, inline row */
+.pos-topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.pos-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md, 8px);
+  color: #94A3B8;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.pos-nav-link .icon {
+  flex: none;
+}
+.pos-nav-link:hover {
+  color: #F8FAFC;
+  background: rgba(148, 163, 184, 0.08);
+}
+.pos-nav-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+.pos-nav-link.is-active {
+  color: #F59E0B;
+  background: color-mix(in srgb, #F59E0B 12%, transparent);
+}
+.pos-nav-label {
+  display: inline;
+}
+
+/* Right actions — theme toggle + user chip */
+.pos-topbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+/* Icon button (theme toggle) */
+.pos-topbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  color: #94A3B8;
+  cursor: pointer;
+  transition: color 0.18s, background 0.18s;
+}
+.pos-topbar-btn:hover {
+  color: #F8FAFC;
+  background: rgba(148, 163, 184, 0.08);
+}
+[data-theme="light"] .pos-topbar-btn .icon-moon {
+  display: none;
+}
+[data-theme="dark"] .pos-topbar-btn .icon-sun {
+  display: none;
+}
+
+/* --- View outlet — full width, no padding, fills remaining space ----- */
+#view-root {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  outline: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge */
+}
+
+/* Completely hide scrollbar for Webkit browsers (Chrome, Edge, Safari) */
+#view-root::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+#view-root h1:focus,
+#view-root h2:focus {
+  outline: none;
+}
+
+/* --- View transition animation (same as admin shell) -------------------- */
+#view-root {
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+}
+
+@keyframes view-zoom-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes view-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+#view-root.view-leaving {
+  animation: view-zoom-out 0.15s ease-in forwards;
+}
+
+#view-root.view-entering {
+  animation: view-zoom-in 0.25s ease-out forwards;
+}
+
+/* --- User chip (dropdown) ------------------------------------------------- */
+.pos-user-chip {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.pos-user-chip::-webkit-details-marker {
+  display: none;
+}
+.pos-user-chip > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: var(--radius-md, 8px);
+  color: #94A3B8;
+  white-space: nowrap;
+  transition: color 0.18s, background 0.18s;
+}
+.pos-user-chip > summary:hover {
+  color: #F8FAFC;
+  background: rgba(148, 163, 184, 0.08);
+}
+.pos-topbar-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-light);
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-light) 22%, transparent);
+  flex-shrink: 0;
+}
+.pos-topbar-username {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+}
+.pos-topbar-role {
+  margin-bottom: 4px;
+  padding: 6px 10px 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  border-bottom: 1px solid var(--nav-border);
+}
+
+/* Dropdown positioning */
+.pos-topbar-actions .dropdown {
+  position: relative;
+}
+
+/* --- Responsive: hide nav labels on narrow viewports (icons only) --------- */
+@media (max-width: 639px) {
+  .pos-nav-label {
+    display: none;
+  }
+  .pos-topbar-word {
+    display: none;
+  }
+  .pos-topbar-username {
+    display: none;
+  }
+  .pos-nav-link {
+    padding: 8px;
+  }
+}

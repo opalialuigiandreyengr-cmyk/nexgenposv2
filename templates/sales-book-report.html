@@ -1,0 +1,151 @@
+{# ============================================================================
+   sales-book-report.html — Statutory Sales Book Reports (Phase 6, Milestone 6.1)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Sales Book Reports - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}sales_book{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/sales_book.css') }}">
+
+<h1 class="sr-only">Statutory Sales Book Reports</h1>
+
+<div class="sb-page" id="salesBookRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="sb-header">
+    <div class="sb-header-left">
+      <div class="sb-breadcrumbs">
+        <a href="/misc" class="sb-back-link">
+          {{ icon('arrow-left', 14) }}
+          <span>Misc Reports</span>
+        </a>
+        <span class="sb-breadcrumb-sep">/</span>
+        <span class="sb-breadcrumb-cur">Sales Books</span>
+      </div>
+      <h2 class="sb-title">Statutory Sales Book Reports</h2>
+      <p class="sb-subtitle">BIR-compliant discount sales books, tax-exempt transaction audits, and regulatory deduction registers.</p>
+    </div>
+  </header>
+
+  {# ── Books Grid ──────────────────────────────────────────────────────── #}
+  <section class="sb-grid" aria-label="Statutory Discount Books">
+    <!-- Card 1: Senior Citizen -->
+    <div class="sb-card sb-card-amber" data-book="senior_citizen">
+      <div class="sb-card-top">
+        <div class="sb-icon-box">{{ icon('users', 22) }}</div>
+        <span class="sb-badge badge-amber">20% SC + 5% BNPC</span>
+      </div>
+      <div class="sb-card-content">
+        <h3 class="sb-card-title">Senior Citizen Sales Book</h3>
+        <p class="sb-card-desc">Comprehensive record of OSCA IDs, senior citizen names, 20% discount totals, and 12% VAT exemption deductions.</p>
+      </div>
+      <div class="sb-card-footer">
+        <button type="button" class="btn sb-btn-download btn-amber" data-action="open-export" data-book="senior_citizen" data-title="Senior Citizen Sales Book" data-endpoint="/export_senior_citizen_sales_book_excel" data-filename="senior_citizen_sales_book.xlsx">
+          {{ icon('file-text', 15) }}
+          <span>Download Book</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 2: PWD -->
+    <div class="sb-card sb-card-blue" data-book="pwd">
+      <div class="sb-card-top">
+        <div class="sb-icon-box">{{ icon('shield', 22) }}</div>
+        <span class="sb-badge badge-blue">20% PWD DISCOUNT</span>
+      </div>
+      <div class="sb-card-content">
+        <h3 class="sb-card-title">Persons with Disability (PWD) Sales Book</h3>
+        <p class="sb-card-desc">Detailed register of PWD ID validations, eligible persons with disability transactions, and VAT-exempt sales totals.</p>
+      </div>
+      <div class="sb-card-footer">
+        <button type="button" class="btn sb-btn-download btn-blue" data-action="open-export" data-book="pwd" data-title="PWD Sales Book" data-endpoint="/export_pwd_sales_book_excel" data-filename="pwd_sales_book.xlsx">
+          {{ icon('file-text', 15) }}
+          <span>Download Book</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 3: Solo Parent -->
+    <div class="sb-card sb-card-pink" data-book="solo_parent">
+      <div class="sb-card-top">
+        <div class="sb-icon-box">{{ icon('user-check', 22) }}</div>
+        <span class="sb-badge badge-pink">RA 11861 SOLO PARENT</span>
+      </div>
+      <div class="sb-card-content">
+        <h3 class="sb-card-title">Solo Parent Sales Book</h3>
+        <p class="sb-card-desc">Statutory register of Republic Act 11861 Solo Parent discount claims, parent ID numbers, and exempted purchase records.</p>
+      </div>
+      <div class="sb-card-footer">
+        <button type="button" class="btn sb-btn-download btn-pink" data-action="open-export" data-book="solo_parent" data-title="Solo Parent Sales Book" data-endpoint="/export_solo_parent_sales_book_excel" data-filename="solo_parent_sales_book.xlsx">
+          {{ icon('file-text', 15) }}
+          <span>Download Book</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 4: National Athletes & Coaches -->
+    <div class="sb-card sb-card-emerald" data-book="national_athlete">
+      <div class="sb-card-top">
+        <div class="sb-icon-box">{{ icon('award', 22) }}</div>
+        <span class="sb-badge badge-emerald">20% NAAC DISCOUNT</span>
+      </div>
+      <div class="sb-card-content">
+        <h3 class="sb-card-title">National Athletes &amp; Coaches Sales Book</h3>
+        <p class="sb-card-desc">Accredited Philippine national athletes and recognized coaches discount claims with official PSC/POC reference numbers.</p>
+      </div>
+      <div class="sb-card-footer">
+        <button type="button" class="btn sb-btn-download btn-emerald" data-action="open-export" data-book="national_athlete" data-title="National Athletes & Coaches Sales Book" data-endpoint="/export_athlete_coaches_sales_book_excel" data-filename="athlete_coaches_sales_book.xlsx">
+          {{ icon('file-text', 15) }}
+          <span>Download Book</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 5: Medal of Valor -->
+    <div class="sb-card sb-card-purple" data-book="medal_of_valor">
+      <div class="sb-card-top">
+        <div class="sb-icon-box">{{ icon('star', 22) }}</div>
+        <span class="sb-badge badge-purple">20% MOV BENEFIT</span>
+      </div>
+      <div class="sb-card-content">
+        <h3 class="sb-card-title">Medal of Valor (MOV) Sales Book</h3>
+        <p class="sb-card-desc">Audit trail of Armed Forces of the Philippines Medal of Valor awardees and dependent beneficiary discount transactions.</p>
+      </div>
+      <div class="sb-card-footer">
+        <button type="button" class="btn sb-btn-download btn-purple" data-action="open-export" data-book="medal_of_valor" data-title="Medal of Valor Sales Book" data-endpoint="/export_mov_sales_book_excel" data-filename="mov_sales_book.xlsx">
+          {{ icon('file-text', 15) }}
+          <span>Download Book</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 6: Regular & Custom Discounts -->
+    <div class="sb-card sb-card-teal" data-book="regular_discount">
+      <div class="sb-card-top">
+        <div class="sb-icon-box">{{ icon('tag', 22) }}</div>
+        <span class="sb-badge badge-teal">PROMO, VIP &amp; CUSTOM</span>
+      </div>
+      <div class="sb-card-content">
+        <h3 class="sb-card-title">Regular &amp; Promotional Discounts Book</h3>
+        <p class="sb-card-desc">Record of store marketing promotions, VIP customer cards, employee concessions, and custom percentage deductions.</p>
+      </div>
+      <div class="sb-card-footer">
+        <button type="button" class="btn sb-btn-download btn-teal" data-action="open-export" data-book="regular_discount" data-title="Regular Discounts Book" data-endpoint="/export_regular_discount_sales_book_excel" data-filename="regular_discount_sales_book.xlsx">
+          {{ icon('file-text', 15) }}
+          <span>Download Book</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  {# ── Compliance Note ─────────────────────────────────────────────────── #}
+  <div class="sb-compliance-note">
+    <div class="sb-note-icon">{{ icon('info', 18) }}</div>
+    <div class="sb-note-body">
+      <strong>Bureau of Internal Revenue (BIR) Compliance Notice:</strong>
+      All exported workbooks comply with BIR Revenue Regulations for sales book reporting and electronic journal verification. Output files include complete business identification, registered machine numbers, and serial audit headers.
+    </div>
+  </div>
+</div>
+{% endblock %}

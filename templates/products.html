@@ -1,0 +1,153 @@
+{# ============================================================================
+   products.html — Product catalog management (Phase 5, Milestone 5.1)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Products - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}products{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/products.css') }}">
+
+<h1 class="sr-only">Products Management</h1>
+
+<div class="prod-page" id="prodPageRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="prod-header">
+    <div class="prod-header-left">
+      <p class="prod-kicker">Menu Management</p>
+      <h2 class="prod-title">Products</h2>
+      <p class="prod-subtitle">Manage your menu catalog, configure prices and packaging, and import bulk items.</p>
+    </div>
+    <div class="prod-header-actions">
+      <button type="button" class="prod-btn-secondary" id="btnExportExcel" title="Export products catalog to Excel workbook (.xlsx)">
+        {{ icon('download', 16) }}
+        <span>Export Excel</span>
+      </button>
+      <button type="button" class="prod-btn-secondary" id="btnImportExcel">
+        {{ icon('file-text', 16) }}
+        <span>Import Excel</span>
+      </button>
+      <button type="button" class="prod-btn-primary" id="btnAddProduct">
+        {{ icon('plus', 16) }}
+        <span>Add Product</span>
+      </button>
+    </div>
+  </header>
+
+  {# ── Metrics Cards ──────────────────────────────────────────────────── #}
+  <section class="prod-stats-row" aria-label="Product Metrics">
+    <div class="prod-stat-card">
+      <div class="prod-stat-icon">
+        {{ icon('box', 20) }}
+      </div>
+      <div class="prod-stat-meta">
+        <span class="prod-stat-label">Total Products</span>
+        <span class="prod-stat-val" id="statTotalCount">0</span>
+      </div>
+    </div>
+    <div class="prod-stat-card">
+      <div class="prod-stat-icon active-stat">
+        {{ icon('check', 20) }}
+      </div>
+      <div class="prod-stat-meta">
+        <span class="prod-stat-label">Active Items</span>
+        <span class="prod-stat-val" id="statActiveCount">0</span>
+      </div>
+    </div>
+    <div class="prod-stat-card">
+      <div class="prod-stat-icon archived-stat">
+        {{ icon('archive', 20) }}
+      </div>
+      <div class="prod-stat-meta">
+        <span class="prod-stat-label">Archived Items</span>
+        <span class="prod-stat-val" id="statArchivedCount">0</span>
+      </div>
+    </div>
+  </section>
+
+  {# ── Filter Toolbar ─────────────────────────────────────────────────── #}
+  <section class="prod-toolbar" aria-label="Product Filters">
+    <div class="prod-filters-left">
+      <div class="prod-search-wrap">
+        {{ icon('search', 16) }}
+        <input type="text" class="prod-input" id="prodSearchInput" placeholder="Search by product name..." autocomplete="off">
+      </div>
+      <select class="prod-select" id="prodCategorySelect" aria-label="Category Filter">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+        <option value="{{ cat }}">{{ cat }}</option>
+        {% endfor %}
+      </select>
+      <select class="prod-select" id="prodPriceRangeSelect" aria-label="Price Range Filter">
+        <option value="">All Prices</option>
+        <option value="0-100">&#8369;0 - &#8369;100</option>
+        <option value="100-300">&#8369;100 - &#8369;300</option>
+        <option value="300-500">&#8369;300 - &#8369;500</option>
+        <option value="500+">&#8369;500+</option>
+      </select>
+      <button type="button" class="prod-reset-btn" id="btnResetFilters" title="Reset Filters">
+        {{ icon('undo', 14) }}
+        <span>Reset</span>
+      </button>
+    </div>
+
+    <div class="prod-status-tabs" role="tablist" aria-label="Status tabs">
+      <button type="button" class="prod-status-tab active" data-status="active">Active</button>
+      <button type="button" class="prod-status-tab" data-status="archived">Archived</button>
+      <button type="button" class="prod-status-tab" data-status="all">All</button>
+    </div>
+  </section>
+
+  {# ── Products Table ─────────────────────────────────────────────────── #}
+  <section class="prod-table-wrap" aria-label="Products Table">
+    <table class="prod-table" id="prodTable">
+      <thead>
+        <tr>
+          <th>Product / SKU</th>
+          <th>Category</th>
+          <th>Cost</th>
+          <th>Selling Price</th>
+          <th>Pax</th>
+          <th>Status</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="prodTableBody">
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+            Loading products catalog...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  {# ── Empty State ────────────────────────────────────────────────────── #}
+  <div class="prod-empty" id="prodEmpty" style="display: none; text-align: center; padding: 3rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+    <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--bg-elev); color: var(--text-muted); margin-bottom: 0.85rem;">
+      {{ icon('box', 28) }}
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.35rem 0;">No products found</h3>
+    <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">Try adjusting your filters or search keywords.</p>
+  </div>
+
+  {# ── Sticky Pagination Footer ────────────────────────────────────────── #}
+  <footer class="prod-pagination" id="prodPagination">
+    <span class="prod-pagination-info" id="prodPaginationInfo">Showing 0 products</span>
+    <div class="prod-pagination-controls" id="prodPaginationControls"></div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Per page:</span>
+      <select class="prod-select" id="prodPerPageSelect" style="height: 32px; padding-top: 0; padding-bottom: 0; font-size: 0.8rem;">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+  </footer>
+</div>
+
+<script type="application/json" id="prodCategoriesData">
+{{ categories|tojson }}
+</script>
+{% endblock %}

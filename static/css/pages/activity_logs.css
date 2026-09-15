@@ -1,0 +1,426 @@
+/* ============================================================================
+   css/pages/activity_logs.css — Activity Logs (Phase 5, Milestone 5.5)
+   ========================================================================== */
+
+#view-root:has(.act-page) {
+  padding: 1.5rem 1.25rem 0;
+}
+
+.act-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-family: var(--font-sans);
+  color: var(--text-main);
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  box-sizing: border-box;
+  min-height: 100%;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.act-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.act-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  margin: 0 0 0.2rem 0;
+}
+
+.act-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.15;
+}
+
+.act-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0.35rem 0 0 0;
+  max-width: 620px;
+}
+
+.act-btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.15rem;
+  background: #10b981;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid #059669;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--dur-fast) var(--ease-out);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.act-btn-export:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+.act-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.act-filters-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: nowrap;
+  flex: 1 1 auto;
+}
+
+.act-range-picker {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.act-search-wrap {
+  position: relative;
+  min-width: 180px;
+  flex: 1 1 200px;
+}
+
+.act-search-wrap .icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.act-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 0.85rem 0 2.25rem;
+  background: var(--bg-input, var(--bg-main));
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+
+.act-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.act-select {
+  height: 38px;
+  padding: 0 1.85rem 0 0.75rem;
+  background: var(--bg-input, var(--bg-main));
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  box-sizing: border-box;
+  cursor: pointer;
+  appearance: none;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+}
+
+.act-btn-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  padding: 0;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.act-btn-reset:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--bg-hover);
+}
+
+/* ── Date Range Popover (Matching All Orders Page) ─────────────────────── */
+.act-range-picker {
+  position: relative;
+}
+
+.act-range-pop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1000;
+  width: 270px;
+  padding: 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.act-cal-hdr,
+.act-cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.act-cal-title {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.act-cal-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-elev);
+  color: var(--text-main);
+  cursor: pointer;
+  padding: 0;
+}
+
+.act-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.act-cal-dow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 0.2rem 0;
+}
+
+.act-cal-day {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 0;
+}
+
+.act-cal-day:hover:not(.out) {
+  background: var(--bg-hover);
+}
+
+.act-cal-day.out {
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+.act-cal-day.today {
+  font-weight: 800;
+  color: var(--color-primary);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+.act-cal-day.sel-start,
+.act-cal-day.sel-end,
+.act-cal-day.range-start,
+.act-cal-day.range-end,
+.act-cal-day.active {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+}
+
+.act-cal-day.in-range {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent) !important;
+  color: var(--text-main);
+  border-radius: 0;
+}
+
+/* ── Logs Table ─────────────────────────────────────────────────────────── */
+.act-table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.act-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.act-table th {
+  padding: 0.75rem 1rem;
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.act-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.85rem;
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.act-table tr:last-child td {
+  border-bottom: none;
+}
+
+.act-table tr:hover td {
+  background: color-mix(in srgb, var(--color-primary) 3%, transparent);
+}
+
+.act-badge-event {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.act-badge-user {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.act-time {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── Sticky Pagination Footer (Matching Products & All Orders Pages) ──── */
+.act-pagination {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+  margin-top: auto;
+}
+
+.act-pagination-info {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.prod-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.prod-page-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-elev);
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.prod-page-btn.active {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.prod-page-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.prod-page-btn:hover:not(.active):not(.disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--bg-hover);
+}
+
+@keyframes actSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,235 @@
+/* ============================================================================
+   css/pages/backup.css — System Backups (Phase 5, Milestone 5.4)
+   ========================================================================== */
+
+#view-root:has(.backup-page) {
+  padding: 1.5rem 1.25rem 0;
+}
+
+.backup-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  font-family: var(--font-sans);
+  color: var(--text-main);
+  width: 100%;
+  max-width: 100%;
+  padding: 0 0 3.5rem 0;
+  box-sizing: border-box;
+  min-height: 100%;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.backup-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.backup-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  margin: 0 0 0.2rem 0;
+}
+
+.backup-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.15;
+}
+
+.backup-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0.35rem 0 0 0;
+  max-width: 620px;
+}
+
+.backup-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.15rem;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 85%, #000);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--dur-fast) var(--ease-out);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.backup-btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* ── Metric Cards ──────────────────────────────────────────────────────── */
+.backup-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.85rem;
+}
+
+.backup-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.backup-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.backup-stat-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.backup-stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.backup-stat-val {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+/* ── Backups Table ──────────────────────────────────────────────────────── */
+.backup-table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.backup-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.backup-table th {
+  padding: 0.75rem 1rem;
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.backup-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.88rem;
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.backup-table tr:last-child td {
+  border-bottom: none;
+}
+
+.backup-table tr:hover td {
+  background: color-mix(in srgb, var(--color-primary) 3%, transparent);
+}
+
+.backup-file-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.backup-file-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.backup-file-name {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+.backup-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.backup-btn-action {
+  height: 32px;
+  padding: 0 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-elev);
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.backup-btn-download {
+  background: #2563eb;
+  color: #fff;
+  border-color: #1d4ed8;
+}
+.backup-btn-download:hover { background: #1d4ed8; }
+
+.backup-btn-delete {
+  background: #ef4444;
+  color: #fff;
+  border-color: #dc2626;
+}
+.backup-btn-delete:hover { background: #dc2626; }

@@ -1,0 +1,256 @@
+{# =============================================================================
+   order_details.html — order detail view (Phase 3, p3a6)
+   =============================================================================
+   Clean card-based layout matching the reference design:
+   - Header bar (shared stl-header)
+   - Two-column: left = items table, right = summary + totals
+   - Timeline card below
+   - Floating actions for pending orders
+   ============================================================================= #}
+{% extends 'pos_shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Order #{{ order.order_no }} - NEXGEN POS{% endblock %}
+{% block area %}pos{% endblock %}
+{% block page_module %}order_details{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pos/settlement.css') }}">
+<link rel="stylesheet" href="{{ asset('css/pos/order_details.css') }}">
+{% set customer_display = order.customer_name if order.customer_name else 'None' %}
+{% set order_type_label = 'Dine-in' if order.order_type == 'dinein' else 'Takeout' %}
+{% set can_settle = order.status == 'pending' and current_user.role != 'crew' %}
+{% set is_dinein = order.order_type == 'dinein' %}
+
+{# ── Header ─────────────────────────────────────────────────────────────── #}
+<header class="stl-header">
+  <div class="stl-header-left">
+    <nav class="stl-header-nav" aria-label="Order views">
+      <a href="/order/{{ order.id }}" class="stl-nav-link active" aria-current="page">{{ icon('eye', 14) }}<span>View Order</span></a>
+      {% if can_settle %}
+      <a href="/settle_order/{{ order.id }}" class="stl-nav-link" id="settleOrderLink">{{ icon('cash-register', 14) }}<span>Settle Order</span></a>
+      {% endif %}
+    </nav>
+    {% if order.tables %}
+    <span class="stl-table-chip">{{ icon('table', 13) }}Table {{ order.tables }}</span>
+    {% endif %}
+    <span class="od-status-chip od-status-{{ order.status }}" id="odStatusChip">{{ order.status|title }}</span>
+  </div>
+  <div class="stl-header-actions" role="group" aria-label="Order actions">
+    {% if order.status == 'pending' %}
+    <a href="/add-items?order_id={{ order.id }}" class="stl-btn stl-btn-bill" id="modifyOrderBtn">
+      {{ icon('edit', 15) }}<span>Modify</span>
+    </a>
+    <button type="button" class="stl-btn stl-btn-cancel" id="cancelOrderHeaderBtn">
+      {{ icon('ban', 15) }}<span>Cancel</span>
+    </button>
+    {% else %}
+      {% if order.status == 'void' %}
+      <button type="button" class="stl-btn stl-btn-bill" id="printVoidOrderBtn">
+        {{ icon('printer', 15) }}<span>Print Void</span>
+      </button>
+      {% elif order.status == 'completed' %}
+      <button type="button" class="stl-btn stl-btn-bill" id="reprintInvoiceBtn">
+        {{ icon('printer', 15) }}<span>Re-print</span>
+      </button>
+      {% endif %}
+    {% endif %}
+    {% set back_url = '/all_orders' if (request.args.get('ref') == 'all_orders' or (request.referrer and 'all_orders' in request.referrer)) else '/orders' %}
+    <a href="{{ back_url }}" class="stl-btn stl-btn-back" id="odBackBtn">{{ icon('arrow-left', 15) }}<span>Back</span></a>
+  </div>
+</header>
+
+{# ── Two-column layout ──────────────────────────────────────────────────── #}
+<div class="od-layout">
+
+  {# ── Left: Order Items ──────────────────────────────────────────────── #}
+  <section class="od-main" aria-label="Order items">
+    <article class="od-card">
+      <div class="od-card-header">
+        {{ icon('receipt', 16) }}
+        <h2 class="od-card-title">Order Items</h2>
+        <span class="od-card-count" id="odItemsCount">{{ order.items|length }} items</span>
+      </div>
+
+      <div class="od-table-wrap">
+        <table class="od-table" id="odItemsTable">
+          <thead>
+            <tr>
+              <th class="od-col-qty">QTY</th>
+              <th class="od-col-item">ITEM</th>
+              <th class="od-col-price od-num">UNIT PRICE</th>
+              <th class="od-col-total od-num">TOTAL</th>
+              <th class="od-col-time">ORDERED</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order.items %}
+            <tr class="od-item-row{% if item.id in refunded_item_ids %} od-item-refunded{% endif %}" data-item-id="{{ item.id }}">
+              <td class="od-col-qty">
+                <div class="od-qty-cell">
+                  <span class="od-qty-num">{{ item.quantity }}</span>
+                  <span class="od-qty-unit">pcs</span>
+                </div>
+              </td>
+              <td class="od-item-cell">
+                {% set display_item = item_display_by_id.get(item.id) if item_display_by_id else None %}
+                <div class="od-item-info">
+                  <span class="od-item-letter">{{ (display_item.base_name if display_item else item.product_name)[:1]|upper }}</span>
+                  <div>
+                    <strong class="od-item-name">{{ display_item.base_name if display_item else item.product_name }}</strong>
+                    <div class="od-item-unit">₱{{ "%.2f"|format(item.price) }} each</div>
+                    {% if display_item and display_item.variant_parts %}
+                    <div class="od-variant-tags">
+                      {% for variant in display_item.variant_parts %}
+                      <span class="od-variant-chip">{{ variant }}</span>
+                      {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if item.modifier %}
+                    <div class="od-item-modifier"><em>{{ item.modifier }}</em></div>
+                    {% endif %}
+                    {% if item.id in refunded_item_ids %}
+                    <span class="od-refunded-badge">{{ icon('repeat', 11) }}Refunded</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+              <td class="od-col-price od-num">₱{{ "%.2f"|format(item.price) }}</td>
+              <td class="od-col-total od-num"><strong>₱{{ "%.2f"|format(item.price * item.quantity) }}</strong></td>
+              <td class="od-col-time od-time-cell">
+                {% set item_ts = item.timestamp if item.timestamp else order.timestamp %}
+                <div class="od-time-date">{{ item_ts.strftime('%m/%d/%Y') }}</div>
+                <div class="od-time-clock">{{ item_ts.strftime('%I:%M %p') }}</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+  </section>
+
+  {# ── Right: Summary + Totals ───────────────────────────────────────── #}
+  <aside class="od-side" aria-label="Order summary">
+
+    {# Order Summary card #}
+    <article class="od-card">
+      <div class="od-card-header">
+        {{ icon('clipboard', 16) }}
+        <h2 class="od-card-title">Order Summary</h2>
+        <button type="button" class="btn btn-ghost od-history-header-btn" id="odHistoryBtn" style="margin-left: auto; border: 1px solid var(--border-color, #2a2a3e); padding: 0.3rem 0.65rem; font-size: 0.76rem;">
+          {{ icon('history', 14) }}<span>History</span>
+        </button>
+      </div>
+      <dl class="od-summary-grid">
+        <div class="od-summary-row">
+          <dt>{{ icon('user', 14) }}Customer</dt>
+          <dd id="odCustomer">{{ customer_display }}</dd>
+        </div>
+        {% if status_reference_no %}
+        <div class="od-summary-row">
+          <dt>{{ icon('tag', 14) }}{{ status_reference_label }}</dt>
+          <dd class="od-mono">{{ status_reference_no|replace('REFUND-', '')|replace('INV-', '') }}</dd>
+        </div>
+        {% endif %}
+        {% if order.status in ['completed', 'refunded'] and order.invoice_no %}
+        <div class="od-summary-row">
+          <dt>{{ icon('receipt', 14) }}Invoice #</dt>
+          <dd class="od-mono">{{ order.invoice_no|replace('REFUND-', '')|replace('INV-', '') }}</dd>
+        </div>
+        {% endif %}
+        <div class="od-summary-row">
+          <dt>{{ icon('store', 14) }}Order Type</dt>
+          <dd>{{ order_type_label }}</dd>
+        </div>
+        <div class="od-summary-row">
+          <dt>{{ icon('users', 14) }}No. of Covers</dt>
+          <dd class="od-mono">{{ total_pax }}</dd>
+        </div>
+        <div class="od-summary-row">
+          <dt>{{ icon('table', 14) }}Table</dt>
+          <dd>{% if order.tables %}{{ order.tables }}{% elif order.status == 'pending' and is_dinein %}<em class="od-muted">No tables assigned</em>{% else %}N/A{% endif %}</dd>
+        </div>
+        {% if order.crew_id %}
+        <div class="od-summary-row">
+          <dt>{{ icon('id-card', 14) }}Served By</dt>
+          <dd>{{ order.crew.username if order.crew else 'Unknown' }}</dd>
+        </div>
+        {% endif %}
+      </dl>
+    </article>
+
+    {# Order Total card #}
+    <article class="od-card">
+      <div class="od-card-header">
+        {{ icon('calculator', 16) }}
+        <h2 class="od-card-title">Order Total</h2>
+      </div>
+      <div class="od-totals-grid">
+        <div class="od-total-row">
+          <span>Subtotal ({{ order.items|length }} items)</span>
+          <span class="od-num">₱{{ "%.2f"|format(order.subtotal) }}</span>
+        </div>
+        <div class="od-total-row">
+          <span>VAT (12%)</span>
+          <span class="od-num">₱{{ "%.2f"|format(order.vat) }}</span>
+        </div>
+        {% if order.discount and order.discount > 0 %}
+        <div class="od-total-row od-total-discount">
+          <span>Discount</span>
+          <span class="od-num">-₱{{ "%.2f"|format(order.discount) }}</span>
+        </div>
+        {% endif %}
+        <div class="od-total-row od-total-grand">
+          <span>TOTAL</span>
+          <span class="od-grand-price od-num">₱{{ "%.2f"|format(adjusted_total if is_fully_refunded else order.total) }}</span>
+        </div>
+      </div>
+    </article>
+
+    {# Sticky bottom-left action buttons (inline, pending dine-in) #}
+    {% if order.status == 'pending' and is_dinein %}
+    <div class="od-bottom-left-actions" id="odStickyBottomLeftActions">
+      {% if current_user.role != 'crew' %}
+      <button type="button" class="stl-btn stl-btn-bill od-sticky-btn" id="reprintKitchenSlipBtn">
+        {{ icon('printer', 16) }}<span>Print Order Slip</span>
+      </button>
+      {% endif %}
+
+      {% if current_user.role == 'crew' %}
+      <button type="button" class="stl-btn stl-btn-bill od-sticky-btn" id="billOutBtn">
+        {{ icon('receipt', 16) }}<span>Bill Out</span>
+      </button>
+      {% else %}
+        {% set split_bill_state = namespace(available=(order.items | length > 1)) %}
+        {% if not split_bill_state.available %}
+          {% for item in order.items %}
+            {% if item.quantity > 1 %}
+              {% set split_bill_state.available = true %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        {% if split_bill_state.available %}
+        <button type="button" class="stl-btn stl-btn-cancel od-sticky-btn" id="splitBillBtn">
+          {{ icon('divide', 16) }}<span>Split Bill</span>
+        </button>
+        {% endif %}
+      {% endif %}
+    </div>
+    {% endif %}
+
+  </aside>
+</div>
+
+{# State bridges #}
+<script type="application/json" id="odOrderBridge">{{ {
+  'id': order.id,
+  'order_no': order.order_no,
+  'status': order.status,
+  'order_type': order.order_type,
+  'role': current_user.role,
+  'order_type_label': order_type_label,
+  'tables': order.tables or '',
+} | tojson | safe }}</script>
+<script type="application/json" id="odItemsBridge">{{ order_items_data | default([]) | tojson | safe }}</script>
+<script type="application/json" id="odProductsBridge">[{% for product in products %}{"id": {{ product.id|tojson }}, "name": {{ product.name|tojson }}, "price": {{ product.price|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}]</script>
+{% endblock %}

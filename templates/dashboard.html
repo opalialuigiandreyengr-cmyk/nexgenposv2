@@ -1,0 +1,484 @@
+{#
+  dashboard.html — V2 read instrument (shell child). Design language:
+  .ulpi/design/DESIGN.md + .ulpi/design/pos-dashboard.md. Backend contract:
+  the legacy main.dashboard context (stats, sales_data, monthly_sales_data,
+  yearly_sales_data, top_products_data, top_products_yesterday_data,
+  top_products_month_data, top_orders_today) is untouched; the V2
+  before_render_template hook adds dash_default (the month-to-date
+  range_snapshot: KPIs with month-aligned prior deltas, MTD daily/weekly/
+  monthly series, top orders, summary), dash_periods (MTD/YTD net sales)
+  and dash_products (per-category top rows with quantity + peso). The
+  default view is month to date (start of month -> today) everywhere:
+  KPIs, series bridges, products, top orders and summary all render MTD;
+  dash_default absent -> legacy today-based stats fallback. Chart series
+  ship as JSON bridges consumed by pages/dashboard.js; KPIs, period cards,
+  table and summary render server-side. The global range bar (preset chips
+  + From/To date inputs + Apply/Reset) fetches /dashboard/range JSON — a
+  full-dashboard snapshot (KPIs with prior-period deltas, series, products,
+  top orders, summary) — and re-renders every panel in place, no reload.
+  Reset restores the server-rendered default view (MTD); the MTD/YTD strip
+  and the product Today/Yesterday/Month segment are hidden while a custom
+  range is active.
+  Signature: the Operational Ticker (dark mono RESET + INVOICES chips).
+#}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+
+{% block title %}Dashboard - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}dashboard{% endblock %}
+
+{% block content %}
+{# Page CSS at the TOP of the content block: ships in both full and
+   fragment modes (browsers fetch <link> tags inserted by htmx swaps). #}
+<link rel="stylesheet" href="{{ asset('css/admin/dashboard.css') }}">
+
+<header class="dash-head">
+  <div class="dash-heading">
+    <h1 class="dash-title">Dashboard</h1>
+    <p class="dash-subtitle" id="dashDate">Loading today&rsquo;s date</p>
+  </div>
+  <div class="dash-head-right">
+    <div class="dash-ticker" aria-label="BIR counters">
+      <span class="dash-ticker-chip" title="Reset counter from the latest Z-reading">
+        {{ icon('refresh', 14) }}<span class="dash-ticker-caption">RESET</span>
+        <span class="dash-ticker-value">{{ "%02d"|format(stats.reset_counter) }}</span>
+      </span>
+      <span class="dash-ticker-chip" title="Invoices issued">
+        {{ icon('file-text', 14) }}<span class="dash-ticker-caption">INVOICES</span>
+        <span class="dash-ticker-value">{{ stats.today_invoice_count }} / {{ stats.total_invoice_count }}</span>
+      </span>
+    </div>
+    <div class="dash-range-pick">
+      <div class="dash-drp" id="dashDRP">
+        <button type="button" class="dash-drp-trigger" id="dashDRPTrigger" aria-label="Select date range" aria-expanded="false">
+          {{ icon('calendar', 14) }}
+          <span class="dash-drp-label" id="dashDRPLabel">This month</span>
+          {{ icon('chevron-down', 12) }}
+        </button>
+        <div class="dash-drp-popup" id="dashDRPPopup" hidden>
+          <div class="dash-drp-body">
+            <div class="dash-drp-sidebar" id="dashDRPSidebar">
+              <button type="button" class="dash-drp-preset" data-preset="today">Today</button>
+              <button type="button" class="dash-drp-preset" data-preset="yesterday">Yesterday</button>
+              <button type="button" class="dash-drp-preset" data-preset="last-7-days">Last 7 days</button>
+              <button type="button" class="dash-drp-preset" data-preset="last-30-days">Last 30 days</button>
+              <button type="button" class="dash-drp-preset" data-preset="this-month">This month</button>
+              <button type="button" class="dash-drp-preset" data-preset="last-month">Last month</button>
+            </div>
+            <div class="dash-drp-main">
+              <div class="dash-drp-calendars" id="dashDRPCalendars">
+                <!-- Left Month -->
+                <div class="dash-drp-cal" id="dashDRPCalLeft">
+                  <div class="dash-drp-cal-head">
+                    <button type="button" class="dash-drp-nav" id="dashDRPPrev" aria-label="Previous month">&lsaquo;</button>
+                    <span class="dash-drp-month" id="dashDRPMonthLeft"></span>
+                    <span class="dash-drp-nav-spacer"></span>
+                  </div>
+                  <div class="dash-drp-weekdays">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                  </div>
+                  <div class="dash-drp-days" id="dashDRPDaysLeft"></div>
+                </div>
+                <!-- Right Month -->
+                <div class="dash-drp-cal" id="dashDRPCalRight">
+                  <div class="dash-drp-cal-head">
+                    <span class="dash-drp-nav-spacer"></span>
+                    <span class="dash-drp-month" id="dashDRPMonthRight"></span>
+                    <button type="button" class="dash-drp-nav" id="dashDRPNext" aria-label="Next month">&rsaquo;</button>
+                  </div>
+                  <div class="dash-drp-weekdays">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                  </div>
+                  <div class="dash-drp-days" id="dashDRPDaysRight"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="dash-drp-foot">
+            <span class="dash-drp-hint" id="dashDRPHint">Select start date</span>
+            <div class="dash-drp-foot-btns">
+              <button type="button" class="dash-drp-btn dash-drp-btn--cancel" id="dashDRPCancel">Cancel</button>
+              <button type="button" class="dash-drp-btn dash-drp-btn--apply" id="dashDRPApply">Apply</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button type="button" id="dashRangeApply" class="dash-preset dash-preset--apply" hidden>Apply</button>
+      <button type="button" id="dashRangeReset" class="dash-reset">Reset</button>
+    </div>
+  </div>
+</header>
+
+{# ---- KPI row: MTD by default (dash_default), legacy today-stats fallback #}
+{% if dash_default %}
+{% set k_orders = dash_default.kpis.orders %}
+{% set k_net = dash_default.kpis.net %}
+{% set k_gross = dash_default.kpis.gross %}
+{% set k_items = dash_default.kpis['items'] %}
+{% set k_orders_p = dash_default.kpis.prior_orders %}
+{% set k_net_p = dash_default.kpis.prior_net %}
+{% set k_gross_p = dash_default.kpis.prior_gross %}
+{% set k_items_p = dash_default.kpis.prior_items %}
+{% set kpi_ref = 'prior period' %}
+{% set kpi_section_aria = "Month-to-date key numbers" %}
+{% else %}
+{% set k_orders = stats.total_orders_today %}
+{% set k_net = stats.net_sales_today %}
+{% set k_gross = stats.gross_sales_today %}
+{% set k_items = stats.items_sold_today %}
+{% set k_orders_p = stats.total_orders_yesterday %}
+{% set k_net_p = stats.net_sales_yesterday %}
+{% set k_gross_p = stats.gross_sales_yesterday %}
+{% set k_items_p = stats.items_sold_yesterday %}
+{% set kpi_ref = 'yesterday' %}
+{% set kpi_section_aria = "Today's key numbers" %}
+{% endif %}
+{% set orders_up = k_orders > k_orders_p %}
+{% set orders_flat = k_orders == k_orders_p %}
+{% set orders_none = k_orders == 0 and k_orders_p == 0 %}
+{% set orders_noprior = k_orders_p == 0 and not orders_none %}
+{% set net_up = k_net > k_net_p %}
+{% set net_flat = k_net == k_net_p %}
+{% set net_none = k_net == 0 and k_net_p == 0 %}
+{% set net_noprior = k_net_p == 0 and not net_none %}
+{% set gross_up = k_gross > k_gross_p %}
+{% set gross_flat = k_gross == k_gross_p %}
+{% set gross_none = k_gross == 0 and k_gross_p == 0 %}
+{% set gross_noprior = k_gross_p == 0 and not gross_none %}
+{% set items_up = k_items > k_items_p %}
+{% set items_flat = k_items == k_items_p %}
+{% set items_none = k_items == 0 and k_items_p == 0 %}
+{% set items_noprior = k_items_p == 0 and not items_none %}
+
+<section class="dash-kpis" id="dashKpiSection" aria-label="{{ kpi_section_aria }}">
+  <article class="dash-kpi" style="--tile: var(--color-primary)">
+    <span class="dash-kpi-icon" aria-hidden="true">{{ icon('cart', 20) }}</span>
+    <div class="dash-kpi-copy">
+      <span class="dash-kpi-label">Total Orders</span>
+      <span class="dash-kpi-value" id="kpiOrdersValue">{{ "%.0f"|format(k_orders) }}</span>
+    </div>
+    {% if orders_none %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiOrdersDelta">No activity yet</span>
+    {% elif orders_noprior %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiOrdersDelta">No prior period</span>
+    {% elif orders_flat %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiOrdersDelta" aria-label="Same as {{ kpi_ref }} ({{ "%.0f"|format(k_orders_p) }})">Same as {{ kpi_ref }} ({{ "%.0f"|format(k_orders_p) }})</span>
+    {% else %}
+    <span class="dash-kpi-delta{% if orders_up %} dash-kpi-delta--up{% else %} dash-kpi-delta--down{% endif %}" id="kpiOrdersDelta" aria-label="{{ 'Up' if orders_up else 'Down' }} vs {{ kpi_ref }} ({{ "%.0f"|format(k_orders_p) }})">
+      {{ icon('arrow-up' if orders_up else 'arrow-down', 12) }} vs {{ kpi_ref }} ({{ "%.0f"|format(k_orders_p) }})
+    </span>
+    {% endif %}
+  </article>
+
+  <article class="dash-kpi" style="--tile: var(--color-success)">
+    <span class="dash-kpi-icon" aria-hidden="true">{{ icon('cash-register', 20) }}</span>
+    <div class="dash-kpi-copy">
+      <span class="dash-kpi-label">Net Sales</span>
+      <span class="dash-kpi-value dash-kpi-value--money" id="kpiNetValue">&#8369;{{ "{:,.2f}".format(k_net) }}</span>
+    </div>
+    {% if net_none %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiNetDelta">No activity yet</span>
+    {% elif net_noprior %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiNetDelta">No prior period</span>
+    {% elif net_flat %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiNetDelta" aria-label="Same as {{ kpi_ref }} (&#8369;{{ "{:,.2f}".format(k_net_p) }})">Same as {{ kpi_ref }} (&#8369;{{ "{:,.2f}".format(k_net_p) }})</span>
+    {% else %}
+    <span class="dash-kpi-delta{% if net_up %} dash-kpi-delta--up{% else %} dash-kpi-delta--down{% endif %}" id="kpiNetDelta" aria-label="{{ 'Up' if net_up else 'Down' }} vs {{ kpi_ref }} (&#8369;{{ "{:,.2f}".format(k_net_p) }})">
+      {{ icon('arrow-up' if net_up else 'arrow-down', 12) }} vs {{ kpi_ref }} (&#8369;{{ "{:,.2f}".format(k_net_p) }})
+    </span>
+    {% endif %}
+  </article>
+
+  <article class="dash-kpi" style="--tile: var(--color-accent)">
+    <span class="dash-kpi-icon" aria-hidden="true">{{ icon('chart', 20) }}</span>
+    <div class="dash-kpi-copy">
+      <span class="dash-kpi-label">Gross Sales</span>
+      <span class="dash-kpi-value dash-kpi-value--money" id="kpiGrossValue">&#8369;{{ "{:,.2f}".format(k_gross) }}</span>
+    </div>
+    {% if gross_none %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiGrossDelta">No activity yet</span>
+    {% elif gross_noprior %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiGrossDelta">No prior period</span>
+    {% elif gross_flat %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiGrossDelta" aria-label="Same as {{ kpi_ref }} (&#8369;{{ "{:,.2f}".format(k_gross_p) }})">Same as {{ kpi_ref }} (&#8369;{{ "{:,.2f}".format(k_gross_p) }})</span>
+    {% else %}
+    <span class="dash-kpi-delta{% if gross_up %} dash-kpi-delta--up{% else %} dash-kpi-delta--down{% endif %}" id="kpiGrossDelta" aria-label="{{ 'Up' if gross_up else 'Down' }} vs {{ kpi_ref }} (&#8369;{{ "{:,.2f}".format(k_gross_p) }})">
+      {{ icon('arrow-up' if gross_up else 'arrow-down', 12) }} vs {{ kpi_ref }} (&#8369;{{ "{:,.2f}".format(k_gross_p) }})
+    </span>
+    {% endif %}
+  </article>
+
+  <article class="dash-kpi" style="--tile: var(--color-muted)">
+    <span class="dash-kpi-icon" aria-hidden="true">{{ icon('box', 20) }}</span>
+    <div class="dash-kpi-copy">
+      <span class="dash-kpi-label">Items Sold</span>
+      <span class="dash-kpi-value" id="kpiItemsValue">{{ "%.0f"|format(k_items) }}</span>
+    </div>
+    {% if items_none %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiItemsDelta">No activity yet</span>
+    {% elif items_noprior %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiItemsDelta">No prior period</span>
+    {% elif items_flat %}
+    <span class="dash-kpi-delta dash-kpi-delta--flat" id="kpiItemsDelta" aria-label="Same as {{ kpi_ref }} ({{ "%.0f"|format(k_items_p) }})">Same as {{ kpi_ref }} ({{ "%.0f"|format(k_items_p) }})</span>
+    {% else %}
+    <span class="dash-kpi-delta{% if items_up %} dash-kpi-delta--up{% else %} dash-kpi-delta--down{% endif %}" id="kpiItemsDelta" aria-label="{{ 'Up' if items_up else 'Down' }} vs {{ kpi_ref }} ({{ "%.0f"|format(k_items_p) }})">
+      {{ icon('arrow-up' if items_up else 'arrow-down', 12) }} vs {{ kpi_ref }} ({{ "%.0f"|format(k_items_p) }})
+    </span>
+    {% endif %}
+  </article>
+</section>
+
+{# ---- Period strip: MTD / YTD (server-rendered V2 enrichment) ------------- #}
+{% set periods = dash_periods|default({'mtd': {'net': 0, 'prior': 0}, 'ytd': {'net': 0, 'prior': 0}}) %}
+{% set mtd_net = periods.mtd.net %}
+{% set mtd_prior = periods.mtd.prior %}
+{% set mtd_up = mtd_net > mtd_prior %}
+{% set mtd_flat = mtd_net == mtd_prior %}
+{% set ytd_net = periods.ytd.net %}
+{% set ytd_prior = periods.ytd.prior %}
+{% set ytd_up = ytd_net > ytd_prior %}
+{% set ytd_flat = ytd_net == ytd_prior %}
+
+<section class="dash-periods" id="dashPeriodStrip" aria-label="Period sales">
+  <article class="dash-period" style="--tile: var(--color-primary)">
+    <span class="dash-period-icon" aria-hidden="true">{{ icon('calendar', 20) }}</span>
+    <div class="dash-period-copy">
+      <span class="dash-kpi-label">Net Sales MTD</span>
+      <span class="dash-period-sub">Month to date</span>
+    </div>
+    <div class="dash-period-right">
+      <span class="dash-period-value">&#8369;{{ "{:,.2f}".format(mtd_net) }}</span>
+      {% if mtd_net == 0 and mtd_prior == 0 %}
+      <span class="dash-kpi-delta dash-kpi-delta--flat">No activity yet</span>
+      {% elif mtd_prior == 0 %}
+      <span class="dash-kpi-delta dash-kpi-delta--flat">No prior period</span>
+      {% elif mtd_flat %}
+      <span class="dash-kpi-delta dash-kpi-delta--flat" aria-label="Same as prior period (&#8369;{{ "{:,.2f}".format(mtd_prior) }})">vs prior period (&#8369;{{ "{:,.2f}".format(mtd_prior) }})</span>
+      {% else %}
+      <span class="dash-kpi-delta{% if mtd_up %} dash-kpi-delta--up{% else %} dash-kpi-delta--down{% endif %}" aria-label="{{ 'Up' if mtd_up else 'Down' }} &#8369;{{ "{:,.2f}".format((mtd_net - mtd_prior)|abs) }} vs prior period (&#8369;{{ "{:,.2f}".format(mtd_prior) }})">
+        {{ icon('arrow-up' if mtd_up else 'arrow-down', 12) }} vs prior period (&#8369;{{ "{:,.2f}".format(mtd_prior) }})
+      </span>
+      {% endif %}
+    </div>
+  </article>
+
+  <article class="dash-period" style="--tile: var(--color-accent)">
+    <span class="dash-period-icon" aria-hidden="true">{{ icon('calendar-check', 20) }}</span>
+    <div class="dash-period-copy">
+      <span class="dash-kpi-label">Net Sales YTD</span>
+      <span class="dash-period-sub">Year to date</span>
+    </div>
+    <div class="dash-period-right">
+      <span class="dash-period-value">&#8369;{{ "{:,.2f}".format(ytd_net) }}</span>
+      {% if ytd_net == 0 and ytd_prior == 0 %}
+      <span class="dash-kpi-delta dash-kpi-delta--flat">No activity yet</span>
+      {% elif ytd_prior == 0 %}
+      <span class="dash-kpi-delta dash-kpi-delta--flat">No prior period</span>
+      {% elif ytd_flat %}
+      <span class="dash-kpi-delta dash-kpi-delta--flat" aria-label="Same as prior period (&#8369;{{ "{:,.2f}".format(ytd_prior) }})">vs prior period (&#8369;{{ "{:,.2f}".format(ytd_prior) }})</span>
+      {% else %}
+      <span class="dash-kpi-delta{% if ytd_up %} dash-kpi-delta--up{% else %} dash-kpi-delta--down{% endif %}" aria-label="{{ 'Up' if ytd_up else 'Down' }} &#8369;{{ "{:,.2f}".format((ytd_net - ytd_prior)|abs) }} vs prior period (&#8369;{{ "{:,.2f}".format(ytd_prior) }})">
+        {{ icon('arrow-up' if ytd_up else 'arrow-down', 12) }} vs prior period (&#8369;{{ "{:,.2f}".format(ytd_prior) }})
+      </span>
+      {% endif %}
+    </div>
+  </article>
+</section>
+
+{# ---- Chart series (JSON bridges consumed by pages/dashboard.js) ----------- #}
+<script type="application/json" id="dashSalesData">{{ { "daily": sales_data, "weekly": dash_weekly|default([]), "monthly": monthly_sales_data }|tojson }}</script>
+<script type="application/json" id="dashProductData">{{ dash_products|default({})|tojson }}</script>
+
+{# ---- Charts row: sales overview + top products ----------------------------- #}
+<section class="dash-charts" aria-label="Sales charts">
+  <div class="dash-panel">
+    <div class="dash-panel-head">
+      <div>
+        <h2 class="dash-panel-title">Sales Overview</h2>
+        <p class="dash-panel-sub" id="dashSalesRange">This month</p>
+      </div>
+      <div class="dash-seg" role="radiogroup" aria-label="Sales range filter">
+        <input type="radio" class="dash-seg-input" name="salesView" id="salesDaily" value="daily" checked>
+        <label class="dash-seg-btn" for="salesDaily">Daily</label>
+        <input type="radio" class="dash-seg-input" name="salesView" id="salesWeekly" value="weekly">
+        <label class="dash-seg-btn" for="salesWeekly">Weekly</label>
+        <input type="radio" class="dash-seg-input" name="salesView" id="salesMonthly" value="monthly">
+        <label class="dash-seg-btn" for="salesMonthly">Monthly</label>
+      </div>
+    </div>
+    <div class="dash-chart" id="salesChartWrap">
+      <canvas id="salesChart" role="img" aria-label="Line chart of net and gross sales for the selected period"></canvas>
+      <div class="dash-empty" id="salesChartEmpty" hidden>
+        {{ icon('chart', 22) }}<p>No sales for this period</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-panel">
+    <div class="dash-panel-head">
+      <div>
+        <h2 class="dash-panel-title">Top Selling Products</h2>
+        <p class="dash-panel-sub" id="dashProductRange">This month</p>
+      </div>
+      <div class="dash-panel-head-right">
+        <div class="dash-seg dash-seg--sm" role="radiogroup" aria-label="Top sellers view type">
+          <input type="radio" class="dash-seg-input" name="productType" id="productTypeProducts" value="products" checked>
+          <label class="dash-seg-btn" for="productTypeProducts">Products</label>
+          <input type="radio" class="dash-seg-input" name="productType" id="productTypeCategories" value="categories">
+          <label class="dash-seg-btn" for="productTypeCategories">Categories</label>
+        </div>
+        <div class="dash-seg" id="dashProductScopeSeg" role="radiogroup" aria-label="Product range filter">
+          <input type="radio" class="dash-seg-input" name="productView" id="productToday" value="today">
+          <label class="dash-seg-btn" for="productToday">Today</label>
+          <input type="radio" class="dash-seg-input" name="productView" id="productYesterday" value="yesterday">
+          <label class="dash-seg-btn" for="productYesterday">Yesterday</label>
+          <input type="radio" class="dash-seg-input" name="productView" id="productMonth" value="month" checked>
+          <label class="dash-seg-btn" for="productMonth">Month</label>
+        </div>
+      </div>
+    </div>
+    <div class="dash-toolbar">
+      <div class="dash-seg dash-seg--sm" role="radiogroup" aria-label="Product metric">
+        <input type="radio" class="dash-seg-input" name="productMetric" id="productQty" value="qty" checked>
+        <label class="dash-seg-btn" for="productQty">Quantity</label>
+        <input type="radio" class="dash-seg-input" name="productMetric" id="productPeso" value="peso">
+        <label class="dash-seg-btn" for="productPeso">Peso</label>
+      </div>
+      <label class="dash-select-wrap" for="dashCategorySelect">
+        <span class="dash-select-label">Category</span>
+        <select id="dashCategorySelect" class="dash-select" aria-label="Product category filter"></select>
+      </label>
+    </div>
+    <div class="dash-chart" id="productChartWrap">
+      <canvas id="productChart" role="img" aria-label="Horizontal bar chart of top selling products for the selected period and category"></canvas>
+      <div class="dash-empty" id="productChartEmpty" hidden>
+        {{ icon('box', 22) }}<p>No products for this period</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---- Bottom row: top orders + summary (MTD by default) ----------------- #}
+{% if dash_default %}
+{% set top_orders = dash_default.top_orders %}
+{% set top_orders_title = 'Top Orders' %}
+{% set top_orders_sub = 'This month' %}
+{% set top_orders_empty = 'No orders this month' %}
+{% set s_avg = dash_default.summary.avg_order_value %}
+{% set s_spo = dash_default.summary.sales_per_order %}
+{% set s_ipo = dash_default.summary.items_per_order %}
+{% set s_customers = dash_default.summary.customers %}
+{% set s_returning = dash_default.summary.returning %}
+{% set s_returning_pct = dash_default.summary.returning_pct %}
+{% set summary_title = 'This Month’s Summary' %}
+{% set summary_sub = 'This month' %}
+{% else %}
+{% set top_orders = top_orders_today %}
+{% set top_orders_title = 'Top Orders' %}
+{% set top_orders_sub = 'This month' %}
+{% set top_orders_empty = 'No orders this month' %}
+{% set s_avg = stats.avg_order_value %}
+{% set s_spo = stats.sales_per_order %}
+{% set s_ipo = stats.items_per_order %}
+{% set s_customers = stats.total_customers_today %}
+{% set s_returning = stats.returning_customers %}
+{% set s_returning_pct = stats.returning_pct %}
+{% set summary_title = 'This Month’s Summary' %}
+{% set summary_sub = 'This month' %}
+{% endif %}
+
+<section class="dash-bottom" aria-label="Orders and summary">
+  <div class="dash-panel">
+    <div class="dash-panel-head">
+      <div>
+        <h2 class="dash-panel-title" id="dashTopOrdersTitle">{{ top_orders_title }}</h2>
+        <p class="dash-panel-sub" id="dashTopOrdersSub">{{ top_orders_sub }}</p>
+      </div>
+      <a class="dash-link" href="/all_orders">View all orders {{ icon('arrow-up-right', 14) }}</a>
+    </div>
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th scope="col">Order</th>
+            <th scope="col">Customer</th>
+            <th scope="col">Type</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="dash-th-amount">Amount</th>
+            <th scope="col" class="dash-th-time">Time</th>
+          </tr>
+        </thead>
+        <tbody id="dashTopOrdersBody">
+          {% for order in top_orders %}
+          <tr>
+            <td><span class="dash-order-no">{{ order.order_no }}</span></td>
+            <td><strong class="dash-customer">{{ order.customer_name }}</strong></td>
+            <td>
+              {% if order.order_type == 'dinein' %}
+              <span class="dash-chip dash-chip--primary">{{ icon('table', 12) }}Dine-in</span>
+              {% else %}
+              <span class="dash-chip dash-chip--muted">{{ icon('cart', 12) }}Takeout</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if order.status == 'completed' %}
+              <span class="dash-chip dash-chip--completed">{{ icon('check', 12) }}Completed</span>
+              {% elif order.status == 'pending' %}
+              <span class="dash-chip dash-chip--pending">{{ icon('clock', 12) }}Pending</span>
+              {% else %}
+              <span class="dash-chip dash-chip--cancelled">{{ icon('x', 12) }}Cancelled</span>
+              {% endif %}
+            </td>
+            <td class="dash-amount">&#8369;{{ "{:,.2f}".format(order.total) }}</td>
+            <td class="dash-time">
+              {%- if dash_default %}{{ order.timestamp[11:16] if order.timestamp else '—' }}
+              {%- else %}{{ order.timestamp.strftime('%I:%M %p') if order.timestamp else '—' }}{% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="dash-table-empty">
+              <div class="dash-empty dash-empty--inline">
+                {{ icon('list', 20) }}<p>{{ top_orders_empty }}</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="dash-panel">
+    <div class="dash-panel-head">
+      <div>
+        <h2 class="dash-panel-title" id="dashSummaryTitle">{{ summary_title }}</h2>
+        <p class="dash-panel-sub" id="dashSummarySub">{{ summary_sub }}</p>
+      </div>
+    </div>
+    <dl class="dash-summary">
+      <div class="dash-summary-row">
+        <dt class="dash-summary-label">{{ icon('cash-register', 14) }}Average Order Value</dt>
+        <dd class="dash-summary-value" id="dashSummaryAvg">&#8369;{{ "{:,.2f}".format(s_avg) }}</dd>
+      </div>
+      <div class="dash-summary-row">
+        <dt class="dash-summary-label">{{ icon('cart', 14) }}Sales per Order</dt>
+        <dd class="dash-summary-value" id="dashSummarySalesPerOrder">&#8369;{{ "{:,.2f}".format(s_spo) }}</dd>
+      </div>
+      <div class="dash-summary-row">
+        <dt class="dash-summary-label">{{ icon('box', 14) }}Items per Order</dt>
+        <dd class="dash-summary-value" id="dashSummaryItemsPerOrder">{{ "%.1f"|format(s_ipo) }}</dd>
+      </div>
+      <div class="dash-summary-row">
+        <dt class="dash-summary-label">{{ icon('users', 14) }}Total Customers</dt>
+        <dd class="dash-summary-value" id="dashSummaryCustomers">{{ "%.0f"|format(s_customers) }}</dd>
+      </div>
+      <div class="dash-summary-row">
+        <dt class="dash-summary-label">{{ icon('repeat', 14) }}Returning Customers</dt>
+        <dd class="dash-summary-value" id="dashSummaryReturning">{{ "%.0f"|format(s_returning) }} ({{ s_returning_pct }}%)</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+{% endblock %}

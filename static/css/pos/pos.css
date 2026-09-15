@@ -1,0 +1,787 @@
+/* =============================================================================
+   css/pos/pos.css — cashier register (templates/pos.html + pages/pos.js)
+   -----------------------------------------------------------------------------
+   Full-viewport instrument: 200px dark category rail | fluid product panel |
+   320px cart rail. Binds to .ulpi/design/DESIGN.md tokens only. The rail is
+   always dark in both themes (--nav-bg family); amber is the sole warm
+   accent (active category, active unit, count badge). Mono numerals on every
+   price/total via --font-mono.
+   ========================================================================== */
+
+/* ---- Screen-reader-only view title ---------------------------------------- */
+.pos-sr-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Register active: hide the shell chrome, zero the outlet --------------
+   pages/pos.js toggles pos-register-active on <html> at mount/destroy so
+   the instrument owns the whole viewport (V1 parity: pos.html hid the
+   navbar). Specificity ties shell.css's [data-area="pos"] rule; pos.css
+   loads after it, so padding: 0 wins. */
+:root.pos-register-active .shell-side,
+:root.pos-register-active .shell-footer,
+:root.pos-register-active .pos-topbar {
+  display: none;
+}
+:root.pos-register-active #view-root {
+  max-width: none;
+  padding: 0;
+}
+:root.pos-register-active .shell-main,
+:root.pos-register-active .pos-shell-frame {
+  min-height: 100dvh;
+}
+
+/* ---- Frame ---------------------------------------------------------------- */
+.pos-shell {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr) 320px;
+  height: 100dvh;
+  background: var(--bg-main);
+}
+.pos-shell > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ---- Category rail (always dark) ------------------------------------------ */
+.pos-cat-rail {
+  display: flex;
+  flex-direction: column;
+  background: var(--nav-bg);
+  border-right: 1px solid var(--nav-border);
+}
+.pos-cat-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3.5rem;
+  border-bottom: 1px solid var(--nav-border);
+}
+.pos-cat-brand img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+.pos-cat-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pos-cat-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.8rem;
+  padding: 0.65rem 0.75rem;
+  border: none;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0;
+  background: transparent;
+  color: var(--nav-text);
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.pos-cat-btn:hover {
+  color: var(--nav-text-hover);
+  background: rgba(148, 163, 184, 0.08);
+}
+.pos-cat-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+.pos-cat-btn .icon {
+  flex-shrink: 0;
+}
+.pos-cat-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pos-cat-logo {
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.pos-cat-btn.is-active {
+  background: var(--color-accent);
+  color: #1F2937;
+  font-weight: 600;
+  border-color: transparent;
+}
+.pos-cat-btn.is-active .icon {
+  color: #1F2937;
+}
+
+/* ---- Products panel ------------------------------------------------------- */
+.pos-products {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-main);
+}
+.pos-products-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--nav-border);
+}
+.pos-search-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.625rem;
+  background: var(--bg-card);
+  border: 1px solid var(--form-border);
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  transition: border-color var(--dur-fast) ease;
+}
+.pos-search-wrap:focus-within {
+  border-color: var(--form-border-hover);
+}
+.pos-search {
+  flex: 1;
+  min-width: 0;
+  height: 2.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--form-text);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  outline: none;
+}
+.pos-search::placeholder {
+  color: var(--form-placeholder);
+}
+.pos-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--form-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.pos-icon-btn:hover {
+  border-color: var(--form-border-hover);
+  color: var(--color-primary);
+}
+.pos-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+.pos-cart-count {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  color: #1F2937;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.pos-products-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+.pos-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 0.75rem;
+}
+
+/* ---- Product card (native button) ----------------------------------------- */
+.pos-product {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--nav-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease;
+}
+
+/* The card has an explicit display value, so preserve the native hidden
+   attribute when live search/category filtering removes it. */
+.pos-product[hidden],
+.product-card[hidden] {
+  display: none !important;
+}
+
+.pos-product:hover {
+  border-color: var(--form-border-hover);
+  box-shadow: var(--shadow-sm);
+}
+.pos-product:active {
+  transform: translateY(1px);
+}
+.pos-product:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+.pos-product-preview {
+  height: 3.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-opacity);
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.pos-product-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+.pos-product-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pos-product-category {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pos-product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+.pos-product-price {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.pos-no-results {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+/* ---- Unit toggle (fixed to the products corner, V1 position) -------------- */
+.pos-unit-toggle {
+  position: fixed;
+  left: 212px;
+  bottom: 14px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem;
+  background: var(--nav-bg);
+  border: 1px solid var(--nav-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+.pos-unit-toggle-label {
+  padding: 0 0.375rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94A3B8;
+}
+.pos-unit-btn {
+  min-width: 2.75rem;
+  height: 1.9rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #CBD5E1;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.pos-unit-btn:hover {
+  color: #F8FAFC;
+}
+.pos-unit-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+.pos-unit-btn.is-active {
+  background: var(--color-accent);
+  color: #1F2937;
+  font-weight: 600;
+}
+
+/* ---- Cart rail ------------------------------------------------------------ */
+.pos-cart {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border-left: 1px solid var(--nav-border);
+}
+.pos-cart-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--nav-border);
+}
+.pos-customer-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  background: var(--form-bg-input);
+  border: 1px solid var(--form-border);
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  transition: border-color var(--dur-fast) ease;
+}
+.pos-customer-wrap:focus-within {
+  border-color: var(--form-border-hover);
+}
+.pos-customer-input {
+  flex: 1;
+  min-width: 0;
+  height: 2.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--form-text);
+  font-size: 0.85rem;
+  outline: none;
+}
+.pos-customer-input::placeholder {
+  color: var(--form-placeholder);
+}
+.pos-table-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 3.25rem;
+  height: 2.5rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--form-border);
+  border-radius: var(--radius-md);
+  background: var(--form-bg-input);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.pos-table-badge {
+  color: var(--text-secondary);
+  max-width: 5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Add-mode banner (V1 add-items banner, token-styled) */
+.pos-add-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-opacity);
+}
+.pos-add-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.pos-add-caption {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.pos-add-order {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.pos-add-table {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+.pos-add-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: background var(--dur-fast) ease;
+}
+.pos-add-back:hover {
+  background: var(--color-primary-opacity);
+}
+
+/* Cart items */
+.pos-cart-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.pos-empty-cart {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.pos-cart-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.pos-cart-item {
+  list-style: none;
+  display: flex;
+  gap: 0.625rem;
+  padding: 0.625rem;
+  border: 1px solid var(--nav-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--bg-main));
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pos-cart-item:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--nav-border));
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--bg-main));
+}
+.pos-cart-item-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 0.5rem;
+}
+.pos-mod-btn {
+  flex-shrink: 0;
+  align-self: flex-start;
+  min-width: 2.5rem;
+  height: 1.75rem;
+  padding: 0 0.375rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: #1F2937;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: filter var(--dur-fast) ease;
+}
+.pos-mod-btn:hover {
+  filter: brightness(1.15);
+}
+.pos-mod-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+.pos-cart-item-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.pos-cart-item-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.pos-item-modifier {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+.pos-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pos-qty-controls {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+.pos-qty-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--form-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.pos-qty-btn:hover {
+  border-color: var(--form-border-hover);
+  color: var(--color-primary);
+}
+.pos-qty-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+.pos-qty-value {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+.pos-cart-item-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.pos-cart-item-total {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+.pos-remove-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--color-error) 30%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-error) 10%, transparent);
+  color: var(--color-error);
+  cursor: pointer;
+  transition: color var(--dur-fast) ease, background var(--dur-fast) ease;
+}
+.pos-remove-btn:hover {
+  color: #fff;
+  background: var(--color-error);
+}
+.pos-remove-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* Summary + actions */
+.pos-cart-summary {
+  padding: 0.75rem;
+  border-top: 1px solid var(--nav-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.pos-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.pos-summary-mono {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.pos-summary-total {
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--nav-border);
+  color: var(--text-main);
+  font-weight: 600;
+}
+.pos-summary-total .pos-summary-mono {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--color-primary);
+}
+.pos-cart-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 0.75rem 0.75rem;
+}
+.pos-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
+}
+.pos-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+.pos-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.pos-btn-primary {
+  flex: 1;
+  background: var(--color-primary);
+  color: #fff;
+}
+.pos-btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover, #2DD4BF);
+}
+.pos-btn-ghost {
+  min-width: 6rem;
+  background: transparent;
+  border-color: var(--form-border);
+  color: var(--text-secondary);
+}
+.pos-btn-ghost:hover {
+  border-color: var(--form-border-hover);
+  color: var(--text-main);
+}
+
+/* ---- Cart drawer (medium screens) — V1 768-991.98px parity + <768 fallback */
+.pos-cart-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(2, 6, 23, 0.5);
+}
+@media (max-width: 991.98px) {
+  .pos-shell {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+  .pos-cart {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    width: 320px;
+    transform: translateX(100%);
+    transition: transform var(--dur-base) var(--ease-out);
+    box-shadow: var(--shadow-lg);
+  }
+  .pos-shell.cart-open .pos-cart {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .pos-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pos-cat-rail {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 45;
+    width: 200px;
+    transform: translateX(-100%);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .pos-shell.cat-open .pos-cat-rail {
+    transform: translateX(0);
+  }
+  .pos-cat-rail::after {
+    content: "Categories";
+    position: absolute;
+    top: 50%;
+    right: -1.5rem;
+    transform: translateY(-50%) rotate(-90deg);
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+    color: #94A3B8;
+    background: var(--nav-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: var(--radius-sm);
+    padding: 0.375rem 0.5rem;
+    cursor: pointer;
+  }
+  .pos-unit-toggle {
+    left: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pos-shell .pos-cart,
+  .pos-shell .pos-cat-rail {
+    transition: none;
+  }
+}

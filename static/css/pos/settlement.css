@@ -1,0 +1,1572 @@
+/* =============================================================================
+   css/pos/settlement.css — settlement view (Phase 3, p3a7; card rebuild 2026-08-28)
+   ------------------------------------------------------------------------------
+   The money screen, bound to .ulpi/design/DESIGN.md + the token vocabulary
+   audit in .ulpi/design/pos-cashier-core.md. Structure (user inspiration,
+   2026-08-28): three equal-height signpost cards — ORDER TOTAL (plain title
+   + dark Ticker hero chip), DISCOUNTS and PAYMENT METHOD (amber signpost
+   bars) — the page FILLS the view outlet so the payment card and its own
+   actions (Add Manual SI / Apply Discount / PAX) ride the bottom of the
+   screen (2026-08-28 clarified request), plus traffic-light header
+   actions: active link red, Bill Out orange, Settle Order green. Class
+   names are frozen: pages/settlement.js generates stl-disc-* / badge
+   markup and toggles field visibility via inline style.display, and the
+   harness pins template markers.
+   ========================================================================== */
+
+/* ---- Header navbar bar -------------------------------------------------------
+   One horizontal always-dark strip (--nav-bg, both themes) holding every
+   control, like the app navbar above it: View/Settle links flush left,
+   table chip inline, action buttons inset right (2026-08-28 user request). */
+.stl-header {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  min-height: 3.5rem;
+  padding: 0 1rem;
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
+}
+
+.stl-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.stl-header-nav {
+  display: flex;
+  align-items: stretch;
+  align-self: stretch;
+}
+
+.stl-order-no {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* Header actions: three SEPARATE full-color buttons inset within the bar
+   (uppercase mono, 44px) with distinct fills (2026-08-28 user traffic-
+   light request): Bill Out = orange, Settle Order = green, Back = slate. */
+.stl-header-actions {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  padding-left: 0.25rem;
+}
+
+/* On the always-dark bar the chip carries dark-safe literals. */
+.stl-header .stl-table-chip {
+  align-self: center;
+  background: #F59E0B;
+  border-color: #F59E0B;
+  color: #FFFFFF;
+}
+.stl-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.stl-card-title-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stl-card-title .stl-order-no {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Amber signpost bar (discounts + payment cards): bleeds to the card
+   edges and names the column, per the clean-card inspiration. */
+.stl-card-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: -0.9rem -0.9rem 0.75rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--color-accent);
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* Header actions: three SEPARATE full-color buttons inset within the bar
+   (uppercase mono, 44px) with distinct fills — Bill Out amber, Settle
+   Order teal, Back slate. */
+
+.stl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.stl-table-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.24rem 0.55rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.stl-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.stl-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ---- View / Settle navbar links ---------------------------------------------
+   Flat full-height bar segments (navbar-link look, 2026-08-28 user
+   request) — no boxed picker: inactive = transparent + white-alpha text,
+   hover = white-alpha wash, ACTIVE = red block + white text (user color
+   request; red = the --color-error hue, brightest on the dark bar). */
+.stl-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+  white-space: nowrap;
+}
+
+.stl-nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.stl-nav-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.stl-nav-link.active {
+  background: var(--color-error);
+  color: #ffffff;
+}
+
+.stl-btn-bill {
+  background: #F59E0B;
+  color: #FFFFFF;
+}
+
+.stl-btn-bill:hover {
+  background: #D97706;
+}
+
+.stl-btn-settle {
+  background: var(--color-success);
+  color: #FFFFFF;
+}
+
+.stl-btn-settle:hover {
+  background: color-mix(in srgb, var(--color-success) 88%, #000);
+}
+
+.stl-btn-back {
+  background: #475569;
+  color: #ffffff;
+}
+
+.stl-btn-back:hover {
+  background: color-mix(in srgb, #475569 88%, #000);
+}
+
+/* ---- Card action buttons ---------------------------------------------------
+   Full-width block buttons inside the cards. Teal fill + dark text = the
+   one primary interactive family per DESIGN.md; the quiet variant carries
+   the themed card chrome (discounts + payment card actions). */
+.stl-btn-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  min-height: 40px;
+  padding: 0.5rem 0.85rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.stl-btn-block:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-inset);
+}
+
+.stl-btn-block:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* Primary variant: solid teal fill, dark text. */
+.stl-btn-block.stl-btn-primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--text-inverse);
+}
+
+.stl-btn-block.stl-btn-primary:hover {
+  background: color-mix(in srgb, var(--color-primary) 88%, #000);
+  border-color: var(--color-primary);
+}
+
+/* Accent variant: solid blue fill, white text (Apply Discount / Add Manual SI). */
+.stl-btn-block.stl-btn-accent {
+  background: #2563EB;
+  border-color: #2563EB;
+  color: #FFFFFF;
+}
+
+.stl-btn-block.stl-btn-accent:hover {
+  background: #1D4ED8;
+  border-color: #1D4ED8;
+}
+
+/* Separator between action buttons in the payment card. */
+.stl-btn-separator {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 0.4rem 0;
+}
+
+/* ---- Screen-fill layout -----------------------------------------------------
+   (2026-08-28 user request, clarified after a dock experiment): the page
+   is a flex column that fills the view outlet (#view-root is the shell's
+   flex:1 child), so the card grid grows and the PAYMENT card — with its
+   own Add Manual SI / Apply Discount / PAX actions — reaches the bottom
+   edge of the screen. No bottom dock. */
+#view-root {
+  display: flex;
+  flex-direction: column;
+}
+
+#settlementForm {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* PAX box: bordered container at the bottom of the payment card — mono
+   label on top, a centered − n + stepper below. Stepping a locked field
+   opens the same admin auth modal as double-click (settlement.js). */
+.stl-pax-box {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.stl-pax-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.stl-pax-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.stl-pax-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.stl-pax-step:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.stl-pax-step:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* The count: frameless centered mono numerals between the stepper buttons
+   (extra-class selectors stay ahead of the later .stl-input base). Spin
+   buttons hidden — the stepper buttons own increment/decrement. */
+.stl-pax-box .stl-input {
+  width: 3.5rem;
+  height: 2.4rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+  cursor: default;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.stl-pax-box .stl-input[readonly] {
+  background: transparent;
+  color: var(--text-main);
+  cursor: default;
+}
+
+.stl-pax-box .stl-input::-webkit-outer-spin-button,
+.stl-pax-box .stl-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stl-pax-box .stl-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.stl-pax-box .stl-input:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+/* The payment card rides the screen bottom (2026-08-28): as a flex column
+   with an auto margin on its first action, the Add Manual SI / Apply
+   Discount / PAX group lifts to the card's bottom edge; when the card is
+   content-height the margin simply collapses to 0. */
+.stl-col-payment > .stl-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.stl-col-payment > .stl-card > #toggleManualSiBtn {
+  margin-top: auto;
+}
+
+/* ---- Inputs ---------------------------------------------------------------- */
+.stl-input {
+  padding: 0.5rem 0.7rem;
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  color: var(--form-text);
+  background: var(--form-bg-input);
+  border: 1px solid var(--form-border);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.stl-input::placeholder {
+  color: var(--form-placeholder);
+}
+
+.stl-input:focus {
+  outline: none;
+  border-color: var(--form-border-hover);
+  box-shadow: var(--ring-focus);
+}
+
+.stl-input[readonly] {
+  background: var(--bg-inset);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.stl-input-mono {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+}
+
+.stl-input-amount {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* ---- Layout ----------------------------------------------------------------
+   THREE columns at every POS width (user request): summary | discounts |
+   payment. The historic bug was the collapse to ONE stacked column below
+   1200px — the 1024x768 terminal gets three ~322px columns instead.
+   The layout is a flex column that FILLS the view outlet: the grid grows
+   so the cards (and the discount column) run down to the dock at the
+   bottom edge of the screen. */
+.stl-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem 1.1rem;
+}
+
+.stl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.stl-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* Equal-height signpost cards: each card fills its grid track so the
+   discount card's Apply Discount action pins to the shared bottom edge. */
+.stl-col > .stl-card {
+  flex: 1;
+}
+
+.stl-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 0.9rem;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Summary Column ---------------------------------------------------------
+   The total box is the Operational Ticker instrument chip: dark in both
+   themes, huge mono numerals, label in --nav-text. */
+/* Total box: the Operational Ticker hero — dark instrument chip with the
+   label above and huge centered mono numerals (inspiration rebuild). */
+.stl-total-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.65rem 0.9rem 0.7rem;
+  background: var(--nav-bg);
+  border: 1px solid var(--nav-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+
+.stl-total-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--nav-text);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.stl-total-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--nav-text-hover);
+}
+
+/* Keeps the JS contract: hidden working span for the final total. */
+.stl-hidden {
+  display: none;
+}
+
+.stl-breakdown {
+  margin-top: 0.2rem;
+}
+
+.stl-summary-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.stl-line-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.32rem 0;
+  font-size: 0.82rem;
+}
+
+.stl-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stl-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* Amount Due: the emphasized read. Amber is the one warm operational
+   accent — the number that must be collected. */
+.stl-total-row {
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.stl-total-row .stl-label,
+.stl-total-row .stl-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.stl-total-row .stl-label {
+  color: var(--text-main);
+}
+
+.stl-total-row .stl-value {
+  font-size: 1.05rem;
+  color: var(--color-accent);
+}
+
+.stl-hidden-tax-row,
+.stl-hidden-service-row {
+  display: none;
+}
+
+/* Original total row: shown when discounts are active — the pre-discount
+   figure that feeds into the breakdown. Bold to stand apart from discount lines. */
+#originalTotalRow .stl-label,
+#originalTotalRow .stl-value {
+  font-weight: 600;
+}
+
+#originalTotalRow .stl-label {
+  color: var(--text-main);
+}
+
+/* Served By: receipt footer voice — divider above, like the inspiration. */
+.stl-summary-panel > .stl-line-item:last-child {
+  border-top: 1px solid var(--border-color);
+  margin-top: 0.3rem;
+  padding-top: 0.55rem;
+}
+
+.stl-badges-panel {
+  margin-top: 0.7rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ---- Discount Column ------------------------------------------------------
+   The card is a flex column: the panel grows so the Apply Discount block
+   button pins to the card bottom (inspiration layout). */
+.stl-col-discount > .stl-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.stl-discounts-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.stl-discounts-heading,
+.stl-discount-heading {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stl-discount-meta {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  padding: 0.6rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  text-align: center;
+  /* Flex column that fills the panel: the empty voice centers within the
+     whole card body (filled states just stack from the top as before). */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* While the column only carries the empty voice, strip the inset chrome
+   so the placeholder owns the bare card body. */
+.stl-discount-meta:has(.stl-no-discounts) {
+  background: transparent;
+  border-color: transparent;
+  padding: 0;
+}
+
+.stl-col-discount .stl-btn-block {
+  margin-top: 0.7rem;
+}
+
+
+
+/* ---- Payment Column ------------------------------------------------------- */
+.stl-payment-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* The bar names the column; nothing else labels the block. */
+.stl-payment-block > .stl-field-label {
+  display: none;
+}
+
+.stl-field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.4rem;
+}
+
+.stl-payment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+
+.stl-payment-card {
+  position: relative;
+}
+
+.stl-payment-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.55rem 0.25rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.stl-payment-option:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-main);
+}
+
+/* Checked method: green tile with white icon for cash, teal for others. */
+.stl-payment-card input[type="radio"]:checked + .stl-payment-option {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #FFFFFF;
+}
+
+.stl-payment-card input[type="radio"]:checked + .stl-payment-option svg,
+.stl-payment-card input[type="radio"]:checked + .stl-payment-option [class*="icon"] {
+  color: #FFFFFF;
+}
+
+/* The radios are visually hidden but stay keyboard-operable (arrow keys
+   move :checked, focus rings the option label). display:block here beats
+   .stl-hidden's display:none — the clip keeps them invisible but focusable. */
+.stl-payment-card input[type="radio"].stl-hidden {
+  position: absolute;
+  display: block;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.stl-payment-card input[type="radio"]:focus-visible + .stl-payment-option {
+  box-shadow: var(--ring-focus);
+}
+
+.stl-credit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+}
+
+.stl-credit-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.stl-credit-option:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-main);
+}
+
+.stl-credit-option:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.stl-credit-option.active {
+  background: var(--color-primary-opacity);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.stl-swipe-status {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: none;
+}
+
+.stl-swipe-ok {
+  color: var(--color-success);
+}
+
+.stl-cash-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* The wrapper owns the field chrome; the inner input goes frameless. */
+.stl-amount-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 0.5rem 0.65rem;
+  background: var(--form-bg-input);
+  border: 1px solid var(--form-border);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.stl-amount-input:focus-within {
+  border-color: var(--form-border-hover);
+  box-shadow: var(--ring-focus);
+}
+
+.stl-amount-input .stl-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.stl-amount-input .stl-input:focus {
+  box-shadow: none;
+  border: none;
+}
+
+.stl-currency-prefix {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+/* Parsed card chips */
+.stl-card-parsed {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+  margin-top: 0.4rem;
+}
+
+.stl-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+
+.stl-badge-primary {
+  background: var(--color-primary-opacity);
+  color: var(--color-primary);
+}
+
+.stl-badge-dark {
+  background: var(--nav-bg);
+  color: var(--nav-text-hover);
+  font-family: var(--font-mono);
+}
+
+.stl-badge-info {
+  background: var(--accent-info-alpha);
+  color: var(--color-info);
+}
+
+.stl-badge-warning {
+  background: var(--accent-warning-alpha);
+  color: var(--color-warning);
+}
+
+/* ---- Applied discount badges (JS-rendered) -------------------------------- */
+.stl-discount-badge,
+.selected-discount-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--color-primary-opacity);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  border-radius: var(--radius-md);
+  margin: 0 0.4rem 0.4rem 0;
+}
+
+/* Icon square: dark chip with the amber ticker glyph. */
+.stl-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--nav-bg);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.selected-discount-badge .discount-icon {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.stl-badge-val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.stl-badge-unit {
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  margin-left: 2px;
+}
+
+.badge-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-family: var(--font-mono);
+}
+
+.badge-value-display,
+.badge-count-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.badge-value-unit {
+  font-size: 0.7rem;
+  color: var(--color-muted);
+}
+
+/* =====================================================================
+   Discount modal — fully custom, does NOT inherit lib-modal spacing.
+   Target: .disc-modal (applied to the lib-modal-box wrapper by JS)
+   ===================================================================== */
+
+/* ---- Box overrides ---- */
+.disc-modal {
+  max-width: 680px;
+  width: calc(100vw - 2rem);
+  padding: 20px;
+  margin: 0 auto;
+  border-radius: var(--radius-lg);
+}
+
+/* Remove inherited title spacing — we manage our own margin. */
+.disc-modal .lib-modal-title {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.disc-modal .disc-title-icon {
+  color: var(--color-warning);
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+/* ---- Scrollable body ---- */
+.disc-modal .lib-modal-text {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+}
+
+.stl-disc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.stl-disc-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-inset);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+  font-size: 0.9rem;
+}
+
+/* Stepper and inline cards need to push content apart. */
+.stl-disc-option:has(.stl-disc-stepper),
+.stl-disc-option:has(.stl-disc-inline-fields) {
+  justify-content: space-between;
+}
+
+.stl-disc-option:hover {
+  border-color: var(--color-primary);
+  background: var(--bg-hover);
+}
+
+.stl-disc-option.checked {
+  border-color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+}
+
+.stl-disc-option input[type="checkbox"] {
+  display: none;
+}
+
+.stl-disc-opt-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.stl-disc-option.checked .stl-disc-opt-icon {
+  background: var(--color-warning);
+  border-color: var(--color-warning);
+  color: var(--bg-main, #0a0a0a);
+}
+
+.stl-disc-opt-label {
+  font-weight: 600;
+  color: var(--text-main);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
+
+
+
+/* ---- Inline stepper (beneficiary count) — round pill ---- */
+.stl-disc-stepper {
+  display: none;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--bg-inset);
+  padding: 0.15rem;
+}
+
+.stl-disc-option.checked .stl-disc-stepper {
+  display: inline-flex;
+}
+
+.stl-disc-step-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-warning);
+  color: var(--bg-main, #0a0a0a);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  padding: 0;
+  line-height: 1;
+}
+
+.stl-disc-step-btn:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.stl-disc-step-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.stl-disc-step-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+  padding: 0;
+}
+
+/* ---- Full-width inline action buttons ---- */
+.disc-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 14px;
+  padding-top: 0;
+}
+
+.disc-modal-btn {
+  flex: 1;
+  padding: 0.6rem 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+
+.disc-modal-btn[data-action="cancel"] {
+  background: var(--neutral-200, #d2d6dd);
+  color: #0a0a0a;
+  border: 1px solid transparent;
+}
+
+.disc-modal-btn[data-action="cancel"]:hover {
+  background: var(--neutral-300, #aaa);
+}
+
+.stl-disc-group {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.stl-disc-group:last-child {
+  border-bottom: none;
+}
+
+/* ---- Discount value row: mode toggle + input ---- */
+.stl-disc-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stl-disc-value-row .stl-disc-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.stl-disc-mode-btns {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.stl-disc-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.8rem;
+  height: 1.6rem;
+  padding: 0 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.stl-disc-mode-btn:last-child {
+  border-right: none;
+}
+
+.stl-disc-mode-btn.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.stl-disc-mode-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.stl-disc-peso-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 1.8rem;
+  text-align: center;
+}
+
+.stl-disc-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--text-main);
+}
+
+.stl-disc-header .stl-disc-type-name {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Type chip: yellow bg matching the discount modal. */
+.stl-disc-type {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.14rem 0.5rem;
+  background: var(--color-warning);
+  border: none;
+  color: var(--bg-main, #0a0a0a);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: var(--radius-sm);
+  margin-right: 0.35rem;
+}
+
+.stl-disc-type-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* ---- Detail stepper + X remove (header row, pushed right) ---- */
+.stl-disc-detail-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.stl-disc-det-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-warning);
+  color: var(--bg-main, #0a0a0a);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.stl-disc-det-step:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.stl-disc-det-step:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.stl-disc-det-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+}
+
+.stl-disc-det-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+
+.stl-disc-det-remove:hover {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.stl-disc-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stl-disc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Remove index circle: quiet until hover, then danger. */
+.stl-disc-idx {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--bg-inset);
+  border: 1px solid transparent;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.stl-disc-idx:hover {
+  border-color: color-mix(in srgb, var(--color-error) 50%, transparent);
+  color: var(--color-error);
+}
+
+.stl-disc-idx:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.stl-disc-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--form-text);
+  background: var(--form-bg-input);
+  border: 1px solid var(--form-border);
+  border-radius: var(--radius-sm);
+}
+
+.stl-disc-input:focus {
+  outline: none;
+  border-color: var(--form-border-hover);
+  box-shadow: var(--ring-focus);
+}
+
+
+
+/* Empty voice: centered, quiet — tag glyph + text (JS-rendered). Grows
+   with the panel via the flex chain; min-height keeps a floor. */
+.stl-no-discounts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  flex: 1;
+  min-height: 12rem;
+  color: var(--color-muted);
+  font-size: 0.86rem;
+  text-align: center;
+}
+
+.stl-no-discounts svg {
+  opacity: 0.45;
+}
+
+/* ---- Responsive -----------------------------------------------------------
+   The 3-column grid holds from 768px up (the 1024x768 POS terminal is the
+   primary device); single column only on true phone widths. */
+@media (max-width: 767.98px) {
+  .stl-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stl-header,
+  .stl-layout {
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+
+  .stl-header {
+    padding: 0.5rem 0.8rem;
+  }
+
+  .stl-header-actions {
+    width: 100%;
+  }
+
+  .stl-header-actions .stl-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0 0.6rem;
+  }
+
+  .stl-payment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stl-payment-option {
+    font-size: 0.78rem;
+  }
+}
+
+/* Short POS displays (1024x768 terminals): compress the vertical rhythm so
+   the whole transaction fits without scrolling. */
+@media (min-width: 768px) and (max-height: 820px) {
+  .stl-header {
+    min-height: 3rem;
+  }
+
+  .stl-card {
+    padding: 0.75rem;
+  }
+
+  /* Bar margins track the tighter card padding. */
+  .stl-card-bar {
+    margin: -0.75rem -0.75rem 0.6rem;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .stl-card-title {
+    margin-bottom: 0.45rem;
+  }
+
+  .stl-total-box {
+    padding: 0.5rem 0.8rem 0.55rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .stl-total-value {
+    font-size: 1.8rem;
+  }
+
+  .stl-line-item {
+    padding: 0.26rem 0;
+    font-size: 0.8rem;
+  }
+
+  .stl-total-row {
+    padding-top: 0.4rem;
+  }
+
+  .stl-no-discounts {
+    min-height: 11rem;
+  }
+
+  .stl-btn-block {
+    min-height: 38px;
+  }
+
+  .stl-pax-box {
+    margin-top: 0.55rem;
+    padding: 0.5rem 0.65rem 0.6rem;
+  }
+
+  .stl-layout {
+    padding-bottom: 0.9rem;
+  }
+}
+
+/* ---- Reduced motion --------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .stl-btn,
+  .stl-btn-block,
+  .stl-pax-step,
+  .stl-nav-link,
+  .stl-payment-option,
+  .stl-credit-option,
+  .stl-disc-option,
+  .stl-disc-step-btn,
+  .stl-disc-add-btn,
+  .stl-disc-idx,
+  .stl-amount-input,
+  .stl-input {
+    transition: none;
+  }
+}
+
+

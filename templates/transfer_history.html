@@ -1,0 +1,201 @@
+{# ============================================================================
+   transfer_history.html — RLC SFTP Transfer History (POS_V2 Admin Overhaul)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+
+{% block title %}RLC SFTP Transfer History - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}transfer_history{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/transfer_history.css') }}">
+
+<h1 class="sr-only">RLC SFTP Transfer History</h1>
+
+<div class="rlc-history-page" id="rlcHistoryRoot">
+  {# ── Page Header ─────────────────────────────────────────────────────── #}
+  <header class="rlc-header">
+    <div>
+      <p class="rlc-kicker">Compliance Monitoring</p>
+      <h2 class="rlc-title">RLC SFTP Transfer History</h2>
+      <p class="rlc-subtitle">Generate, monitor, and resend Robinsons Land Corporation daily sales files.</p>
+    </div>
+  </header>
+
+  {# ── Automatic Reconnection Banner ──────────────────────────────────── #}
+  <div class="rlc-banner">
+    {{ icon('wifi', 18) }}
+    <div>
+      <strong>Automatic Reconnection System:</strong> Pending RLC files automatically attempt SFTP transmission every 20 seconds when internet connectivity is active.
+    </div>
+  </div>
+
+  {# ── Manual Generation Card ─────────────────────────────────────────── #}
+  <div class="rlc-card">
+    <div class="rlc-card-header">
+      <h3 class="rlc-card-title">
+        {{ icon('cloud-upload', 18) }}
+        <span>Generate or Regenerate RLC Sales File</span>
+      </h3>
+    </div>
+    <div class="rlc-generate-body">
+      <div class="rlc-generate-grid">
+        <div class="rlc-field">
+          <label class="rlc-label" for="rlcReportDateTrigger">Report Business Date</label>
+          {% set init_date = default_report_date if default_report_date else (today.strftime('%Y-%m-%d') if today else '') %}
+          <div class="rlc-custom-picker" id="rlcDatePicker">
+            <button type="button" class="rlc-picker-trigger" id="rlcReportDateTrigger" aria-label="Select report date" aria-expanded="false">
+              {{ icon('calendar', 15) }}
+              <span class="rlc-picker-value" id="rlcReportDateLabel">{{ init_date }}</span>
+              {{ icon('chevron-down', 12) }}
+            </button>
+            <input type="hidden" id="rlcReportDate" value="{{ init_date }}">
+
+            <div class="rlc-picker-popover" id="rlcDatePickerPopover" hidden>
+              <div class="rlc-cal-header">
+                <button type="button" class="rlc-cal-nav" id="rlcCalPrev" aria-label="Previous month">&lsaquo;</button>
+                <span class="rlc-cal-title" id="rlcCalTitle"></span>
+                <button type="button" class="rlc-cal-nav" id="rlcCalNext" aria-label="Next month">&rsaquo;</button>
+              </div>
+              <div class="rlc-cal-weekdays">
+                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+              </div>
+              <div class="rlc-cal-days" id="rlcCalDays"></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="rlc-btn rlc-btn-primary" id="btnGenerateSendRlc">
+          {{ icon('send', 15) }}
+          <span>Generate &amp; Transmit</span>
+        </button>
+      </div>
+
+      <div class="rlc-progress-wrap" id="rlcProgressWrap" style="display: none;">
+        <div class="rlc-progress-bar">
+          <div class="rlc-progress-fill" id="rlcProgressFill" style="width: 0%;"></div>
+        </div>
+        <div class="rlc-progress-status" id="rlcProgressStatus">Initializing generation...</div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Metrics Cards Grid ─────────────────────────────────────────────── #}
+  <section class="rlc-metrics-grid">
+    <div class="rlc-metric-card" id="cardCompleted" role="button" title="Click to filter completed">
+      <div class="rlc-metric-icon icon-success">
+        {{ icon('check-circle', 22) }}
+      </div>
+      <div>
+        <div class="rlc-metric-val" id="cntCompleted">-</div>
+        <div class="rlc-metric-lbl">Completed</div>
+      </div>
+    </div>
+
+    <div class="rlc-metric-card" id="cardPending" role="button" title="Click to filter pending">
+      <div class="rlc-metric-icon icon-pending">
+        {{ icon('clock', 22) }}
+      </div>
+      <div>
+        <div class="rlc-metric-val" id="cntPending">-</div>
+        <div class="rlc-metric-lbl">Pending</div>
+      </div>
+    </div>
+
+    <div class="rlc-metric-card" id="cardFailed" role="button" title="Click to filter failed">
+      <div class="rlc-metric-icon icon-failed">
+        {{ icon('alert-triangle', 22) }}
+      </div>
+      <div>
+        <div class="rlc-metric-val" id="cntFailed">-</div>
+        <div class="rlc-metric-lbl">Failed</div>
+      </div>
+    </div>
+
+    <div class="rlc-metric-card" id="cardTotal" role="button" title="Click to show all files">
+      <div class="rlc-metric-icon icon-total">
+        {{ icon('file-text', 22) }}
+      </div>
+      <div>
+        <div class="rlc-metric-val" id="cntTotal">-</div>
+        <div class="rlc-metric-lbl">Total Files</div>
+      </div>
+    </div>
+  </section>
+
+  {# ── Filters & Toolbar Card ───────────────────────────────────────── #}
+  <div class="rlc-card rlc-filter-card">
+    <div class="rlc-filter-header">
+      <div class="rlc-filter-title">
+        {{ icon('filter', 16) }}
+        <span>Filter Transmissions</span>
+      </div>
+      <button type="button" class="rlc-btn-text" id="btnResetFilters" style="display: none;">
+        {{ icon('x', 14) }}
+        <span>Clear Filters</span>
+      </button>
+    </div>
+
+    <div class="rlc-filter-body">
+      <div class="rlc-filter-row">
+        <!-- Status Segmented Tabs -->
+        <div class="rlc-status-tabs" id="rlcStatusTabs">
+          <button type="button" class="rlc-status-tab active" data-status="all">All</button>
+          <button type="button" class="rlc-status-tab" data-status="completed">Completed</button>
+          <button type="button" class="rlc-status-tab" data-status="pending">Pending</button>
+          <button type="button" class="rlc-status-tab" data-status="failed">Failed</button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="rlc-search-wrap">
+          <span class="rlc-search-icon">{{ icon('search', 15) }}</span>
+          <input type="text" id="rlcSearchFilter" class="rlc-input rlc-search-input" placeholder="Search filename..." autocomplete="off">
+          <button type="button" id="btnClearSearch" class="rlc-clear-search" hidden aria-label="Clear search">
+            {{ icon('x', 13) }}
+          </button>
+        </div>
+
+        <!-- Date Filter -->
+        <div class="rlc-date-wrap">
+          <span class="rlc-date-icon">{{ icon('calendar', 15) }}</span>
+          <input type="date" id="rlcDateFilter" class="rlc-input rlc-date-input" title="Filter by date">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Transfer Logs Data Table ───────────────────────────────────────── #}
+  <div class="rlc-card rlc-table-card">
+    <div class="rlc-table-wrap">
+      <table class="rlc-table compact-mode" id="rlcMainTable">
+        <thead>
+          <tr>
+            <th>Filename</th>
+            <th>Status</th>
+            <th style="text-align: center;">Batch</th>
+            <th style="text-align: right;">Gross Sales</th>
+            <th>Created</th>
+            <th>Transferred</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rlcLogsTbody">
+          <tr>
+            <td colspan="7" class="rlc-loading-cell">Loading transfer logs...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    {# ── Pagination ───────────────────────────────────────────────────── #}
+    <div class="rlc-pagination" id="rlcPagination" style="display: none;">
+      <div class="rlc-pag-info" id="rlcPagInfo">Showing 0 of 0 items</div>
+      <div class="rlc-pag-btns">
+        <button type="button" class="rlc-btn rlc-btn-sm" id="btnPrevPage" disabled>&lsaquo; Prev</button>
+        <span class="rlc-pag-pages" id="rlcPagPages">Page 1 of 1</span>
+        <button type="button" class="rlc-btn rlc-btn-sm" id="btnNextPage" disabled>Next &rsaquo;</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

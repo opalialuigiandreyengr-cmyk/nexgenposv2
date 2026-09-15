@@ -1,0 +1,574 @@
+{# ============================================================================
+   settings.html — Comprehensive Store, System & Hardware Settings
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Settings - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}settings{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/settings.css') }}">
+
+<h1 class="sr-only">System &amp; Store Settings</h1>
+
+<div class="settings-page" id="settingsPageRoot">
+  {# ── Body Layout with Main Content Panes ───────────────────────────── #}
+  <div class="settings-body-layout">
+    {# ── Settings Main Content Area ───────────────────────────────────── #}
+    <main class="settings-main-content">
+
+      {# ── Pane 2: Store Settings & Operating Parameters ──────────────────── #}
+      <div class="settings-pane" id="pane-store" role="tabpanel">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3 class="settings-card-title">{{ icon('box', 18) }} Business Profile &amp; Operations</h3>
+              <p class="settings-card-desc">Configure business category, operating schedule, service types, and accepted payment modes.</p>
+            </div>
+          </div>
+          <form id="storeSettingsForm" style="display: flex; flex-direction: column; gap: 1.15rem;">
+            <div class="settings-form-grid">
+              <div class="settings-field">
+                <label class="settings-label" for="ssBusinessType">Business Type</label>
+                <select class="settings-select" id="ssBusinessType" name="business_type">
+                  <option value="">Select business type...</option>
+                  <option value="Restaurant">Restaurant</option>
+                  <option value="Kiosk">Kiosk</option>
+                  <option value="Fast Food">Fast Food</option>
+                  <option value="Cafe">Cafe</option>
+                  <option value="Bakery">Bakery</option>
+                  <option value="Food Truck">Food Truck</option>
+                  <option value="Bar">Bar</option>
+                  <option value="Eatery">Eatery</option>
+                  <option value="Dessert Shop">Dessert Shop</option>
+                  <option value="Tea House">Tea House</option>
+                  <option value="Buffet">Buffet</option>
+                </select>
+              </div>
+              <div class="settings-field">
+                <label class="settings-label">Operating Hours</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <input type="time" class="settings-input" id="ssOpenTime" name="open_time" title="Opening Time">
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">to</span>
+                  <input type="time" class="settings-input" id="ssCloseTime" name="close_time" title="Closing Time">
+                </div>
+              </div>
+              <div class="settings-field field-full">
+                <label class="settings-label">Business Days <span class="settings-label-note">(click to toggle active operating days)</span></label>
+                <div class="settings-chip-row" id="ssBusinessDays">
+                  <button type="button" class="settings-chip" data-value="Monday">Mon</button>
+                  <button type="button" class="settings-chip" data-value="Tuesday">Tue</button>
+                  <button type="button" class="settings-chip" data-value="Wednesday">Wed</button>
+                  <button type="button" class="settings-chip" data-value="Thursday">Thu</button>
+                  <button type="button" class="settings-chip" data-value="Friday">Fri</button>
+                  <button type="button" class="settings-chip" data-value="Saturday">Sat</button>
+                  <button type="button" class="settings-chip" data-value="Sunday">Sun</button>
+                </div>
+              </div>
+              <div class="settings-field field-full">
+                <label class="settings-label">Service Types <span class="settings-label-note">(select supported order channels)</span></label>
+                <div class="settings-chip-row" id="ssServiceTypes">
+                  <button type="button" class="settings-chip" data-value="Dine-in">Dine-in</button>
+                  <button type="button" class="settings-chip" data-value="Takeout / To-go">Takeout / To-go</button>
+                  <button type="button" class="settings-chip" data-value="Pickup">Pickup</button>
+                  <button type="button" class="settings-chip" data-value="Delivery">Delivery</button>
+                </div>
+              </div>
+              <div class="settings-field field-full">
+                <label class="settings-label">Accepted Payment Types <span class="settings-label-note">(select accepted payment methods)</span></label>
+                <div class="settings-chip-row" id="ssPaymentTypes">
+                  <button type="button" class="settings-chip" data-value="Cash">Cash</button>
+                  <button type="button" class="settings-chip" data-value="Card">Card (Credit/Debit)</button>
+                  <button type="button" class="settings-chip" data-value="Gift Cheque">Gift Cheque</button>
+                  <button type="button" class="settings-chip" data-value="GCash">GCash</button>
+                  <button type="button" class="settings-chip" data-value="PayMaya">PayMaya</button>
+                  <button type="button" class="settings-chip" data-value="ShopeePay">ShopeePay</button>
+                  <button type="button" class="settings-chip" data-value="Bank Transfer">Bank Transfer</button>
+                </div>
+              </div>
+            </div>
+            <div class="settings-actions-footer">
+              <button type="submit" class="settings-btn-save" id="btnSaveStoreSettings">
+                {{ icon('check', 16) }}
+                <span>Save Store Settings</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {# ── Pane 3: Visual Theme Selection ──────────────────────────────────── #}
+      <div class="settings-pane" id="pane-theme" role="tabpanel">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3 class="settings-card-title">{{ icon('sun', 18) }} Appearance &amp; Visual Theme</h3>
+              <p class="settings-card-desc">Choose your preferred visual theme. Your choice is saved locally and applies instantly system-wide.</p>
+            </div>
+          </div>
+          <div class="theme-selection-grid">
+            <button type="button" class="theme-card" id="themeCardLight" data-theme-choice="light">
+              <div class="theme-card-preview preview-light">
+                <div class="theme-preview-topbar"></div>
+                <div class="theme-preview-sidebar"></div>
+                <div class="theme-preview-content">
+                  <div class="theme-preview-box"></div>
+                  <div class="theme-preview-box"></div>
+                </div>
+              </div>
+              <div class="theme-card-info">
+                <span class="theme-card-title">{{ icon('sun', 16) }} Light Theme</span>
+                <span class="theme-card-badge">{{ icon('check', 14) }} Active</span>
+              </div>
+            </button>
+
+            <button type="button" class="theme-card" id="themeCardDark" data-theme-choice="dark">
+              <div class="theme-card-preview preview-dark">
+                <div class="theme-preview-topbar"></div>
+                <div class="theme-preview-sidebar"></div>
+                <div class="theme-preview-content">
+                  <div class="theme-preview-box"></div>
+                  <div class="theme-preview-box"></div>
+                </div>
+              </div>
+              <div class="theme-card-info">
+                <span class="theme-card-title">{{ icon('moon', 16) }} Dark Theme</span>
+                <span class="theme-card-badge">{{ icon('check', 14) }} Active</span>
+              </div>
+            </button>
+          </div>
+          <div class="settings-note">
+            {{ icon('info', 16) }}
+            <span>Switching themes applies immediately across POS cashier view, kitchen display, reports, and administrative forms.</span>
+          </div>
+        </div>
+      </div>
+
+      {# ── Pane 4: Merged Receipt Design & Live Preview ──────────────────── #}
+      <div class="settings-pane active" id="pane-receipt" role="tabpanel">
+        <div class="receipt-designer-split">
+          {# ── Left Column: Interactive Receipt Builder Form ──────────────── #}
+          <div class="receipt-form-column">
+            <form id="receiptSettingsForm" style="display: flex; flex-direction: column; gap: 1.25rem;">
+              {# Card 1: BIR Credentials #}
+              <div class="settings-card">
+                <div class="settings-card-header">
+                  <div>
+                    <h3 class="settings-card-title">{{ icon('file-text', 18) }} BIR Credentials</h3>
+                    <p class="settings-card-desc">Official BIR registration parameters printed on customer receipts in mandatory tax compliance sequence.</p>
+                  </div>
+                </div>
+                <div class="settings-form-grid">
+                  {# 1. Business Name #}
+                  <div class="settings-field field-full">
+                    <label class="settings-label" for="cfgReceiptStoreName">Business Name / Trade Name</label>
+                    <input type="text" class="settings-input" id="cfgReceiptStoreName" name="store_name" placeholder="e.g. SAVORE KITCHEN CORP" autocomplete="off">
+                  </div>
+                  {# 2. TIN #}
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgTin">Tax Identification No. (TIN)</label>
+                    <input type="text" class="settings-input" id="cfgTin" name="tin" placeholder="e.g. VAT REG. TIN 681-242-294-00000" autocomplete="off">
+                  </div>
+                  {# 3. PTU #}
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgPtu">Permit to Use (PTU No.)</label>
+                    <input type="text" class="settings-input" id="cfgPtu" name="ptu_no" placeholder="e.g. PTU NO: FP032026-088-0596274-000000" autocomplete="off">
+                  </div>
+                  {# 4. PTU Issued #}
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgPtuIssued">PTU Date Issued</label>
+                    <input type="text" class="settings-input" id="cfgPtuIssued" name="ptu_date_issued" placeholder="e.g. DATE ISSUED: 03/26/2026" autocomplete="off">
+                  </div>
+                  {# 5. Stall No / Branch #}
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgBranchName">Stall No. / Branch Name</label>
+                    <input type="text" class="settings-input" id="cfgBranchName" name="branch_name" placeholder="e.g. LEVEL 1 STALL #126 ROBINSONS NORTH" autocomplete="off">
+                  </div>
+                  {# 6. Store Address #}
+                  <div class="settings-field field-full">
+                    <label class="settings-label" for="cfgStoreAddress">Store Address</label>
+                    <input type="text" class="settings-input" id="cfgStoreAddress" name="store_location" placeholder="e.g. BRGY 91 ABUCAY, TACLOBAN CITY, LEYTE" autocomplete="off">
+                  </div>
+                  {# 7. MIN #}
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgMin">Machine Identification No. (MIN)</label>
+                    <input type="text" class="settings-input" id="cfgMin" name="min" placeholder="e.g. MIN - 2603271052400600" autocomplete="off">
+                  </div>
+                  {# 8. Serial No. (SN) #}
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgSerial">POS Serial Number (SN)</label>
+                    <input type="text" class="settings-input" id="cfgSerial" name="serial_number" placeholder="e.g. SN - 1F250421014035" autocomplete="off">
+                  </div>
+                </div>
+              </div>
+
+              {# Card 2: Thank You Footer & Closing Disclaimer #}
+              <div class="settings-card">
+                <div class="settings-card-header">
+                  <div>
+                    <h3 class="settings-card-title">{{ icon('receipt', 18) }} Thank You Message &amp; Receipt Footer</h3>
+                    <p class="settings-card-desc">Closing message printed at the bottom of customer slips.</p>
+                  </div>
+                </div>
+                <div class="settings-field field-full">
+                  <label class="settings-label" for="cfgFooterLines">Thank You / Closing Message</label>
+                  <textarea class="settings-textarea" id="cfgFooterLines" name="footer_lines" rows="3" placeholder="e.g. Thank you for dining with us! Please come again."></textarea>
+                </div>
+              </div>
+
+              <div class="settings-actions-footer">
+                <button type="submit" class="settings-btn-save" id="btnSaveReceiptSettings">
+                  {{ icon('check', 16) }}
+                  <span>Save Receipt &amp; Header Settings</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {# ── Right Column: 80mm ESC/POS Receipt Paper Preview ──── #}
+          <aside class="receipt-preview-wrap" aria-label="Receipt Preview">
+            <div class="receipt-preview-header">
+              <div class="receipt-preview-title">
+                {{ icon('receipt', 18) }}
+                <span>Receipt Preview</span>
+              </div>
+              <button type="button" class="receipt-test-print-btn" id="btnTestPrintReceipt" title="Send a test print to your physical printer">
+                {{ icon('printer', 14) }}
+                <span>Test Print</span>
+              </button>
+            </div>
+
+            <div class="receipt-paper">
+              <div class="receipt-paper-header">
+                <div class="receipt-paper-store" id="prevStoreName">SAVORE KITCHEN CORP</div>
+                <div id="prevTin" style="font-size: 0.68rem; margin-top: 0.15rem;">VAT REG. TIN 681-242-294-00000</div>
+                <div id="prevPtu" style="font-size: 0.68rem;">PTU NO: FP032026-088-0596274-000000</div>
+                <div id="prevPtuIssued" style="font-size: 0.68rem;">DATE ISSUED: 03/26/2026</div>
+                <div id="prevBranchName" style="font-size: 0.72rem; color: #4b5563; font-weight: 600; margin-top: 0.15rem;">LEVEL 1 STALL #126 ROBINSONS NORTH</div>
+                <div id="prevAddress" style="font-size: 0.68rem; color: #6b7280;">BRGY 91 ABUCAY TACLOBAN CITY</div>
+                <div id="prevMin" style="font-size: 0.68rem; margin-top: 0.15rem;">MIN: 2603271052400600</div>
+                <div id="prevSerial" style="font-size: 0.68rem;">SN: 1F250421014035</div>
+              </div>
+              <hr class="receipt-paper-divider">
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
+                <span>OR #: 20260903-0001</span>
+                <span>Table: 04</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #6b7280;">
+                <span>Cashier: Admin</span>
+                <span>Dine-In</span>
+              </div>
+              <hr class="receipt-paper-divider">
+              <div style="display: flex; justify-content: space-between; font-weight: 700;">
+                <span>1x Truffle Burger</span>
+                <span>&#8369;350.00</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-weight: 700;">
+                <span>2x Iced Americano</span>
+                <span>&#8369;240.00</span>
+              </div>
+              <hr class="receipt-paper-divider">
+              <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.85rem;">
+                <span>TOTAL AMOUNT:</span>
+                <span>&#8369;590.00</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-top: 0.2rem;">
+                <span>CASH TENDERED:</span>
+                <span>&#8369;1,000.00</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
+                <span>CHANGE:</span>
+                <span>&#8369;410.00</span>
+              </div>
+              <hr class="receipt-paper-divider">
+              <div class="receipt-paper-footer">
+                <div id="prevFooterMsg" style="font-weight: 600;">Thank you for dining with us!</div>
+                <div style="font-size: 0.62rem; color: #9ca3af; margin-top: 0.35rem;">THIS SERVES AS AN OFFICIAL RECEIPT</div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      {# ── Pane 5: Printers & Hardware Configuration ────────────────────────── #}
+      <div class="settings-pane" id="pane-printers" role="tabpanel">
+        <div class="hw-printers-wrapper">
+          {# ── Section 1: Live Hardware Health & Connectivity Hub ──────────── #}
+          <div class="hw-health-hub">
+            <div class="hw-health-card" id="cardCashierHealth" data-state="checking">
+              <div class="hw-health-top">
+                <div class="hw-health-icon cashier-icon">
+                  {{ icon('printer', 20) }}
+                </div>
+                <div class="hw-health-meta">
+                  <span class="hw-health-kicker">Checkout Hardware</span>
+                  <h4 class="hw-health-title">Cashier Receipt Printer</h4>
+                </div>
+                <div class="printer-status-chip" id="cashierStatusChip" data-state="checking">
+                  <span class="status-dot"></span>
+                  <span id="cashierStatusText">Checking...</span>
+                </div>
+              </div>
+              <div class="hw-health-body">
+                <div class="hw-health-detail">
+                  <span class="hw-detail-label">Active Connection</span>
+                  <strong class="hw-detail-val" id="cashierActiveTarget">Checking IP / Spooler...</strong>
+                </div>
+                <button type="button" class="hw-test-btn" id="btnTestCashierPrinter">
+                  {{ icon('printer', 15) }}
+                  <span>Test Cashier Slip</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="hw-health-card" id="cardKitchenHealth" data-state="checking">
+              <div class="hw-health-top">
+                <div class="hw-health-icon kitchen-icon">
+                  {{ icon('printer', 20) }}
+                </div>
+                <div class="hw-health-meta">
+                  <span class="hw-health-kicker">Order Dispatch</span>
+                  <h4 class="hw-health-title">Kitchen Orders Printer</h4>
+                </div>
+                <div class="printer-status-chip" id="kitchenStatusChip" data-state="checking">
+                  <span class="status-dot"></span>
+                  <span id="kitchenStatusText">Checking...</span>
+                </div>
+              </div>
+              <div class="hw-health-body">
+                <div class="hw-health-detail">
+                  <span class="hw-detail-label">Active Connection</span>
+                  <strong class="hw-detail-val" id="kitchenActiveTarget">Checking IP / Spooler...</strong>
+                </div>
+                <button type="button" class="hw-test-btn" id="btnTestKitchenPrinter">
+                  {{ icon('printer', 15) }}
+                  <span>Test Kitchen Ticket</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {# ── Section 2: Hardware Discovery Radar Panel ───────────────────── #}
+          <div class="printer-scan-card hw-radar-card">
+            <div class="printer-scan-header">
+              <div class="hw-radar-header-info">
+                <div class="hw-radar-badge">{{ icon('search', 14) }} Auto Discovery</div>
+                <h4 class="printer-scan-title">Scan &amp; Discover Hardware Printers</h4>
+                <p class="printer-scan-desc">Detect local Windows spooler queues, direct USB receipt printers, and LAN network IP interfaces on your subnet.</p>
+              </div>
+              <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                <button type="button" class="settings-btn-secondary" id="btnReloadPrinterStatus">
+                  {{ icon('refresh', 16) }}
+                  <span>Reload Status</span>
+                </button>
+                <button type="button" class="settings-btn-save" id="btnScanPrinters">
+                  {{ icon('search', 16) }}
+                  <span>Scan Network &amp; USB</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="printer-scan-status" id="printerScanStatus">
+              {{ icon('info', 16) }}
+              <span>Click <strong>Scan Network &amp; USB</strong> to automatically discover available Windows spoolers, direct USB devices, and LAN network printers.</span>
+            </div>
+
+            <div class="printer-scan-results" id="printerScanResults" style="display: none;"></div>
+          </div>
+
+          {# ── Section 3: Configuration Form ────────────────────────────────── #}
+          <form id="printerSettingsForm" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            {# Paper Size Spec Card #}
+            <div class="settings-card hw-spec-card">
+              <div class="settings-card-header">
+                <div>
+                  <h3 class="settings-card-title">{{ icon('receipt', 18) }} Receipt Paper Spec &amp; Font Clarity</h3>
+                  <p class="settings-card-desc">Select font scale and text density optimized for your thermal receipt paper roll size.</p>
+                </div>
+              </div>
+
+              {# Hidden Select for Form Sync #}
+              <select class="settings-select" id="cfgPrinterPrintSize" name="print_size" style="display: none;">
+                <option value="compact">Compact</option>
+                <option value="normal" selected>Normal</option>
+              </select>
+
+              {# Interactive Visual Segmented Choice Cards #}
+              <div class="hw-paper-choice-grid">
+                <div class="hw-paper-card" data-paper-choice="compact" id="paperChoiceCompact">
+                  <div class="hw-paper-card-radio"></div>
+                  <div class="hw-paper-card-content">
+                    <span class="hw-paper-tag">58mm / Impact</span>
+                    <h4 class="hw-paper-card-title">Compact Print Size</h4>
+                    <p class="hw-paper-card-desc">Small condensed text. Best for 58mm paper rolls, dot matrix impact printers, or extra-long receipts.</p>
+                  </div>
+                </div>
+
+                <div class="hw-paper-card active" data-paper-choice="normal" id="paperChoiceNormal">
+                  <div class="hw-paper-card-radio"></div>
+                  <div class="hw-paper-card-content">
+                    <span class="hw-paper-tag tag-recommended">80mm Thermal (Recommended)</span>
+                    <h4 class="hw-paper-card-title">Normal Thermal Print Size</h4>
+                    <p class="hw-paper-card-desc">Large high-clarity text. Designed for standard 80mm ESC/POS thermal printers for maximum readability.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {# Cashier & Kitchen Assignments Grid #}
+            <div class="hw-assignments-grid">
+              {# Cashier Printer Assignment Card #}
+              <div class="settings-card hw-assign-card">
+                <div class="settings-card-header">
+                  <div>
+                    <h3 class="settings-card-title">{{ icon('printer', 18) }} Cashier Checkout Printer</h3>
+                    <p class="settings-card-desc">Prints official receipts, customer bills, and settlement slips.</p>
+                  </div>
+                </div>
+                <div class="settings-form-grid">
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgCashierPrinterHost">IP Address / Host</label>
+                    <input type="text" class="settings-input" id="cfgCashierPrinterHost" name="cashier_printer_host" placeholder="e.g. 192.168.1.100 or leave empty">
+                  </div>
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgCashierPrinterPort">Network Port</label>
+                    <input type="number" class="settings-input" id="cfgCashierPrinterPort" name="cashier_printer_port" placeholder="9100" value="9100" min="1" max="65535">
+                  </div>
+                  <div class="settings-field field-full">
+                    <label class="settings-label" for="cfgCashierWindowsPrinter">Windows Spooler / Driver Queue Name</label>
+                    <input type="text" class="settings-input" id="cfgCashierWindowsPrinter" name="cashier_windows_printer_name" placeholder="e.g. EPSON TM-T82X-II Receipt or Xprinter XP-76">
+                  </div>
+                </div>
+              </div>
+
+              {# Kitchen Printer Assignment Card #}
+              <div class="settings-card hw-assign-card">
+                <div class="settings-card-header">
+                  <div>
+                    <h3 class="settings-card-title">{{ icon('printer', 18) }} Kitchen Order Printer</h3>
+                    <p class="settings-card-desc">Dispatches order kitchen tickets and food prep dockets.</p>
+                  </div>
+                </div>
+                <div class="settings-form-grid">
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgKitchenPrinterHost">IP Address / Host</label>
+                    <input type="text" class="settings-input" id="cfgKitchenPrinterHost" name="kitchen_printer_host" placeholder="e.g. 192.168.254.108 or leave empty">
+                  </div>
+                  <div class="settings-field">
+                    <label class="settings-label" for="cfgKitchenPrinterPort">Network Port</label>
+                    <input type="number" class="settings-input" id="cfgKitchenPrinterPort" name="kitchen_printer_port" placeholder="9100" value="9100" min="1" max="65535">
+                  </div>
+                  <div class="settings-field field-full">
+                    <label class="settings-label" for="cfgKitchenWindowsPrinter">Windows Spooler / Driver Queue Name</label>
+                    <input type="text" class="settings-input" id="cfgKitchenWindowsPrinter" name="kitchen_windows_printer_name" placeholder="e.g. Kitchen POS Thermal Printer">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {# Transaction Safety & Auto-Discovery Toggles #}
+            <div class="settings-toggles-grid">
+              <label class="toggle-card" for="cfgPrinterRequired">
+                <div class="toggle-info">
+                  <span class="toggle-title">Require Reachable Printer for Transactions</span>
+                  <span class="toggle-desc">When enabled, checkout requires a verified printer connection before completing orders. Disable for paperless testing.</span>
+                </div>
+                <div class="toggle-switch">
+                  <input type="checkbox" id="cfgPrinterRequired" name="printer_required" checked>
+                  <span class="toggle-slider"></span>
+                </div>
+              </label>
+
+              <label class="toggle-card" for="cfgAutoDiscoverPrinters">
+                <div class="toggle-info">
+                  <span class="toggle-title">Auto-Detect LAN Network Subnet</span>
+                  <span class="toggle-desc">Automatically scans local subnet if primary configured IP address or Windows queue becomes unreachable.</span>
+                </div>
+                <div class="toggle-switch">
+                  <input type="checkbox" id="cfgAutoDiscoverPrinters" name="auto_discover_network_printers" checked>
+                  <span class="toggle-slider"></span>
+                </div>
+              </label>
+            </div>
+
+            <div class="settings-actions-footer">
+              <button type="submit" class="settings-btn-save" id="btnSavePrinterSettings">
+                {{ icon('check', 16) }}
+                <span>Save Hardware Printer Settings</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {# ── Pane 6: RLC SFTP Transfer Configuration ──────────────────────────── #}
+      <div class="settings-pane" id="pane-rlc" role="tabpanel">
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3 class="settings-card-title">{{ icon('cloud-upload', 18) }} Robinsons Land Corporation (RLC) SFTP Transfer</h3>
+              <p class="settings-card-desc">Configure automated End-of-Day sales summary uploads directly to RLC tenant portal servers.</p>
+            </div>
+          </div>
+
+          <form id="rlcSettingsForm" style="display: flex; flex-direction: column; gap: 1rem;">
+            <label class="toggle-card" for="cfgRlcEnabled">
+              <div class="toggle-info">
+                <span class="toggle-title">Enable Automated RLC SFTP Upload</span>
+                <span class="toggle-desc">Automatically generates and transmits daily RLC sales files during End-of-Day execution.</span>
+              </div>
+              <div class="toggle-switch">
+                <input type="checkbox" id="cfgRlcEnabled" name="rlc_enabled">
+                <span class="toggle-slider"></span>
+              </div>
+            </label>
+
+            <div class="settings-form-grid">
+              <div class="settings-field">
+                <label class="settings-label" for="rlcServer">SFTP Server / Hostname</label>
+                <input type="text" class="settings-input" id="rlcServer" name="server" placeholder="e.g. rlccloud.robinsonsland.com" autocomplete="off">
+              </div>
+              <div class="settings-field">
+                <label class="settings-label" for="rlcPort">Port</label>
+                <input type="number" class="settings-input" id="rlcPort" name="port" placeholder="22" value="22" min="1" max="65535">
+              </div>
+              <div class="settings-field">
+                <label class="settings-label" for="rlcUsername">SFTP Username</label>
+                <input type="text" class="settings-input" id="rlcUsername" name="username" placeholder="Tenant username e.g. PrimeraSavoryTac" autocomplete="off">
+              </div>
+              <div class="settings-field">
+                <label class="settings-label" for="rlcPassword">SFTP Password</label>
+                <div class="password-input-wrap">
+                  <input type="password" class="settings-input" id="rlcPassword" name="password" placeholder="SFTP Account Password" autocomplete="new-password">
+                  <button type="button" class="password-toggle-btn" id="btnToggleRlcPassword" title="Show password" aria-label="Show password">
+                    {{ icon('eye', 16) }}
+                  </button>
+                </div>
+              </div>
+              <div class="settings-field field-full">
+                <label class="settings-label" for="rlcRemoteDir">Remote Upload Path</label>
+                <input type="text" class="settings-input" id="rlcRemoteDir" name="remote_path" placeholder="e.g. /50047569/50047569/" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="settings-actions-footer">
+              <button type="button" class="settings-btn-secondary" id="btnTestRlcConnection" title="Test SFTP server reachability and login credentials">
+                {{ icon('wifi', 16) }}
+                <span>Test Connection</span>
+              </button>
+              <button type="button" class="settings-btn-secondary" id="btnClearRlcSettings" title="Clear all RLC SFTP fields">
+                {{ icon('trash-2', 16) }}
+                <span>Clear All</span>
+              </button>
+              <button type="submit" class="settings-btn-save" id="btnSaveRlcSettings">
+                {{ icon('check', 16) }}
+                <span>Save RLC Settings</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

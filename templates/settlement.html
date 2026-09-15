@@ -1,0 +1,296 @@
+{# ============================================================================
+   settlement.html — settlement view (Phase 3, p3a7)
+   ----------------------------------------------------------------------------
+   SPA shell page (extends shell.html). Ports the legacy templates/
+   settlement.html view contract served by orders.settle_order_page:
+   nav picker (View / Settle), payment matrix (cash/card/gift_check/cheque),
+   discount modal (8 types with VAT exemption logic), summary sidebar with
+   breakdown, PAX field with admin-auth edit, bill out button, manual SI
+   toggle, and the on-screen keyboard integration.
+
+   All interactive modals (discount selection, admin auth for PAX edit,
+   printer guard, settlement confirmation) are built at runtime by
+   pages/settlement.js using the njX inline-overlay idiom — no Bootstrap
+   classes in this markup. The discount matrix logic (calculateOrderDiscount)
+   maintains byte-level behavioral parity with V1 settlement.js.
+   ============================================================================ #}
+{% extends 'pos_shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Settle Order #{{ order.order_no }} - NEXGEN POS{% endblock %}
+{% block area %}pos{% endblock %}
+{% block page_module %}settlement{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pos/settlement.css') }}">
+<link rel="stylesheet" href="{{ asset('css/core/keyboard.css') }}">
+
+<header class="stl-header">
+  {# Navbar bar (2026-08-28 user request): one horizontal dark strip holds
+     everything — view links flush left, settlement actions flush right. #}
+  <div class="stl-header-left">
+    <nav class="stl-header-nav" aria-label="Order views">
+      <a href="/order/{{ order.id }}" class="stl-nav-link">{{ icon('eye', 14) }}<span>View Order</span></a>
+      <a href="/settle_order/{{ order.id }}" class="stl-nav-link active" aria-current="page">{{ icon('cash-register', 14) }}<span>Settle Order</span></a>
+    </nav>
+    {% if order.tables %}
+    <span class="stl-table-chip">{{ icon('table', 13) }}Table {{ order.tables }}</span>
+    {% endif %}
+  </div>
+  <div class="stl-header-actions" role="group" aria-label="Settlement actions">
+    <button type="button" class="stl-btn stl-btn-bill" id="billOutBtn">
+      {{ icon('receipt', 15) }}<span>Bill Out</span>
+    </button>
+    <button type="submit" form="settlementForm" class="stl-btn stl-btn-settle" id="settleBtnHeader">
+      {{ icon('check', 15) }}<span>Settle Order</span>
+    </button>
+    <a href="/orders" class="stl-btn stl-btn-back">{{ icon('arrow-left', 15) }}<span>Back</span></a>
+  </div>
+</header>
+
+<div class="stl-layout">
+  <form id="settlementForm" action="/settle_order/{{ order.id }}" method="POST" novalidate hx-boost="false">
+    <input type="hidden" id="orderDiscount" name="order_discount" value="no_discount">
+
+    <div class="stl-grid">
+      {# Column 1: Summary #}
+      <div class="stl-col stl-col-summary">
+        <div class="stl-card">
+          {# Plain title row (inspiration layout): ORDER TOTAL left, the order
+             number quiet on the right; the table chip lives in the header. #}
+          <div class="stl-card-title">
+            <span class="stl-card-title-label">{{ icon('chart', 15) }}<span>Order Total</span></span>
+            <h1 class="stl-order-no">Order #{{ order.order_no }}</h1>
+          </div>
+          <div class="stl-total-box">
+            <span class="stl-total-label">Total</span>
+            <span class="stl-total-value">&#8369;<span id="orderTotalDisplay">0.00</span></span>
+          </div>
+          <span id="finalTotal" class="stl-hidden">0.00</span>
+
+          <div class="stl-breakdown" id="calculationDisplay">
+            <div class="stl-summary-panel">
+              <div class="stl-line-item" id="originalTotalRow" style="display: none;">
+                <span class="stl-label">Total</span>
+                <span class="stl-value">&#8369;<span id="originalTotalDisplay">0.00</span></span>
+              </div>
+              <div id="receiptDiscountBreakdown">
+                <div class="stl-line-item">
+                  <span class="stl-label" id="receiptDiscountLabel">Less Discount</span>
+                  <span class="stl-value">-&#8369;<span id="receiptDiscountAmount">0.00</span></span>
+                </div>
+              </div>
+              <div class="stl-line-item stl-hidden-service-row">
+                <span class="stl-label">Service Charge</span>
+                <span class="stl-value">&#8369;<span id="serviceCharge">0.00</span></span>
+              </div>
+              <div class="stl-line-item stl-total-row" id="amountDueRow">
+                <span class="stl-label">Amount Due</span>
+                <span class="stl-value">&#8369;<span id="amountDue">0.00</span></span>
+              </div>
+              <div class="stl-line-item">
+                <span class="stl-label">Amount Received</span>
+                <span class="stl-value">&#8369;<span id="cashReceivedDisplay">0.00</span></span>
+              </div>
+              <div class="stl-line-item">
+                <span class="stl-label">Change</span>
+                <span class="stl-value">&#8369;<span id="changeAmount">0.00</span></span>
+              </div>
+              <div class="stl-line-item stl-hidden-tax-row">
+                <span class="stl-label">VAT - Sales</span>
+                <span class="stl-value">&#8369;<span id="vatSales">0.00</span></span>
+              </div>
+              <div class="stl-line-item stl-hidden-tax-row">
+                <span class="stl-label">VAT - Exempt Sale</span>
+                <span class="stl-value">&#8369;<span id="vatExemptSale">0.00</span></span>
+              </div>
+              <div class="stl-line-item stl-hidden-tax-row">
+                <span class="stl-label">VAT Amount</span>
+                <span class="stl-value">&#8369;<span id="vatAmount">0.00</span></span>
+              </div>
+              <div class="stl-line-item stl-hidden-tax-row">
+                <span class="stl-label">Zero Rated Sales</span>
+                <span class="stl-value">&#8369;<span id="zeroRatedSales">0.00</span></span>
+              </div>
+              <div class="stl-line-item">
+                <span class="stl-label">Served By</span>
+                <span class="stl-value">{% if order.crew_id %}{{ order.crew.username }}{% else %}{{ current_user.username }}{% endif %}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stl-badges-panel" id="discountBadgesBox">
+            <div id="selectedDiscountsContent"></div>
+          </div>
+        </div>
+      </div>
+
+      {# Column 2: Discounts (restored per user request — own column, never
+         merges; ids unchanged for settlement.js). #}
+      <div class="stl-col stl-col-discount">
+        <div class="stl-card">
+          {# Amber signpost bar (inspiration layout); the panel grows so the
+             Apply Discount action pins to the card bottom. #}
+          <div class="stl-card-bar">{{ icon('tag', 14) }}<span>Discounts</span></div>
+          <div class="stl-discounts-panel" id="selectedDiscountsBox">
+            <div id="selectedDiscountDetails" class="stl-discount-meta"></div>
+          </div>
+          <button type="button" class="stl-btn-block stl-btn-accent" id="orderDiscountBtn">
+            {{ icon('tag', 15) }}<span>Apply Discount</span>
+          </button>
+        </div>
+      </div>
+
+      {# Column 3: Payment Methods #}
+      <div class="stl-col stl-col-payment">
+        <div class="stl-card">
+          {# Amber signpost bar (inspiration layout); the field label IS the
+             bar now. #}
+          <div class="stl-card-bar">{{ icon('credit-card', 14) }}<span>Payment Method</span></div>
+          <div class="stl-payment-block">
+            <div class="stl-payment-grid">
+              <div class="stl-payment-card">
+                <input type="radio" name="payment_method" id="cashPayment" value="cash" checked class="stl-hidden">
+                <label class="stl-payment-option" for="cashPayment">
+                  {{ icon('money', 20) }}
+                  <span>Cash</span>
+                </label>
+              </div>
+              <div class="stl-payment-card">
+                <input type="radio" name="payment_method" id="cardPayment" value="card" class="stl-hidden">
+                <label class="stl-payment-option" for="cardPayment">
+                  {{ icon('credit-card', 20) }}
+                  <span>Credit</span>
+                </label>
+              </div>
+              <div class="stl-payment-card">
+                <input type="radio" name="payment_method" id="giftCheckPayment" value="gift_check" class="stl-hidden">
+                <label class="stl-payment-option" for="giftCheckPayment">
+                  {{ icon('gift', 20) }}
+                  <span>Gift Check</span>
+                </label>
+              </div>
+              <div class="stl-payment-card">
+                <input type="radio" name="payment_method" id="chequePayment" value="cheque" class="stl-hidden">
+                <label class="stl-payment-option" for="chequePayment">
+                  {{ icon('credit-card', 20) }}
+                  <span>Cheque</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div id="cardOptions" style="display: none;">
+            <input type="hidden" id="cardType" name="card_type" value="gcash">
+            <div class="stl-credit-grid" id="creditTypeGrid">
+              <button type="button" class="stl-credit-option active" data-value="gcash" aria-pressed="true">
+                {{ icon('smartphone', 16) }} GCash
+              </button>
+              <button type="button" class="stl-credit-option" data-value="maya" aria-pressed="false">
+                {{ icon('smartphone', 16) }} Maya
+              </button>
+              <button type="button" class="stl-credit-option" data-value="credit_card" aria-pressed="false">
+                {{ icon('credit-card', 16) }} Credit Card
+              </button>
+              <button type="button" class="stl-credit-option" data-value="debit_card" aria-pressed="false">
+                {{ icon('building', 16) }} Debit Card
+              </button>
+            </div>
+
+            <div id="cardSwipeField" style="display: none; margin-top: 0.6rem;">
+              <label for="cardSwipeData" class="stl-field-label">
+                {{ icon('magnet', 14) }} Card Swipe Data
+                <span id="cardSwipeStatus" class="stl-swipe-status">Waiting for swipe...</span>
+              </label>
+              <input type="text" class="stl-input stl-input-mono" id="cardSwipeData" name="card_swipe_data" placeholder="Swipe card to auto-fill..." autocomplete="off">
+              <input type="hidden" id="cardSwipeJson" name="card_swipe_json" value="">
+              <div id="cardSwipeParsed" style="margin-top: 0.35rem; display: none;">
+                <div class="stl-card-parsed">
+                  <span class="stl-badge stl-badge-primary" id="parsedCardType" style="display: none;">----</span>
+                  <span class="stl-badge stl-badge-dark" id="parsedCardNumber">----</span>
+                  <span class="stl-badge stl-badge-info" id="parsedCardName" style="display: none;">----</span>
+                  <span class="stl-badge stl-badge-warning" id="parsedExpiry" style="display: none;">----</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="cashReceivedField">
+            <label for="cashReceived" class="stl-field-label">Amount Received</label>
+            <div class="stl-cash-row">
+              <div class="stl-amount-input">
+                <span class="stl-currency-prefix">&#8369;</span>
+                <input type="text" class="stl-input stl-input-amount" id="cashReceived" name="cash_received" placeholder="Enter amount" required>
+              </div>
+            </div>
+          </div>
+
+          <div id="giftCheckAmountField" style="display: none;">
+            <label for="giftCheckAmount" class="stl-field-label">Gift Check Amount</label>
+            <div class="stl-amount-input">
+              <span class="stl-currency-prefix">&#8369;</span>
+              <input type="number" class="stl-input" id="giftCheckAmount" name="gift_check_amount" step="0.01" placeholder="Gift check amount" required>
+            </div>
+          </div>
+
+          <div id="giftCheckNumberField" style="display: none;">
+            <label for="giftCheckNumber" class="stl-field-label">Gift Check Number</label>
+            <input type="text" class="stl-input" id="giftCheckNumber" name="gift_check_number" placeholder="Gift Check # (e.g., #123456)" required>
+          </div>
+
+          <div id="chequeAmountField" style="display: none;">
+            <label for="chequeAmount" class="stl-field-label">Cheque Amount</label>
+            <div class="stl-amount-input">
+              <span class="stl-currency-prefix">&#8369;</span>
+              <input type="number" class="stl-input" id="chequeAmount" name="cheque_amount" step="0.01" placeholder="Cheque amount" required>
+            </div>
+          </div>
+
+          <div id="chequeNumberField" style="display: none;">
+            <label for="chequeNumber" class="stl-field-label">Cheque Number</label>
+            <input type="text" class="stl-input" id="chequeNumber" name="cheque_number" placeholder="Cheque # (e.g., #123456)" required>
+          </div>
+
+          <div id="manualSiFieldWrap" style="display: none; margin-top: 0.6rem;">
+            <label for="remarks" class="stl-field-label">Manual SI #</label>
+            <div class="stl-amount-input">
+              <input type="text" class="stl-input stl-input-amount" id="remarks" name="remarks" placeholder="Enter SI number">
+            </div>
+          </div>
+
+          {# Card actions (2026-08-28 clarified): NO separate dock — these stay
+             in the payment card, and the card itself stretches to the bottom
+             of the screen, so the actions read as bottom-of-screen controls
+             (CSS pins them to the card's bottom edge). All inside the form so
+             total_no_pax submits. #}
+          <button type="button" class="stl-btn-block stl-btn-accent" id="toggleManualSiBtn" aria-expanded="false">
+            {{ icon('plus', 14) }}<span>Add Manual SI #</span>
+          </button>
+          <hr class="stl-btn-separator" />
+          <button type="button" class="stl-btn-block stl-btn-accent" id="orderDiscountBtnPay">
+            {{ icon('tag', 14) }}<span>Apply Discount</span>
+          </button>
+
+          <div class="stl-pax-box">
+            <label for="totalNoPax" class="stl-pax-label">Pax / Customer</label>
+            <div class="stl-pax-stepper">
+              <button type="button" class="stl-pax-step" id="paxMinusBtn" aria-label="Decrease pax">{{ icon('minus', 14) }}</button>
+              <input type="number" class="stl-input" id="totalNoPax" name="total_no_pax" min="1" value="{{ total_pax }}" required readonly title="Double-click to edit (admin required)">
+              <button type="button" class="stl-pax-step" id="paxPlusBtn" aria-label="Increase pax">{{ icon('plus', 14) }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+{# State bridge: the page module seeds its controllers from this JSON document. #}
+<script type="application/json" id="settlementBridge">{{ {
+  'order_id': order.id,
+  'order_no': order.order_no,
+  'order_total': order.total,
+  'customer_name': order.customer_name or '',
+  'order_timestamp': order.timestamp.isoformat(),
+  'calculated_covers': total_pax,
+  'role': current_user.role,
+} | tojson | safe }}</script>
+{% endblock %}

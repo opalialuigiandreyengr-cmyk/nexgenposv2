@@ -1,0 +1,100 @@
+{# ============================================================================
+   data_retention.html — Data Retention Policies (Phase 5, Milestone 5.4)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Data Retention - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}data_retention{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/data_retention.css') }}">
+
+<h1 class="sr-only">Data Retention &amp; Maintenance</h1>
+
+<div class="retention-page" id="retentionPageRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="retention-header">
+    <div class="retention-header-left">
+      <p class="retention-kicker">System Maintenance</p>
+      <h2 class="retention-title">Data Retention</h2>
+      <p class="retention-subtitle">Configure compliance-based record lifecycles, database storage optimization, and automated archival rules.</p>
+    </div>
+  </header>
+
+  {# ── Summary Cards ───────────────────────────────────────────────────── #}
+  <section class="retention-stats-row" aria-label="Retention Summary">
+    <div class="retention-stat-card">
+      <div class="retention-stat-icon">
+        {{ icon('database', 20) }}
+      </div>
+      <div class="retention-stat-meta">
+        <span class="retention-stat-label">Database Status</span>
+        <span class="retention-stat-val">Healthy</span>
+      </div>
+    </div>
+    <div class="retention-stat-card">
+      <div class="retention-stat-icon">
+        {{ icon('calendar', 20) }}
+      </div>
+      <div class="retention-stat-meta">
+        <span class="retention-stat-label">BIR Required Retention</span>
+        <span class="retention-stat-val">5 Years</span>
+      </div>
+    </div>
+    <div class="retention-stat-card">
+      <div class="retention-stat-icon">
+        {{ icon('shield', 20) }}
+      </div>
+      <div class="retention-stat-meta">
+        <span class="retention-stat-label">Compliance Policy</span>
+        <span class="retention-stat-val">Active</span>
+      </div>
+    </div>
+  </section>
+
+  {# ── Policies Table ─────────────────────────────────────────────────── #}
+  <div class="retention-card">
+    <div class="retention-card-header">
+      <h3 class="retention-card-title">{{ icon('clipboard', 18) }} Active Retention Rules</h3>
+      <p class="retention-card-desc">Scheduled rules enforcing automated cleanup while preserving BIR-auditable records.</p>
+    </div>
+
+    <table class="retention-table">
+      <thead>
+        <tr>
+          <th>Data Category</th>
+          <th>Minimum Retention Period</th>
+          <th>Action On Expiry</th>
+          <th>Compliance Standard</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Sales Transactions &amp; Invoices</strong></td>
+          <td><span style="font-family: var(--font-mono); font-weight: 700;">5 Years (1,825 Days)</span></td>
+          <td>Archive to encrypted backup</td>
+          <td>BIR RR 11-2004 / EIS</td>
+        </tr>
+        <tr>
+          <td><strong>E-Journal &amp; Audit Logs</strong></td>
+          <td><span style="font-family: var(--font-mono); font-weight: 700;">5 Years (1,825 Days)</span></td>
+          <td>Archive to cold storage</td>
+          <td>BIR Tax Audit Parity</td>
+        </tr>
+        <tr>
+          <td><strong>RLC Transfer Logs</strong></td>
+          <td><span style="font-family: var(--font-mono); font-weight: 700;">1 Year (365 Days)</span></td>
+          <td>Purge transfer receipts</td>
+          <td>Mall Management Parity</td>
+        </tr>
+        <tr>
+          <td><strong>Temporary POS Sessions</strong></td>
+          <td><span style="font-family: var(--font-mono); font-weight: 700;">30 Days</span></td>
+          <td>Auto-purge transient tokens</td>
+          <td>System Performance</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{# ============================================================================
+   shell.html — SPA parent frame (the V2 base template)
+   ----------------------------------------------------------------------------
+   Migrated pages EXTEND this template; legacy pages keep extending the
+   legacy base.html. The shell is deliberately NOT named base.html so the
+   ChoiceLoader can never hijack legacy children (see app.py) — mixed
+   migration and per-page rollback are safe by construction.
+
+   Blocks
+   ------
+   area         'admin' (default) or 'pos'   -> <html data-area> + view meta
+   page_module  page-module name or empty    -> lazy-imported by core/spa.js
+   title        <title> text (plain)         -> also the view-meta title
+   styles       <head> extras (rare)         -> page CSS belongs in content
+   content      the child view               -> rendered in BOTH modes
+   page_js      body-end extras (rare)       -> spa.js auto-mounts page module
+
+   Child-view conventions
+   ----------------------
+   * Page CSS goes at the TOP of the content block so it loads in both full
+     and fragment mode (the browser fetches <link> tags inserted by swaps):
+         {% block content %}
+         <link rel="stylesheet" href="{{ asset('css/admin/orders.css') }}">
+         ...view markup...
+         {% endblock %}
+   * Every view must render exactly one <h1> — core/spa.js moves focus to it
+     after every navigation (a11y).
+   * Non-boosted forms keep working natively; every htmx request (hx-*) that
+     hits a migrated route receives the fragment mode below.
+   ========================================================================== #}
+{% from 'partials/_icons.html' import icon %}
+{# Attribute-only blocks: overrides render here (inside a comment, invisible)
+   and are consumed via self.area() / self.page_module() in both modes. #}
+<!-- {% block area %}admin{% endblock %} {% block page_module %}{% endblock %} -->
+{%- set _fragment = request.headers.get('HX-Request') -%}
+{%- if not _fragment %}
+<!DOCTYPE html>
+<html lang="en" data-area="{{ self.area() }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}NEXGEN POS{% endblock %}</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/nexgen_pos_icon.ico') }}">
+  <link rel="preload" href="{{ asset('fonts/space-grotesk-latin-400-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ vendor('njx/njx.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/shell.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/core/modal.css') }}">
+  {% block styles %}{% endblock %}
+  <script src="{{ asset('js/core/theme.js') }}"></script>
+</head>
+<body class="page-{{ (request.endpoint or 'unknown')|replace('.', '-') }}" data-user-role="{{ current_user.role if current_user.is_authenticated else '' }}" hx-boost="true" hx-target="#view-root" hx-swap="innerHTML">
+  <a class="skip-link" href="#view-root" hx-boost="false">Skip to main content</a>
+  <div class="shell">
+    {% if current_user.is_authenticated %}
+    <aside class="shell-side" id="side-nav" aria-label="Primary">
+      {% include 'partials/_sidebar.html' %}
+    </aside>
+    <div class="shell-main">
+      <header class="shell-topbar">
+        <button type="button" class="shell-icon-btn" data-side-toggle aria-expanded="true" aria-controls="side-nav" title="Collapse sidebar" aria-label="Collapse sidebar">
+          {{ icon('menu', 18) }}{{ icon('chevron-left', 18) }}
+        </button>
+        <span class="shell-topbar-title" id="topbar-title" data-default="NEXGEN POS">NEXGEN POS</span>
+        <div class="shell-topbar-actions">
+          <button type="button" class="shell-icon-btn" data-theme-toggle title="Toggle light/dark theme" aria-label="Toggle light/dark theme">
+            {{ icon('sun', 18) }}{{ icon('moon', 18) }}
+          </button>
+          <details class="dropdown dropdown-right shell-user-chip" id="user-menu">
+            <summary class="dropdown-trigger">
+              <span class="shell-avatar" aria-hidden="true">{{ current_user.username[0]|upper }}</span>
+              <span class="shell-user-name">{{ current_user.username }}</span>
+              <span class="dropdown-arrow" aria-hidden="true"></span>
+            </summary>
+            <div class="dropdown-menu">
+              <div class="shell-user-role">{{ current_user.role|replace('_', ' ')|title }}</div>
+              <a class="dropdown-item js-logout-link" href="/logout" hx-boost="false">{{ icon('log-out', 16) }}<span>Log out</span></a>
+            </div>
+          </details>
+        </div>
+      </header>
+    {% endif %}
+    <main id="view-root" tabindex="-1" role="main">
+{%- endif %}
+{% block content %}{% endblock %}
+<template data-view-meta data-title="{{ self.title()|striptags|trim }}" data-area="{{ self.area() }}" data-version="{{ asset_version }}"{% if self.page_module() %} data-page="{{ self.page_module() }}"{% endif %}></template>
+{%- if not _fragment %}
+    </main>
+    {% if current_user.is_authenticated %}
+    </div>
+    {% endif %}
+  </div>
+  <div id="toast-host"></div>
+  <div id="modal-host"></div>
+  <script type="application/json" id="flash-data">{{ get_flashed_messages(with_categories=true)|tojson }}</script>
+  <script src="{{ vendor('njx/njx.js') }}"></script>
+  <script src="{{ vendor('htmx/htmx.min.js') }}"></script>
+  <script type="module" src="{{ asset('js/core/flash.js') }}"></script>
+  <script type="module" src="{{ asset('js/core/spa.js') }}"></script>
+  <script type="module">
+    import { connect } from "{{ asset('js/core/sse.js') }}";
+    connect();
+  </script>
+  {% block page_js %}{% endblock %}
+</body>
+</html>
+{%- endif %}

@@ -1,0 +1,205 @@
+{# ============================================================================
+   misc.html — Miscellaneous Reports Hub (Phase 5, Milestone 5.5)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Misc Reports - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}misc{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/misc.css') }}">
+
+<h1 class="sr-only">Miscellaneous Reports &amp; Tools</h1>
+
+<div class="misc-page" id="miscPageRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="misc-header">
+    <div class="misc-header-left">
+      <p class="misc-kicker">Reporting Hub</p>
+      <h2 class="misc-title">Miscellaneous Reports</h2>
+      <p class="misc-subtitle">Quick access to statutory sales books, audit readings, cashier accountability, and compliance tools.</p>
+    </div>
+  </header>
+
+  {# ── Section 1: Discount Books ───────────────────────────────────────── #}
+  <section aria-label="Statutory Discount Sales Books" class="misc-section">
+    <div class="misc-section-header">
+      <h3 class="misc-section-title">
+        <span class="misc-section-icon section-icon-amber">{{ icon('file-text', 18) }}</span>
+        <span>Statutory Discount Sales Books</span>
+      </h3>
+      <span class="misc-section-count">6 Books</span>
+    </div>
+
+    <div class="misc-grid">
+      <a href="#" class="misc-card card-amber" data-action="open-export" data-book="senior_citizen" data-title="Senior Citizen Sales Book" data-endpoint="/export_senior_citizen_sales_book_excel">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('users', 20) }}</div>
+          <span class="misc-badge badge-amber">20% SC</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">Senior Citizen Sales Book</h4>
+          <p class="misc-card-desc">Track SC ID numbers, 20% discount totals, and VAT exemption records.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">Export Excel {{ icon('download', 14) }}</span>
+        </div>
+      </a>
+
+      <a href="#" class="misc-card card-blue" data-action="open-export" data-book="pwd" data-title="PWD Sales Book" data-endpoint="/export_pwd_sales_book_excel">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('shield', 20) }}</div>
+          <span class="misc-badge badge-blue">20% PWD</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">PWD Sales Book</h4>
+          <p class="misc-card-desc">Audit Persons with Disability discounts, ID validation, and deductions.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">Export Excel {{ icon('download', 14) }}</span>
+        </div>
+      </a>
+
+      <a href="#" class="misc-card card-pink" data-action="open-export" data-book="solo_parent" data-title="Solo Parent Sales Book" data-endpoint="/export_solo_parent_sales_book_excel">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('user-check', 20) }}</div>
+          <span class="misc-badge badge-pink">RA 11861</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">Solo Parent Sales Book</h4>
+          <p class="misc-card-desc">Review Republic Act 11861 Solo Parent discounts and transactions.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">Export Excel {{ icon('download', 14) }}</span>
+        </div>
+      </a>
+
+      <a href="#" class="misc-card card-emerald" data-action="open-export" data-book="national_athlete" data-title="National Athletes &amp; Coaches Sales Book" data-endpoint="/export_athlete_coaches_sales_book_excel">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('award', 20) }}</div>
+          <span class="misc-badge badge-emerald">NAAC 20%</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">National Athlete Sales Book</h4>
+          <p class="misc-card-desc">Log accredited athletes and coaches discount claims.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">Export Excel {{ icon('download', 14) }}</span>
+        </div>
+      </a>
+
+      <a href="#" class="misc-card card-purple" data-action="open-export" data-book="medal_of_valor" data-title="Medal of Valor Sales Book" data-endpoint="/export_mov_sales_book_excel">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('star', 20) }}</div>
+          <span class="misc-badge badge-purple">MOV 20%</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">Medal of Valor Sales Book</h4>
+          <p class="misc-card-desc">Audit Medal of Valor recipients and beneficiary discounts.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">Export Excel {{ icon('download', 14) }}</span>
+        </div>
+      </a>
+
+      <a href="#" class="misc-card card-teal" data-action="open-export" data-book="regular_discount" data-title="Regular Discounts Book" data-endpoint="/export_regular_discount_sales_book_excel">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('tag', 20) }}</div>
+          <span class="misc-badge badge-teal">PROMO &amp; VIP</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">Regular Discount Sales Book</h4>
+          <p class="misc-card-desc">Promotional, VIP, employee, and custom percentage discounts.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">Export Excel {{ icon('download', 14) }}</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  {# ── Section 2: Audit & Operational Reports ──────────────────────────── #}
+  <section aria-label="Operational Reports" class="misc-section">
+    <div class="misc-section-header">
+      <h3 class="misc-section-title">
+        <span class="misc-section-icon section-icon-cyan">{{ icon('bar-chart', 18) }}</span>
+        <span>Operational &amp; Financial Summaries</span>
+      </h3>
+      <span class="misc-section-count">6 Reports</span>
+    </div>
+
+    <div class="misc-grid">
+      <a href="#" class="misc-card card-cyan" data-action="open-daily-sales">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('calendar', 20) }}</div>
+          <span class="misc-badge badge-cyan">Z-READING</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">Daily Sales Report</h4>
+          <p class="misc-card-desc">Daily gross sales, tender breakdowns, tax totals, and Z/X readings.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">Export / Print {{ icon('chevron-right', 14) }}</span>
+        </div>
+      </a>
+
+      <a href="#" class="misc-card card-orange" data-action="open-item-sales">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('box', 20) }}</div>
+          <span class="misc-badge badge-orange">ITEMS</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">Item Sales Summary</h4>
+          <p class="misc-card-desc">Quantity sold and revenue performance broken down by product.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">Export / Print {{ icon('chevron-right', 14) }}</span>
+        </div>
+      </a>
+
+      <a href="/cashier_accountability" class="misc-card card-green">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('dollar-sign', 20) }}</div>
+          <span class="misc-badge badge-green">SHIFTS</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">Cashier Accountability</h4>
+          <p class="misc-card-desc">Individual shift collections, cash drawer overages, and shortages.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">View Report {{ icon('chevron-right', 14) }}</span>
+        </div>
+      </a>
+
+      <a href="/cancelled_void_refund_report" class="misc-card card-amber">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('clipboard', 20) }}</div>
+          <span class="misc-badge badge-amber">AUDIT</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">Cancelled, Void &amp; Refund Audit</h4>
+          <p class="misc-card-desc">Item voids, order cancellations, refunds, and supervisor overrides.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">View Audit {{ icon('chevron-right', 14) }}</span>
+        </div>
+      </a>
+
+
+      <a href="#" class="misc-card card-purple" data-action="open-bir-summary">
+        <div class="misc-card-top">
+          <div class="misc-card-icon">{{ icon('file-text', 20) }}</div>
+          <span class="misc-badge badge-purple">BIR SUMMARY</span>
+        </div>
+        <div class="misc-card-body">
+          <h4 class="misc-card-name">BIR Sales Summary</h4>
+          <p class="misc-card-desc">Consolidated BIR monthly/annual sales tax declaration summary.</p>
+        </div>
+        <div class="misc-card-footer">
+          <span class="misc-card-action">Export Excel {{ icon('chevron-right', 14) }}</span>
+        </div>
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %}

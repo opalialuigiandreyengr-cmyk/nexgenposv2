@@ -1,0 +1,105 @@
+{#
+  home.html — V2 admin start board (shell child). Design language:
+  .ulpi/design/DESIGN.md. Backend contract frozen: rlc_enabled context
+  global, status-row DOM ids consumed by pages/home.js, and the stats +
+  recent-orders data fetched client-side from /home/overview (read-only
+  JSON in POS_V2/app.py). Signature: the Operational Ticker (dark mono
+  clock chip + status pill strip).
+#}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+
+{% block title %}Home - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}home{% endblock %}
+
+{% block content %}
+{# Page CSS at the TOP of the content block: ships in both full and
+   fragment modes (browsers fetch <link> tags inserted by htmx swaps). #}
+<link rel="stylesheet" href="{{ asset('css/admin/home.css') }}">
+
+<header class="home-head">
+  <div class="home-heading">
+    <h1 class="home-title">Start</h1>
+    <p class="home-greeting" id="homeGreeting" data-user="{{ current_user.username }}">Welcome back, {{ current_user.username }}</p>
+  </div>
+  <div class="home-ticker" role="timer" aria-label="Current time">
+    <span class="home-ticker-clock" id="homeClockTime">--:--:--</span>
+    <span class="home-ticker-date" id="homeClockDate"></span>
+  </div>
+</header>
+
+<section class="home-stats" aria-label="Today at a glance">
+  <div class="home-stat">
+    <span class="home-stat-icon" aria-hidden="true">{{ icon('cash-register', 20) }}</span>
+    <div class="home-stat-copy">
+      <span class="home-stat-value home-stat-value--money" id="homeStatSales">--</span>
+      <span class="home-stat-label">Today's Sales (Net)</span>
+    </div>
+  </div>
+  <div class="home-stat">
+    <span class="home-stat-icon" aria-hidden="true">{{ icon('cart', 20) }}</span>
+    <div class="home-stat-copy">
+      <span class="home-stat-value" id="homeStatOrders">--</span>
+      <span class="home-stat-label">Orders Today</span>
+    </div>
+  </div>
+  <div class="home-stat">
+    <span class="home-stat-icon" aria-hidden="true">{{ icon('box', 20) }}</span>
+    <div class="home-stat-copy">
+      <span class="home-stat-value" id="homeStatItems">--</span>
+      <span class="home-stat-label">Items Sold</span>
+    </div>
+  </div>
+  <div class="home-stat">
+    <span class="home-stat-icon" aria-hidden="true">{{ icon('tag', 20) }}</span>
+    <div class="home-stat-copy">
+      <span class="home-stat-value" id="homeStatProducts">--</span>
+      <span class="home-stat-label">Menu Products</span>
+    </div>
+  </div>
+</section>
+
+<section class="home-actions" aria-label="Quick actions">
+  <a class="home-qa home-qa--primary" href="/orders">{{ icon('plus', 16) }}<span>New Order</span></a>
+  <a class="home-qa" href="/end_of_day">{{ icon('calendar-check', 16) }}<span>End of Day</span></a>
+  <a class="home-qa" href="/backup_system">{{ icon('hard-drive', 16) }}<span>System Backup</span></a>
+</section>
+
+<section class="home-recent" aria-label="Recent orders">
+  <div class="home-recent-head">
+    <h2 class="home-recent-title">Recent Orders</h2>
+    <a class="home-recent-all" href="/all_orders">View all {{ icon('arrow-up-right', 14) }}</a>
+  </div>
+  <ol class="home-recent-list" id="homeRecentOrders">
+    <li class="home-recent-row home-recent-row--skeleton" aria-hidden="true">
+      <span class="home-recent-mono">----------</span>
+      <span class="home-recent-customer">Loading orders</span>
+      <span class="home-recent-mono home-recent-time">--:--</span>
+      <span class="home-recent-mono home-recent-total">--</span>
+      <span class="home-chip home-chip--default">…</span>
+    </li>
+  </ol>
+</section>
+
+<footer class="home-status" aria-label="System status">
+  <span class="home-status-caption" aria-hidden="true">SYSTEM</span>
+  <span class="home-status-item home-status-online" id="homeNetworkStatusIndicator" title="Network: Online">
+    {{ icon('wifi', 13) }}<span id="homeNetworkLabel">ON</span>
+  </span>
+  <span class="home-status-divider" aria-hidden="true"></span>
+  <span class="home-status-item home-status-offline" id="homeCashierPrinterStatusIndicator" title="Cashier Printer: Checking...">
+    {{ icon('printer', 13) }}<span id="homeCashierPrinterLabel">C:OFF</span>
+  </span>
+  <span class="home-status-divider" aria-hidden="true"></span>
+  <span class="home-status-item home-status-offline" id="homeKitchenPrinterStatusIndicator" title="Kitchen Printer: Checking...">
+    {{ icon('printer', 13) }}<span id="homeKitchenPrinterLabel">K:OFF</span>
+  </span>
+  {% if rlc_enabled %}
+  <span class="home-status-divider" aria-hidden="true"></span>
+  <span class="home-status-item home-status-muted" id="homePendingStatusIndicator" title="RLC Pending Files">
+    {{ icon('cloud-upload', 13) }}<span id="homePendingBadge" style="display:none;">0</span>
+  </span>
+  {% endif %}
+</footer>
+{% endblock %}

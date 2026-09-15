@@ -1,0 +1,438 @@
+/* =============================================================================
+   css/pages/sales_book.css — Statutory Sales Book Reports (Phase 6, Milestone 6.1)
+   ============================================================================= */
+
+.sb-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0;
+  width: 100%;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.sb-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sb-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.sb-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.sb-back-link:hover {
+  color: var(--color-primary);
+}
+
+.sb-breadcrumb-sep {
+  color: var(--border-color);
+}
+
+.sb-breadcrumb-cur {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.sb-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem 0;
+}
+
+.sb-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 680px;
+  line-height: 1.45;
+}
+
+/* ── Grid ───────────────────────────────────────────────────────────────── */
+.sb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.25rem;
+}
+
+.sb-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+.sb-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--card-accent, var(--color-primary));
+}
+
+.sb-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--card-accent, var(--color-primary)) 40%, var(--border-color));
+}
+
+.sb-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.sb-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--card-accent, var(--color-primary)) 12%, transparent);
+  color: var(--card-accent, var(--color-primary));
+}
+
+.sb-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Accent Color Variations */
+.sb-card-amber { --card-accent: #f59e0b; }
+.badge-amber {
+  background: color-mix(in srgb, #f59e0b 14%, transparent);
+  color: #f59e0b;
+  border: 1px solid color-mix(in srgb, #f59e0b 35%, transparent);
+}
+.btn-amber {
+  background: #f59e0b !important;
+  color: #0f172a !important;
+  border: 1px solid #f59e0b !important;
+}
+
+.sb-card-blue { --card-accent: #3b82f6; }
+.badge-blue {
+  background: color-mix(in srgb, #3b82f6 14%, transparent);
+  color: #3b82f6;
+  border: 1px solid color-mix(in srgb, #3b82f6 35%, transparent);
+}
+.btn-blue {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  border: 1px solid #3b82f6 !important;
+}
+
+.sb-card-pink { --card-accent: #ec4899; }
+.badge-pink {
+  background: color-mix(in srgb, #ec4899 14%, transparent);
+  color: #ec4899;
+  border: 1px solid color-mix(in srgb, #ec4899 35%, transparent);
+}
+.btn-pink {
+  background: #ec4899 !important;
+  color: #ffffff !important;
+  border: 1px solid #ec4899 !important;
+}
+
+.sb-card-emerald { --card-accent: #10b981; }
+.badge-emerald {
+  background: color-mix(in srgb, #10b981 14%, transparent);
+  color: #10b981;
+  border: 1px solid color-mix(in srgb, #10b981 35%, transparent);
+}
+.btn-emerald {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border: 1px solid #10b981 !important;
+}
+
+.sb-card-purple { --card-accent: #8b5cf6; }
+.badge-purple {
+  background: color-mix(in srgb, #8b5cf6 14%, transparent);
+  color: #8b5cf6;
+  border: 1px solid color-mix(in srgb, #8b5cf6 35%, transparent);
+}
+.btn-purple {
+  background: #8b5cf6 !important;
+  color: #ffffff !important;
+  border: 1px solid #8b5cf6 !important;
+}
+
+.sb-card-teal { --card-accent: #14b8a6; }
+.badge-teal {
+  background: color-mix(in srgb, #14b8a6 14%, transparent);
+  color: #14b8a6;
+  border: 1px solid color-mix(in srgb, #14b8a6 35%, transparent);
+}
+.btn-teal {
+  background: #14b8a6 !important;
+  color: #ffffff !important;
+  border: 1px solid #14b8a6 !important;
+}
+
+.sb-card-content {
+  flex: 1;
+  margin-bottom: 1.25rem;
+}
+
+.sb-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.45rem 0;
+  line-height: 1.35;
+}
+
+.sb-card-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.sb-card-footer {
+  margin-top: auto;
+}
+
+.sb-btn-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  height: 40px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+
+.sb-btn-download:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+/* ── Compliance Note ─────────────────────────────────────────────────────── */
+.sb-compliance-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--border-color));
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+.sb-note-icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Export Modal Custom Styling ────────────────────────────────────────── */
+.sb-modal-box {
+  max-width: 480px;
+  width: 100%;
+  padding: 1.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.sb-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sb-modal-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.sb-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.15rem 0;
+}
+
+.sb-modal-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.sb-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sb-preset-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.sb-chip-btn {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-elev);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.sb-chip-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--bg-hover);
+}
+
+.sb-chip-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.sb-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+/* Primary Green Export Confirm Button Styling */
+.sb-modal-actions .btn-export-primary,
+.sb-modal-actions .user-btn-primary,
+#btnDsExportExcel,
+#btnIsExportExcel,
+#btnBirExportExcel,
+#btnConfirmSbExport,
+button.btn-export-primary {
+  background: #10b981 !important;
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  border: 1px solid #10b981 !important;
+  border-radius: var(--radius-md, 10px) !important;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  padding: 0.55rem 1.15rem !important;
+  height: 42px !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background 0.15s ease !important;
+  filter: none !important;
+  cursor: pointer !important;
+}
+
+.sb-modal-actions .btn-export-primary:hover,
+.sb-modal-actions .user-btn-primary:hover,
+#btnDsExportExcel:hover,
+#btnIsExportExcel:hover,
+#btnBirExportExcel:hover,
+#btnConfirmSbExport:hover,
+button.btn-export-primary:hover {
+  background: #059669 !important;
+  background-color: #059669 !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Cancel / Close Secondary Button Styling */
+.sb-modal-actions .lib-modal-warning-cancel,
+#btnCancelDs,
+#btnCancelIs,
+#btnCancelBir,
+#btnCancelSbExport {
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-elev, transparent) !important;
+  color: var(--text-main) !important;
+  border-radius: var(--radius-md, 10px) !important;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  padding: 0.55rem 1.15rem !important;
+  height: 42px !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+  filter: none !important;
+  cursor: pointer !important;
+}
+
+.sb-modal-actions .lib-modal-warning-cancel:hover,
+#btnCancelDs:hover,
+#btnCancelIs:hover,
+#btnCancelBir:hover,
+#btnCancelSbExport:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}

@@ -1,0 +1,615 @@
+/* =============================================================================
+   shell.css — SPA shell layout only (tokens-only, no hard-coded colors)
+   -----------------------------------------------------------------------------
+   Loaded by shell.html after njx.min.css + tokens.css. Everything here is
+   the persistent parent frame: skip link, always-dark sidebar (rail-
+   capable), slim topbar (collapse toggle + view title + theme + user chip),
+   view outlet, footer and the toast host. Page layout lives in
+   admin/<page>.css / pos/<page>.css.
+
+   Sidebar state: body[data-side-nav]="expanded|rail" is set by core/spa.js
+   (localStorage posSideNav, default: rail below 1280px). Before JS runs the
+   media block below supplies the same rail default, so a narrow screen never
+   flashes the full sidebar.
+   ========================================================================== */
+
+/* Skip link — visually hidden until focused (WCAG 2.4.1) */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9600;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 var(--radius-md, 8px) 0;
+  background: var(--color-primary);
+  color: var(--color-light);
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+/* Shell frame — sidebar (sticky) / main column (topbar + outlet + footer) */
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+/* --- Sidebar ---------------------------------------------------------------
+   Always dark in both themes (design invariant, like the login panel).
+   Rail vs expanded is driven by the --side-* switch props below: one set of
+   content rules, two selectors that flip them. */
+.shell-side {
+  /* Page-locked literals (sidebar is always dark — these do NOT theme-flip) */
+  --side-bg: #0B1120;
+  --side-border: rgba(148, 163, 184, 0.10);
+  --side-text: #94A3B8;
+  --side-text-hover: #F8FAFC;
+  --side-accent: #F59E0B; /* amber = the warm operational accent (locked) */
+  --side-hover-bg: rgba(148, 163, 184, 0.08);
+  /* State switches — rail sets these, expanded restores them */
+  --side-w: 220px;
+  --side-caption-display: block;
+  --side-label-display: block;
+  --side-foot-display: block;
+  --side-word-display: block;
+  --side-brand-justify: flex-start;
+  --side-brand-pad: 18px 16px 16px;
+  --side-link-justify: flex-start;
+  --side-link-pad-x: 10px;
+
+  width: var(--side-w);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--side-bg);
+  border-right: 1px solid var(--side-border);
+  z-index: 900;
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+/* Brand block — logo + wordmark (rail shows the logo only) */
+.side-brand {
+  display: flex;
+  align-items: center;
+  justify-content: var(--side-brand-justify);
+  gap: 10px;
+  padding: var(--side-brand-pad);
+  text-decoration: none;
+}
+.side-brand-logo {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--radius-sm, 4px);
+}
+.side-brand-word {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--side-text-hover);
+  white-space: nowrap;
+  display: var(--side-word-display);
+}
+
+/* Scrollable link area — brand and build tag stay pinned */
+.side-nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 10px 16px;
+}
+
+/* Group caption: mono micro-label (rail hides it) */
+.side-caption {
+  display: var(--side-caption-display);
+  padding: 14px 10px 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--side-text);
+  white-space: nowrap;
+}
+
+/* Nav link — icon + label; amber rail echo on the active one */
+.side-link {
+  display: flex;
+  align-items: center;
+  justify-content: var(--side-link-justify);
+  gap: 10px;
+  margin: 1px 0;
+  padding: 9px var(--side-link-pad-x);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md, 8px);
+  color: var(--side-text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.side-link .icon {
+  flex: none;
+}
+.side-link:hover {
+  color: var(--side-text-hover);
+  background: var(--side-hover-bg);
+}
+.side-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+.side-link.is-active {
+  color: var(--side-accent);
+  background: color-mix(in srgb, var(--side-accent) 12%, transparent);
+  border-left-color: var(--side-accent);
+}
+.side-link-label {
+  display: var(--side-label-display);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+/* Sidebar Dropdown (Settings) */
+.side-dropdown {
+  position: relative;
+  margin: 1px 0;
+}
+.side-dropdown-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+.side-dropdown-chevron {
+  margin-left: auto;
+  display: var(--side-label-display);
+  transition: transform 0.2s var(--ease-out, ease);
+  color: var(--side-text);
+  flex-shrink: 0;
+}
+.side-dropdown.is-open .side-dropdown-chevron {
+  transform: rotate(180deg);
+}
+.side-dropdown-menu {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 14px;
+  margin-top: 2px;
+  margin-bottom: 4px;
+}
+.side-dropdown.is-open .side-dropdown-menu {
+  display: flex;
+}
+.side-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--radius-md, 8px);
+  color: var(--side-text);
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 500;
+  border-left: 2px solid transparent;
+  transition: color var(--dur-fast, 0.18s) var(--ease-out, ease),
+              background var(--dur-fast, 0.18s) var(--ease-out, ease);
+}
+.side-dropdown-item .icon {
+  flex: none;
+  opacity: 0.85;
+}
+.side-dropdown-item:hover {
+  color: var(--side-text-hover);
+  background: var(--side-hover-bg);
+}
+.side-dropdown-item:hover .icon {
+  opacity: 1;
+}
+.side-dropdown-item:focus,
+.side-dropdown-item:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus, 0 0 0 2px rgba(59, 130, 246, 0.5));
+}
+.side-dropdown-item.is-active {
+  color: var(--side-accent);
+  background: color-mix(in srgb, var(--side-accent) 12%, transparent);
+  border-left-color: var(--side-accent);
+  font-weight: 600;
+}
+.side-dropdown-item.is-active .icon {
+  opacity: 1;
+  color: var(--side-accent);
+}
+
+/* Rail Mode Adjustments for Dropdown */
+body[data-side-nav="rail"] .side-dropdown-chevron {
+  display: none !important;
+}
+body[data-side-nav="rail"] .side-dropdown-menu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-top: 0;
+  margin-left: 6px;
+  padding: 6px;
+  min-width: 210px;
+  background: #0B1120;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+body[data-side-nav="rail"] .side-dropdown.is-open .side-dropdown-menu {
+  display: none;
+}
+body[data-side-nav="rail"] .side-dropdown:hover .side-dropdown-menu,
+body[data-side-nav="rail"] .side-dropdown:focus-within .side-dropdown-menu {
+  display: flex !important;
+}
+body[data-side-nav="rail"] .side-dropdown-item .side-link-label {
+  display: inline-block !important;
+}
+
+@media (max-width: 1279px) {
+  body:not([data-side-nav]) .side-dropdown-chevron {
+    display: none !important;
+  }
+  body:not([data-side-nav]) .side-dropdown-menu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    margin-top: 0;
+    margin-left: 6px;
+    padding: 6px;
+    min-width: 210px;
+    background: #0B1120;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: var(--radius-md, 8px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+  body:not([data-side-nav]) .side-dropdown.is-open .side-dropdown-menu {
+    display: none;
+  }
+  body:not([data-side-nav]) .side-dropdown:hover .side-dropdown-menu,
+  body:not([data-side-nav]) .side-dropdown:focus-within .side-dropdown-menu {
+    display: flex !important;
+  }
+  body:not([data-side-nav]) .side-dropdown-item .side-link-label {
+    display: inline-block !important;
+  }
+}
+
+/* Build tag — the signature's mono BUILD tag, pinned at the sidebar foot */
+.side-foot {
+  display: var(--side-foot-display);
+  padding: 12px 10px 16px;
+  border-top: 1px solid var(--side-border);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--side-text);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* --- Rail state ------------------------------------------------------------
+   Two selectors flip the same switch props: explicit JS state, and the
+   pre-JS default below 1280px (POS panels are 1024px wide). */
+body[data-side-nav="rail"] .shell-side {
+  --side-w: 64px;
+  --side-caption-display: none;
+  --side-label-display: none;
+  --side-foot-display: none;
+  --side-word-display: none;
+  --side-brand-justify: center;
+  --side-brand-pad: 18px 0 16px;
+  --side-link-justify: center;
+  --side-link-pad-x: 0;
+}
+@media (max-width: 1279px) {
+  body:not([data-side-nav]) .shell-side {
+    --side-w: 64px;
+    --side-caption-display: none;
+    --side-label-display: none;
+    --side-foot-display: none;
+    --side-word-display: none;
+    --side-brand-justify: center;
+    --side-brand-pad: 18px 0 16px;
+    --side-link-justify: center;
+    --side-link-pad-x: 0;
+  }
+}
+/* Explicit expanded state must beat the media default (same specificity,
+   later in source). */
+body[data-side-nav="expanded"] .shell-side {
+  --side-w: 220px;
+  --side-caption-display: block;
+  --side-label-display: block;
+  --side-foot-display: block;
+  --side-word-display: block;
+  --side-brand-justify: flex-start;
+  --side-brand-pad: 18px 16px 16px;
+  --side-link-justify: flex-start;
+  --side-link-pad-x: 10px;
+}
+
+/* --- Main column: topbar / outlet / footer -------------------------------- */
+.shell-main {
+  min-width: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.shell-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--color-border, var(--nav-border));
+  box-shadow: var(--shadow-sm);
+}
+.shell-topbar-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-main);
+}
+.shell-topbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Collapse toggle icon: chevron-left when expanded, menu when rail */
+.shell-topbar [data-side-toggle] .icon-menu {
+  display: none;
+}
+body[data-side-nav="rail"] .shell-topbar [data-side-toggle] .icon-menu {
+  display: block;
+}
+body[data-side-nav="rail"] .shell-topbar [data-side-toggle] .icon-chevron-left {
+  display: none;
+}
+
+/* Child-view outlet — swapped in-place by htmx; focusable for a11y */
+#view-root {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.5rem;
+  outline: none;
+}
+/* Suppress the focus ring on the heading that spa.js focuses for a11y
+   (tabindex="-1" + programmatic focus). The ring is only useful on
+   user-initiated focus (keyboard tab), not on page-load focus. */
+#view-root h1:focus,
+#view-root h2:focus {
+  outline: none;
+}
+/* POS area goes full-width (tactical screens: keypad, cart, floor plan) */
+:root[data-area="pos"] #view-root {
+  max-width: none;
+  padding: 1rem;
+}
+
+.shell-footer {
+  padding: 0.9rem 1.25rem 1.1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  border-top: 1px solid var(--nav-border);
+}
+
+/* Toast host — pre-rendered by the shell; core/toast.js appends pills here */
+#toast-host {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 9500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+#toast-host .toast,
+.toast {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  padding: 0.65rem 1rem !important;
+  border-radius: 6px !important;
+  font-family: inherit !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  max-width: 420px !important;
+}
+
+#toast-host .toast .toast-message,
+.toast .toast-message {
+  color: #ffffff !important;
+}
+
+#toast-host .toast-success,
+.toast-success {
+  background: #064e3b !important;
+  border: 1px solid #059669 !important;
+  color: #ffffff !important;
+}
+
+#toast-host .toast-error,
+.toast-error {
+  background: #7f1d1d !important;
+  border: 1px solid #dc2626 !important;
+  color: #ffffff !important;
+}
+
+#toast-host .toast-warning,
+.toast-warning {
+  background: #78350f !important;
+  border: 1px solid #d97706 !important;
+  color: #ffffff !important;
+}
+
+#toast-host .toast-primary,
+.toast-primary,
+#toast-host .toast-info,
+.toast-info {
+  background: #1e293b !important;
+  border: 1px solid #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+/* User chip — summary row lays out avatar + name + caret horizontally */
+.shell-topbar .dropdown {
+  position: relative;
+}
+.shell-user-chip {
+  cursor: pointer;
+  list-style: none; /* hide the <details> disclosure marker */
+  user-select: none;
+}
+.shell-user-chip::-webkit-details-marker {
+  display: none;
+}
+.shell-user-chip > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md, 8px);
+  color: var(--nav-text);
+  white-space: nowrap;
+  transition: color 0.18s, background 0.18s;
+}
+.shell-user-chip > summary:hover {
+  color: var(--nav-text-hover);
+  background: color-mix(in srgb, var(--color-neutral-600) 10%, transparent);
+}
+.shell-user-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.shell-user-role {
+  margin-bottom: 4px;
+  padding: 6px 10px 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  border-bottom: 1px solid var(--nav-border);
+}
+.shell-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1; /* optically center the initial (no extra glyph line box) */
+  color: var(--color-light);
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-light) 22%, transparent);
+  flex-shrink: 0;
+}
+
+/* Theme toggle icon button (lives in the always-light-adaptive topbar) */
+.shell-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color 0.18s, background 0.18s;
+}
+.shell-icon-btn:hover {
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--color-neutral-600) 10%, transparent);
+}
+[data-theme="light"] .shell-icon-btn .icon-moon {
+  display: none;
+}
+[data-theme="dark"] .shell-icon-btn .icon-sun {
+  display: none;
+}
+
+/* --- View transition animation ------------------------------------------
+   When navigating between SPA pages, the outgoing view zooms out while
+   the incoming view zooms in. core/spa.js drives these classes:
+     .view-leaving  — old content zooms out (0.15s)
+     .view-entering — new content zooms in  (0.25s)
+   Rapid clicks are safe: the JS flag prevents double-firing.
+   ---------------------------------------------------------------------- */
+#view-root {
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+}
+
+@keyframes view-zoom-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes view-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+#view-root.view-leaving {
+  animation: view-zoom-out 0.15s ease-in forwards;
+}
+
+#view-root.view-entering {
+  animation: view-zoom-in 0.25s ease-out forwards;
+}

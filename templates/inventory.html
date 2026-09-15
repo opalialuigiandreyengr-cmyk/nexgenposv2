@@ -1,0 +1,155 @@
+{# ============================================================================
+   inventory.html — Daily Inventory & Raw Material Consumption Tracker
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Inventory - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}inventory{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/inventory.css') }}">
+
+<h1 class="sr-only">Daily Inventory & Consumption Tracker</h1>
+
+<div class="inv-page" id="invPageRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="inv-header">
+    <div class="inv-header-left">
+      <p class="inv-kicker">Inventory Management</p>
+      <h2 class="inv-title">Daily Consumption Tracker</h2>
+      <p class="inv-subtitle">Track raw material consumption based on POS sales. Import recipes and generate daily deduction reports.</p>
+    </div>
+    <div class="inv-header-actions">
+      <button type="button" class="inv-btn-secondary" id="btnImportRecipes">
+        {{ icon('file-text', 16) }}
+        <span>Import Recipes</span>
+      </button>
+      <button type="button" class="inv-btn-primary" id="btnAddRecipe">
+        {{ icon('plus', 16) }}
+        <span>Add Recipe</span>
+      </button>
+    </div>
+  </header>
+
+  {# ── Tab Navigation ─────────────────────────────────────────────────── #}
+  <div class="inv-tabs" role="tablist" aria-label="Inventory sections">
+    <button type="button" class="inv-tab active" data-tab="report" role="tab" aria-selected="true">
+      {{ icon('file-text', 16) }}
+      <span>Daily Report</span>
+    </button>
+    <button type="button" class="inv-tab" data-tab="recipes" role="tab" aria-selected="false">
+      {{ icon('list', 16) }}
+      <span>Recipe Mappings</span>
+    </button>
+  </div>
+
+  {# ── Daily Report Tab ───────────────────────────────────────────────── #}
+  <div class="inv-pane active" id="pane-report">
+    <div class="inv-report-toolbar">
+      <div class="inv-report-toolbar-left">
+        <div class="inv-date-group">
+          <label for="reportDate" class="inv-label">Report Date</label>
+          <input type="date" class="inv-input" id="reportDate" />
+        </div>
+        <button type="button" class="inv-btn-secondary" id="btnGenerateReport">
+          {{ icon('refresh-cw', 16) }}
+          <span>Generate</span>
+        </button>
+      </div>
+      <div class="inv-report-toolbar-right">
+        <button type="button" class="inv-btn-secondary" id="btnExportReport" disabled>
+          {{ icon('download', 16) }}
+          <span>Export Excel</span>
+        </button>
+      </div>
+    </div>
+
+    {# Metrics #}
+    <div class="inv-metrics-row" id="reportMetrics" style="display:none;">
+      <div class="inv-metric-card">
+        <div class="inv-metric-icon">{{ icon('shopping-bag', 20) }}</div>
+        <div class="inv-metric-body">
+          <span class="inv-metric-label">Orders</span>
+          <span class="inv-metric-val" id="metricOrders">0</span>
+        </div>
+      </div>
+      <div class="inv-metric-card">
+        <div class="inv-metric-icon products-metric">{{ icon('box', 20) }}</div>
+        <div class="inv-metric-body">
+          <span class="inv-metric-label">Products Sold</span>
+          <span class="inv-metric-val" id="metricProducts">0</span>
+        </div>
+      </div>
+      <div class="inv-metric-card">
+        <div class="inv-metric-icon rawmat-metric">{{ icon('package', 20) }}</div>
+        <div class="inv-metric-body">
+          <span class="inv-metric-label">Raw Materials Used</span>
+          <span class="inv-metric-val" id="metricRawMats">0</span>
+        </div>
+      </div>
+      <div class="inv-metric-card">
+        <div class="inv-metric-icon unmapped-metric">{{ icon('alert-triangle', 20) }}</div>
+        <div class="inv-metric-body">
+          <span class="inv-metric-label">Unmapped Products</span>
+          <span class="inv-metric-val" id="metricUnmapped">0</span>
+        </div>
+      </div>
+    </div>
+
+    {# Report Tables #}
+    <div id="reportContent">
+      <div class="inv-empty-state" id="reportEmpty">
+        <div class="inv-empty-icon">{{ icon('file-text', 36) }}</div>
+        <h3>Select a Date & Generate</h3>
+        <p>Choose a date and click <strong>Generate</strong> to calculate raw material consumption from POS sales.</p>
+      </div>
+    </div>
+  </div>
+
+  {# ── Recipe Mappings Tab ────────────────────────────────────────────── #}
+  <div class="inv-pane" id="pane-recipes">
+    <div class="inv-recipe-toolbar">
+      <div class="inv-search-wrap">
+        {{ icon('search', 16) }}
+        <input type="text" class="inv-input" id="recipeSearch" placeholder="Search by product or raw material..." autocomplete="off">
+      </div>
+      <select class="inv-select" id="recipeCategoryFilter" aria-label="Category filter">
+        <option value="">All Categories</option>
+      </select>
+      <span class="inv-recipe-count" id="recipeCount">0 mappings</span>
+    </div>
+
+    <div class="inv-table-wrap">
+      <table class="inv-table" id="recipeTable">
+        <thead>
+          <tr>
+            <th>Product (Sales Category)</th>
+            <th>Raw Material</th>
+            <th>Category</th>
+            <th>Qty / Order</th>
+            <th>UOM</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="recipeTableBody">
+          <tr>
+            <td colspan="6" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
+              Loading recipe mappings...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="inv-empty-state" id="recipeEmpty" style="display:none;">
+      <div class="inv-empty-icon">{{ icon('package', 36) }}</div>
+      <h3>No Recipe Mappings Yet</h3>
+      <p>Import your raw materials Excel or manually add recipe mappings to get started.</p>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="invProductsData">
+{{ products_json|safe }}
+</script>
+{% endblock %}

@@ -1,0 +1,214 @@
+{# ============================================================================
+   cancelled_void_refund_report.html — Cancel, Void & Refund Audit (Phase 6, Milestone 6.4)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Cancelled, Void &amp; Refund Audit - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}audit_reports{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/audit_reports.css') }}">
+
+<h1 class="sr-only">Cancelled, Void and Refund Audit Report</h1>
+
+<div class="ar-page" id="auditReportRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="ar-header">
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 1rem; margin-bottom: 0.25rem;">
+      <h2 class="ar-title" style="margin: 0;">Cancelled, Void &amp; Refund Audit</h2>
+      <a href="/misc" class="btn ar-back-btn">
+        {{ icon('arrow-left', 15) }}
+        <span>Back</span>
+      </a>
+    </div>
+
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; width: 100%;">
+      <p class="ar-subtitle" style="margin: 0;">Comprehensive audit trail of managerial overrides, voided line items, order cancellations, and refunds.</p>
+
+      <div class="ar-header-actions">
+        <div class="ar-date-group">
+          <input type="date" id="arFromDate" class="ar-date-input" value="{{ from_date.strftime('%Y-%m-%d') }}">
+          <span class="ar-date-sep">to</span>
+          <input type="date" id="arToDate" class="ar-date-input" value="{{ to_date.strftime('%Y-%m-%d') }}">
+          <button type="button" class="btn ar-btn-filter" id="btnFilterDates">Filter</button>
+        </div>
+
+        <a href="/export_cancelled_void_refund_report?from_date={{ from_date.strftime('%Y-%m-%d') }}&to_date={{ to_date.strftime('%Y-%m-%d') }}" class="btn ar-btn-export" hx-boost="false">
+          {{ icon('download', 15) }}
+          <span>Export Excel</span>
+        </a>
+        <a href="/print_cancelled_void_refund_report?from_date={{ from_date.strftime('%Y-%m-%d') }}&to_date={{ to_date.strftime('%Y-%m-%d') }}" class="btn ar-btn-print" hx-boost="false" target="_blank">
+          {{ icon('printer', 15) }}
+          <span>Print Report</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  {# ── KPI Metrics ─────────────────────────────────────────────────────── #}
+  <section class="ar-kpi-grid" aria-label="Audit Exception Metrics">
+    <div class="ar-kpi-card card-cancelled">
+      <div class="ar-kpi-top">
+        <span class="ar-kpi-label">Cancelled Orders</span>
+        <span class="ar-badge badge-cancelled">{{ totals.cancelled_count or 0 }} orders</span>
+      </div>
+      <span class="ar-kpi-val text-red">₱{{ "%.2f"|format(totals.cancelled_amount or 0.0) }}</span>
+      <span class="ar-kpi-sub">Total value of cancelled transactions</span>
+    </div>
+
+    <div class="ar-kpi-card card-refunded">
+      <div class="ar-kpi-top">
+        <span class="ar-kpi-label">Refunded Orders</span>
+        <span class="ar-badge badge-refunded">{{ totals.refunded_count or 0 }} orders</span>
+      </div>
+      <span class="ar-kpi-val text-amber">₱{{ "%.2f"|format(totals.refunded_amount or 0.0) }}</span>
+      <span class="ar-kpi-sub">Total amount refunded to customers</span>
+    </div>
+
+    <div class="ar-kpi-card card-voided">
+      <div class="ar-kpi-top">
+        <span class="ar-kpi-label">Voided Items</span>
+        <span class="ar-badge badge-voided">{{ totals.voided_count or 0 }} items</span>
+      </div>
+      <span class="ar-kpi-val text-purple">₱{{ "%.2f"|format(totals.voided_amount or 0.0) }}</span>
+      <span class="ar-kpi-sub">Total line items voided before settlement</span>
+    </div>
+  </section>
+
+  {# ── Section: Voided Items ───────────────────────────────────────────── #}
+  <section class="ar-table-card">
+    <div class="ar-card-head">
+      <h3 class="ar-section-title">
+        <span class="ar-icon-badge badge-purple">{{ icon('alert-octagon', 16) }}</span>
+        <span>Voided Line Items</span>
+      </h3>
+      <span class="ar-count-pill">{{ voided_items|length }} items</span>
+    </div>
+
+    <div class="ar-table-wrap">
+      <table class="ar-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Order #</th>
+            <th>Item Name</th>
+            <th class="text-center">Qty</th>
+            <th class="text-right">Unit Price</th>
+            <th class="text-right">Void Amount</th>
+            <th>Reason / Note</th>
+            <th>Authorized By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if voided_items %}
+            {% for item in voided_items %}
+            <tr>
+              <td class="font-mono">{{ item.timestamp.strftime('%Y-%m-%d %I:%M %p') }}</td>
+              <td class="font-mono font-bold">{{ item.order_no or ('#' ~ item.order_id) }}</td>
+              <td>{{ item.product_name or item.item_name or 'N/A' }}</td>
+              <td class="text-center font-mono">{{ item.modified_qty or item.quantity or 1 }}</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(item.price or 0.0) }}</td>
+              <td class="text-right font-mono text-purple">₱{{ "%.2f"|format(item.voided_amount or ((item.modified_qty or 1) * (item.price or 0.0))) }}</td>
+              <td><span class="ar-reason-text">{{ item.reason or item.notes or 'No reason provided' }}</span></td>
+              <td><span class="ar-admin-badge">{{ item.user.username if item.user else (item.authorized_by or 'Manager') }}</span></td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="8" class="ar-empty-cell">No voided items recorded in this date range.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {# ── Section: Refunded Orders ────────────────────────────────────────── #}
+  <section class="ar-table-card">
+    <div class="ar-card-head">
+      <h3 class="ar-section-title">
+        <span class="ar-icon-badge badge-amber">{{ icon('rotate-ccw', 16) }}</span>
+        <span>Refunded Orders &amp; Items</span>
+      </h3>
+      <span class="ar-count-pill">{{ refunded_orders|length }} orders</span>
+    </div>
+
+    <div class="ar-table-wrap">
+      <table class="ar-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Order #</th>
+            <th>Status</th>
+            <th class="text-right">Original Total</th>
+            <th>Refund Reason</th>
+            <th>Cashier / Staff</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if refunded_orders %}
+            {% for order in refunded_orders %}
+            <tr>
+              <td class="font-mono">{{ order.timestamp.strftime('%Y-%m-%d %I:%M %p') }}</td>
+              <td class="font-mono font-bold">#{{ order.id }}</td>
+              <td><span class="ar-badge badge-refunded">{{ order.status|upper }}</span></td>
+              <td class="text-right font-mono text-amber">₱{{ "%.2f"|format(order.total or 0.0) }}</td>
+              <td><span class="ar-reason-text">{{ order.refund_reason or order.notes or 'Customer requested refund' }}</span></td>
+              <td>{{ order.cashier.username if order.cashier else 'System' }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="ar-empty-cell">No refunded orders recorded in this date range.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {# ── Section: Cancelled Orders ───────────────────────────────────────── #}
+  <section class="ar-table-card">
+    <div class="ar-card-head">
+      <h3 class="ar-section-title">
+        <span class="ar-icon-badge badge-cancelled">{{ icon('x-circle', 16) }}</span>
+        <span>Cancelled Orders</span>
+      </h3>
+      <span class="ar-count-pill">{{ cancelled_orders|length }} orders</span>
+    </div>
+
+    <div class="ar-table-wrap">
+      <table class="ar-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Order #</th>
+            <th>Table / Type</th>
+            <th class="text-right">Order Amount</th>
+            <th>Cancellation Reason</th>
+            <th>Cashier</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if cancelled_orders %}
+            {% for order in cancelled_orders %}
+            <tr>
+              <td class="font-mono">{{ order.timestamp.strftime('%Y-%m-%d %I:%M %p') }}</td>
+              <td class="font-mono font-bold">#{{ order.id }}</td>
+              <td>{{ order.table_number or order.order_type or 'Dine-in' }}</td>
+              <td class="text-right font-mono text-red">₱{{ "%.2f"|format(order.total or 0.0) }}</td>
+              <td><span class="ar-reason-text">{{ order.cancellation_reason or 'No reason provided' }}</span></td>
+              <td>{{ order.cashier.username if order.cashier else 'Staff' }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="ar-empty-cell">No cancelled orders recorded in this date range.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

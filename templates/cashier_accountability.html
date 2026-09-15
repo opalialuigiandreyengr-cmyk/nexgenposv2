@@ -1,0 +1,231 @@
+{# ============================================================================
+   cashier_accountability.html — Cashier Accountability Report (Phase 6, Milestone 6.2)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Cashier Accountability - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}cashier_accountability{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/cashier_accountability.css') }}">
+
+<h1 class="sr-only">Cashier Accountability Report</h1>
+
+<div class="ca-page" id="accountabilityRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="ca-header">
+    <div class="ca-header-left">
+      <div class="ca-breadcrumbs">
+        <a href="/misc" class="ca-back-link">
+          {{ icon('arrow-left', 14) }}
+          <span>Misc Reports</span>
+        </a>
+        <span class="ca-breadcrumb-sep">/</span>
+        <span class="ca-breadcrumb-cur">Cashier Accountability</span>
+      </div>
+      <h2 class="ca-title">Cashier Accountability Report</h2>
+      <p class="ca-subtitle">Daily shift reconciliation, tender breakdowns, tax audits, and drawer cash verification.</p>
+    </div>
+
+    <div class="ca-header-actions">
+      <div class="ca-date-wrap">
+        <label for="caReportDate" class="sr-only">Report Date</label>
+        <input type="date" id="caReportDate" class="ca-date-input" value="{{ report_date.strftime('%Y-%m-%d') }}">
+      </div>
+      <button type="button" class="btn btn-secondary ca-btn-today" id="btnShowToday">
+        {{ icon('eye', 15) }}
+        <span>Show Report Today</span>
+      </button>
+      <button type="button" class="btn ca-btn-print" id="btnPrintAccountability">
+        {{ icon('printer', 15) }}
+        <span>Print Accountability Report</span>
+      </button>
+    </div>
+  </header>
+
+  {# ── KPI Summary Cards ────────────────────────────────────────────────── #}
+  <section class="ca-kpi-grid" aria-label="Accountability Summary Metrics">
+    <div class="ca-kpi-card">
+      <span class="ca-kpi-label">Gross Sales</span>
+      <span class="ca-kpi-val" id="kpiGross">₱{{ "%.2f"|format(gross_sales or 0.0) }}</span>
+      <span class="ca-kpi-sub">Total sales before deductions</span>
+    </div>
+
+    <div class="ca-kpi-card">
+      <span class="ca-kpi-label">Total Discounts</span>
+      <span class="ca-kpi-val text-amber" id="kpiDiscount">₱{{ "%.2f"|format(total_discounts or 0.0) }}</span>
+      <span class="ca-kpi-sub">{{ (senior_discount_count or 0) + (pwd_discount_count or 0) + (solo_parent_discount_count or 0) + (regular_discount_count or 0) }} total discounts applied</span>
+    </div>
+
+    <div class="ca-kpi-card">
+      <span class="ca-kpi-label">Net Sales</span>
+      <span class="ca-kpi-val text-emerald" id="kpiNet">₱{{ "%.2f"|format(net_sales or 0.0) }}</span>
+      <span class="ca-kpi-sub">Gross less tax &amp; discounts</span>
+    </div>
+
+    <div class="ca-kpi-card">
+      <span class="ca-kpi-label">Cash In Drawer</span>
+      <span class="ca-kpi-val text-blue" id="kpiCash">₱{{ "%.2f"|format(total_cash or 0.0) }}</span>
+      <span class="ca-kpi-sub">Cash sales tender total</span>
+    </div>
+  </section>
+
+  {# ── Main Report Sheet ───────────────────────────────────────────────── #}
+  <main class="ca-sheet-wrap" id="caSheetWrap">
+    <div class="ca-sheet">
+      <!-- Sheet Header -->
+      <div class="ca-sheet-header">
+        <div class="ca-store-title">NEXGEN POS — SHIFT ACCOUNTABILITY</div>
+        <div class="ca-meta-grid">
+          <div><strong>Cashier:</strong> {{ selected_cashier.username if selected_cashier else current_user.username }}</div>
+          <div><strong>Date:</strong> {{ report_date.strftime('%B %d, %Y') }}</div>
+          <div><strong>Shift Start:</strong> {{ start_time.strftime('%I:%M %p') if start_time else '09:00 AM' }}</div>
+          <div><strong>Shift End:</strong> {{ end_time.strftime('%I:%M %p') if end_time else report_time.strftime('%I:%M %p') }}</div>
+          <div><strong>Beginning OR#:</strong> {{ beginning_or_no or 'N/A' }}</div>
+          <div><strong>Ending OR#:</strong> {{ ending_or_no or 'N/A' }}</div>
+        </div>
+      </div>
+
+      <!-- Section: Tender Breakdown -->
+      <div class="ca-section">
+        <h3 class="ca-section-title">{{ icon('dollar-sign', 14) }} Payment Tender Summary</h3>
+        <table class="ca-table">
+          <tbody>
+            <tr>
+              <td>Cash Collections</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(total_cash or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>Credit / Debit Card</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(total_card or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>Gift Certificates / GC</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(total_gc or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>Cheques / Other Tenders</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(total_cheque or 0.0) }}</td>
+            </tr>
+            <tr class="ca-total-row">
+              <td><strong>Total Tenders Collected</strong></td>
+              <td class="text-right font-mono"><strong>₱{{ "%.2f"|format((total_cash or 0.0) + (total_card or 0.0) + (total_gc or 0.0) + (total_cheque or 0.0)) }}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section: Tax & Sales Breakdown -->
+      <div class="ca-section">
+        <h3 class="ca-section-title">{{ icon('file-text', 14) }} Sales &amp; VAT Breakdown</h3>
+        <table class="ca-table">
+          <tbody>
+            <tr>
+              <td>VATable Sales</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(vatable_sales or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>12% Output VAT</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(vat_amount or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>VAT-Exempt Sales</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(vat_exempt_sales or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>Zero-Rated Sales</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(zero_rated_sales or 0.0) }}</td>
+            </tr>
+            <tr class="ca-total-row">
+              <td><strong>Net Sales</strong></td>
+              <td class="text-right font-mono"><strong>₱{{ "%.2f"|format(net_sales or 0.0) }}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section: Discounts Breakdown -->
+      <div class="ca-section">
+        <h3 class="ca-section-title">{{ icon('tag', 14) }} Discount Deductions</h3>
+        <table class="ca-table">
+          <thead>
+            <tr>
+              <th>Discount Type</th>
+              <th class="text-center">Transactions</th>
+              <th class="text-right">Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Senior Citizen (SC)</td>
+              <td class="text-center font-mono">{{ senior_discount_count or 0 }}</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(senior_discount_total or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>Persons with Disability (PWD)</td>
+              <td class="text-center font-mono">{{ pwd_discount_count or 0 }}</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(pwd_discount_total or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>Solo Parent (RA 11861)</td>
+              <td class="text-center font-mono">{{ solo_parent_discount_count or 0 }}</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(solo_parent_discount_total or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>National Athletes &amp; Coaches (NAAC)</td>
+              <td class="text-center font-mono">{{ athlete_discount_count or 0 }}</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(athlete_discount_total or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>Medal of Valor (MOV)</td>
+              <td class="text-center font-mono">{{ mov_discount_count or 0 }}</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(mov_discount_total or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>Regular &amp; Custom Promo</td>
+              <td class="text-center font-mono">{{ regular_discount_count or 0 }}</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(regular_discount_total or 0.0) }}</td>
+            </tr>
+            <tr class="ca-total-row">
+              <td><strong>Total Discounts</strong></td>
+              <td class="text-center font-mono"><strong>{{ (senior_discount_count or 0) + (pwd_discount_count or 0) + (solo_parent_discount_count or 0) + (athlete_discount_count or 0) + (mov_discount_count or 0) + (regular_discount_count or 0) }}</strong></td>
+              <td class="text-right font-mono"><strong>₱{{ "%.2f"|format(total_discounts or 0.0) }}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section: Audit Exceptions -->
+      <div class="ca-section">
+        <h3 class="ca-section-title">{{ icon('alert-triangle', 14) }} Audit Exceptions &amp; Adjustments</h3>
+        <table class="ca-table">
+          <tbody>
+            <tr>
+              <td>Voided Items</td>
+              <td class="text-center font-mono">{{ void_count or 0 }} items</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(void_amount or 0.0) }}</td>
+            </tr>
+            <tr>
+              <td>Refunded Orders</td>
+              <td class="text-center font-mono">{{ refund_count or 0 }} orders</td>
+              <td class="text-right font-mono">₱{{ "%.2f"|format(refund_amount or 0.0) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Signature Section -->
+      <div class="ca-sign-section">
+        <div class="ca-sign-box">
+          <div class="ca-sign-line"></div>
+          <span class="ca-sign-label">Prepared by Cashier</span>
+        </div>
+        <div class="ca-sign-box">
+          <div class="ca-sign-line"></div>
+          <span class="ca-sign-label">Verified by Supervisor / Manager</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

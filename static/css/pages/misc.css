@@ -1,0 +1,525 @@
+/* ============================================================================
+   css/pages/misc.css — Miscellaneous Reports Hub (Phase 5, Milestone 5.5)
+   ========================================================================== */
+
+#view-root:has(.misc-page) {
+  padding: 1.5rem 1.25rem 0;
+}
+
+.misc-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  font-family: var(--font-sans);
+  color: var(--text-main);
+  width: 100%;
+  max-width: 100%;
+  padding: 0 0 3.5rem 0;
+  box-sizing: border-box;
+  min-height: 100%;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.misc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.misc-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  margin: 0 0 0.2rem 0;
+}
+
+.misc-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.15;
+}
+
+.misc-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0.35rem 0 0 0;
+  max-width: 620px;
+}
+
+/* ── Section Headers ────────────────────────────────────────────────────── */
+.misc-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.misc-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.misc-section-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  letter-spacing: -0.01em;
+}
+
+.misc-section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.section-icon-amber {
+  background: rgba(245, 158, 11, 0.14);
+  color: #f59e0b;
+}
+
+.section-icon-cyan {
+  background: rgba(6, 182, 212, 0.14);
+  color: #06b6d4;
+}
+
+.misc-section-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Grid & Cards ──────────────────────────────────────────────────────── */
+.misc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.misc-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.25rem 1rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  text-decoration: none;
+  color: var(--text-main);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  overflow: hidden;
+}
+
+.misc-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.misc-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.misc-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.misc-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.misc-card-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.misc-card-desc {
+  font-size: 0.81rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Card Action Footer */
+.misc-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+}
+
+.misc-card-action {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.misc-card:hover .misc-card-action {
+  color: var(--card-accent, var(--color-primary));
+}
+
+/* ── Color Theme Variants ───────────────────────────────────────────────── */
+
+/* Amber (Senior Citizen / Audit) */
+.misc-card.card-amber { --card-accent: #f59e0b; color: #f59e0b; }
+.misc-card.card-amber .misc-card-name, .misc-card.card-amber .misc-card-desc { color: initial; }
+.misc-card.card-amber .misc-card-icon {
+  background: rgba(245, 158, 11, 0.14);
+  color: #f59e0b;
+}
+.badge-amber {
+  background: rgba(245, 158, 11, 0.16);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.misc-card.card-amber:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12);
+}
+
+/* Blue (PWD) */
+.misc-card.card-blue { --card-accent: #3b82f6; color: #3b82f6; }
+.misc-card.card-blue .misc-card-name, .misc-card.card-blue .misc-card-desc { color: initial; }
+.misc-card.card-blue .misc-card-icon {
+  background: rgba(59, 130, 246, 0.14);
+  color: #3b82f6;
+}
+.badge-blue {
+  background: rgba(59, 130, 246, 0.16);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+.misc-card.card-blue:hover {
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.12);
+}
+
+/* Pink (Solo Parent) */
+.misc-card.card-pink { --card-accent: #ec4899; color: #ec4899; }
+.misc-card.card-pink .misc-card-name, .misc-card.card-pink .misc-card-desc { color: initial; }
+.misc-card.card-pink .misc-card-icon {
+  background: rgba(236, 72, 153, 0.14);
+  color: #ec4899;
+}
+.badge-pink {
+  background: rgba(236, 72, 153, 0.16);
+  color: #db2777;
+  border: 1px solid rgba(236, 72, 153, 0.35);
+}
+.misc-card.card-pink:hover {
+  border-color: rgba(236, 72, 153, 0.45);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.12);
+}
+
+/* Emerald (National Athletes NAAC) */
+.misc-card.card-emerald { --card-accent: #10b981; color: #10b981; }
+.misc-card.card-emerald .misc-card-name, .misc-card.card-emerald .misc-card-desc { color: initial; }
+.misc-card.card-emerald .misc-card-icon {
+  background: rgba(16, 185, 129, 0.14);
+  color: #10b981;
+}
+.badge-emerald {
+  background: rgba(16, 185, 129, 0.16);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.misc-card.card-emerald:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12);
+}
+
+/* Purple (Medal of Valor) */
+.misc-card.card-purple { --card-accent: #8b5cf6; color: #8b5cf6; }
+.misc-card.card-purple .misc-card-name, .misc-card.card-purple .misc-card-desc { color: initial; }
+.misc-card.card-purple .misc-card-icon {
+  background: rgba(139, 92, 246, 0.14);
+  color: #8b5cf6;
+}
+.badge-purple {
+  background: rgba(139, 92, 246, 0.16);
+  color: #7c3aed;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+}
+.misc-card.card-purple:hover {
+  border-color: rgba(139, 92, 246, 0.45);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.12);
+}
+
+/* Teal (Regular Discount) */
+.misc-card.card-teal { --card-accent: #14b8a6; color: #14b8a6; }
+.misc-card.card-teal .misc-card-name, .misc-card.card-teal .misc-card-desc { color: initial; }
+.misc-card.card-teal .misc-card-icon {
+  background: rgba(20, 184, 166, 0.14);
+  color: #14b8a6;
+}
+.badge-teal {
+  background: rgba(20, 184, 166, 0.16);
+  color: #0d9488;
+  border: 1px solid rgba(20, 184, 166, 0.35);
+}
+.misc-card.card-teal:hover {
+  border-color: rgba(20, 184, 166, 0.45);
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.12);
+}
+
+/* Cyan (Daily Sales) */
+.misc-card.card-cyan { --card-accent: #06b6d4; color: #06b6d4; }
+.misc-card.card-cyan .misc-card-name, .misc-card.card-cyan .misc-card-desc { color: initial; }
+.misc-card.card-cyan .misc-card-icon {
+  background: rgba(6, 182, 212, 0.14);
+  color: #06b6d4;
+}
+.badge-cyan {
+  background: rgba(6, 182, 212, 0.16);
+  color: #0891b2;
+  border: 1px solid rgba(6, 182, 212, 0.35);
+}
+.misc-card.card-cyan:hover {
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.12);
+}
+
+/* Orange (Item Sales) */
+.misc-card.card-orange { --card-accent: #f97316; color: #f97316; }
+.misc-card.card-orange .misc-card-name, .misc-card.card-orange .misc-card-desc { color: initial; }
+.misc-card.card-orange .misc-card-icon {
+  background: rgba(249, 115, 22, 0.14);
+  color: #f97316;
+}
+.badge-orange {
+  background: rgba(249, 115, 22, 0.16);
+  color: #ea580c;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+.misc-card.card-orange:hover {
+  border-color: rgba(249, 115, 22, 0.45);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.12);
+}
+
+/* Green (Cashier Accountability) */
+.misc-card.card-green { --card-accent: #22c55e; color: #22c55e; }
+.misc-card.card-green .misc-card-name, .misc-card.card-green .misc-card-desc { color: initial; }
+.misc-card.card-green .misc-card-icon {
+  background: rgba(34, 197, 94, 0.14);
+  color: #22c55e;
+}
+.badge-green {
+  background: rgba(34, 197, 94, 0.16);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+.misc-card.card-green:hover {
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.12);
+}
+
+/* Indigo (RLC Compliance) */
+.misc-card.card-indigo { --card-accent: #6366f1; color: #6366f1; }
+.misc-card.card-indigo .misc-card-name, .misc-card.card-indigo .misc-card-desc { color: initial; }
+.misc-card.card-indigo .misc-card-icon {
+  background: rgba(99, 102, 241, 0.14);
+  color: #6366f1;
+}
+.badge-indigo {
+  background: rgba(99, 102, 241, 0.16);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+.misc-card.card-indigo:hover {
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+.misc-card.card-indigo { --card-accent: #6366f1; color: #6366f1; }
+.misc-card.card-indigo .misc-card-name, .misc-card.card-indigo .misc-card-desc { color: initial; }
+.misc-card.card-indigo .misc-card-icon {
+  background: rgba(99, 102, 241, 0.14);
+  color: #6366f1;
+}
+.badge-indigo {
+  background: rgba(99, 102, 241, 0.16);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+.misc-card.card-indigo:hover {
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+}
+
+/* Dark mode theme overrides for badges */
+[data-theme="dark"] .badge-amber { color: #fbbf24; }
+[data-theme="dark"] .badge-blue { color: #60a5fa; }
+[data-theme="dark"] .badge-pink { color: #f472b6; }
+[data-theme="dark"] .badge-emerald { color: #34d399; }
+[data-theme="dark"] .badge-purple { color: #a78bfa; }
+[data-theme="dark"] .badge-teal { color: #2dd4bf; }
+[data-theme="dark"] .badge-cyan { color: #22d3ee; }
+[data-theme="dark"] .badge-orange { color: #fb923c; }
+[data-theme="dark"] .badge-green { color: #4ade80; }
+[data-theme="dark"] .badge-indigo { color: #818cf8; }
+
+/* ── Export Modal Custom Styling ────────────────────────────────────────── */
+.sb-modal-box {
+  max-width: 480px;
+  width: 100%;
+  padding: 1.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+}
+
+.sb-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sb-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.15rem 0;
+}
+
+.sb-modal-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.sb-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+/* Primary Green Export Confirm Button Styling */
+.sb-modal-actions .btn-export-primary,
+.sb-modal-actions .user-btn-primary,
+#btnDsExportExcel,
+#btnIsExportExcel,
+#btnBirExportExcel,
+#btnConfirmSbExport,
+button.btn-export-primary {
+  background: #10b981 !important;
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  border: 1px solid #10b981 !important;
+  border-radius: var(--radius-md, 10px) !important;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  padding: 0.55rem 1.15rem !important;
+  height: 42px !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background 0.15s ease !important;
+  filter: none !important;
+  cursor: pointer !important;
+}
+
+.sb-modal-actions .btn-export-primary:hover,
+.sb-modal-actions .user-btn-primary:hover,
+#btnDsExportExcel:hover,
+#btnIsExportExcel:hover,
+#btnBirExportExcel:hover,
+#btnConfirmSbExport:hover,
+button.btn-export-primary:hover {
+  background: #059669 !important;
+  background-color: #059669 !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Cancel / Close Secondary Button Styling */
+.sb-modal-actions .lib-modal-warning-cancel,
+#btnCancelDs,
+#btnCancelIs,
+#btnCancelBir,
+#btnCancelSbExport {
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-elev, transparent) !important;
+  color: var(--text-main) !important;
+  border-radius: var(--radius-md, 10px) !important;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  padding: 0.55rem 1.15rem !important;
+  height: 42px !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+  filter: none !important;
+  cursor: pointer !important;
+}
+
+.sb-modal-actions .lib-modal-warning-cancel:hover,
+#btnCancelDs:hover,
+#btnCancelIs:hover,
+#btnCancelBir:hover,
+#btnCancelSbExport:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}

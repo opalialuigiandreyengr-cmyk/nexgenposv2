@@ -1,0 +1,129 @@
+{# ============================================================================
+   add-items.html — V2 add-items register (shell child, area=pos).
+   ----------------------------------------------------------------------------
+   Same layout as pos.html but always in "add mode": the route /add-items
+   passes `existing_order` (the order being modified) along with categories
+   and products. pos.js detects add mode via #addToOrderId hidden input and
+   POSTs to /save_add_items/<id> instead of /save_pos_order.
+   ========================================================================== #}
+{% extends 'pos_shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+
+{% block title %}Add Items - Order #{{ existing_order.order_no if existing_order else '' }} - NEXGEN POS{% endblock %}
+{% block area %}pos{% endblock %}
+{% block page_module %}pos{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pos/pos.css') }}">
+<link rel="stylesheet" href="{{ asset('css/core/keyboard.css') }}">
+<link rel="stylesheet" href="{{ asset('css/core/guards.css') }}">
+
+<h1 class="pos-sr-title">Add Items to Order</h1>
+
+<div class="pos-shell" id="posShell">
+  {# Category rail #}
+  <aside class="pos-cat-rail" id="categoriesSidebar" aria-label="Categories">
+    <div class="pos-cat-brand" aria-hidden="true">
+      <img src="{{ url_for('static', filename='box_logo.png') }}" alt="" width="32" height="32">
+    </div>
+    <div class="pos-cat-list" id="categoryButtons">
+      <button type="button" class="pos-cat-btn is-active" data-category="all" aria-pressed="true">
+        <img class="pos-cat-logo" src="{{ url_for('static', filename='savore_logo.png') }}" alt="" width="20" height="20">All
+      </button>
+      <button type="button" class="pos-cat-btn" data-category="GRAB" aria-pressed="false">
+        <img class="pos-cat-logo" src="{{ url_for('static', filename='grabfood.png') }}" alt="" width="20" height="20">GRAB
+      </button>
+      <button type="button" class="pos-cat-btn" data-category="FOODPANDA" aria-pressed="false">
+        <img class="pos-cat-logo" src="{{ url_for('static', filename='foodpanda.png') }}" alt="" width="20" height="20">FOODPANDA
+      </button>
+      {% for category in categories %}
+      <button type="button" class="pos-cat-btn" data-category="{{ category|replace(' ', '_') }}" aria-pressed="false">
+        {{ icon('tag', 15) }}<span>{{ category }}</span>
+      </button>
+      {% endfor %}
+    </div>
+  </aside>
+
+  {# Products panel #}
+  <section class="pos-products" aria-label="Products">
+    <div class="pos-products-toolbar">
+      <div class="pos-search-wrap">
+        {{ icon('search', 16) }}
+        <input type="text" class="pos-search" id="productSearch" placeholder="Search products...">
+      </div>
+      <button type="button" class="pos-icon-btn pos-cart-toggle" id="posCartToggle" title="Toggle cart" aria-expanded="false" aria-controls="posCartPanel">
+        {{ icon('cart', 18) }}
+        <span class="pos-cart-count" id="posCartCount">0</span>
+      </button>
+    </div>
+
+    <div class="pos-products-scroll">
+      <div class="pos-products-grid" id="productsGrid">
+        {% for product in products %}
+        <button type="button" class="pos-product"
+                data-product-id="{{ product.id }}"
+                data-product-name="{{ product.name }}"
+                data-product-price="{{ product.price }}"
+                data-product-category="{{ product.category|replace(' ', '_') }}">
+          <span class="pos-product-preview" aria-hidden="true">{{ product.name[:1]|upper }}</span>
+          <span class="pos-product-meta">
+            <span class="pos-product-name">{{ product.name }}</span>
+            <span class="pos-product-category">{{ product.category }}</span>
+          </span>
+          <span class="pos-product-footer">
+            <span class="pos-product-price">₱{{ "%.2f"|format(product.price) }}</span>
+          </span>
+        </button>
+        {% endfor %}
+      </div>
+      <div id="noResultsMessage" class="pos-no-results" hidden>
+        No products found
+      </div>
+    </div>
+  </section>
+
+  {# Unit toggle #}
+  <div class="pos-unit-toggle" id="posUnitToggle" aria-label="Quantity unit mode">
+    <span class="pos-unit-toggle-label">Unit:</span>
+    <button type="button" class="pos-unit-btn is-active" data-unit-mode="qty" aria-pressed="true">Qty</button>
+    <button type="button" class="pos-unit-btn" data-unit-mode="g" aria-pressed="false">g</button>
+  </div>
+
+  <div class="pos-cart-backdrop" id="posCartBackdrop" hidden></div>
+
+  {# Cart rail — always in add mode #}
+  <aside class="pos-cart" id="posCartPanel" aria-label="Cart">
+    <div class="pos-add-banner">
+      <div class="pos-add-copy">
+        <div class="pos-add-caption">Adding to Order</div>
+        <div class="pos-add-order">#{{ existing_order.order_no }}</div>
+        <div class="pos-add-table">Table: {{ existing_order.tables or 'N/A' }}</div>
+      </div>
+      <a class="pos-add-back" href="/order/{{ existing_order.id }}">{{ icon('arrow-left', 14) }}<span>Back</span></a>
+    </div>
+    <input type="hidden" id="tableNumber" value="{{ existing_order.tables or '' }}">
+    <input type="hidden" id="orderType" value="{{ existing_order.order_type }}">
+    <input type="hidden" id="addToOrderId" value="{{ existing_order.id }}">
+
+    <div class="pos-cart-items" id="cartItems">
+      <div class="pos-empty-cart" id="emptyCartMessage">Your cart is empty</div>
+    </div>
+
+    <div class="pos-cart-summary" aria-live="polite">
+      <div class="pos-summary-row"><span>Subtotal</span><span class="pos-summary-mono" id="subtotal">₱0.00</span></div>
+      <div class="pos-summary-row"><span>VAT (12%)</span><span class="pos-summary-mono" id="vat">₱0.00</span></div>
+      <div class="pos-summary-row pos-summary-total"><span>Total</span><span class="pos-summary-mono" id="total">₱0.00</span></div>
+    </div>
+
+    <div class="pos-cart-actions">
+      <button class="pos-btn pos-btn-primary" id="checkoutBtn" disabled>
+        {{ icon('plus', 16) }}
+        <span>Save & Add</span>
+      </button>
+      <button class="pos-btn pos-btn-ghost" id="clearCartBtn">
+        {{ icon('arrow-left', 16) }}<span>Back</span>
+      </button>
+    </div>
+  </aside>
+</div>
+{% endblock %}

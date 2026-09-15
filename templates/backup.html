@@ -1,0 +1,82 @@
+{# ============================================================================
+   backup.html — System Backups (Phase 5, Milestone 5.4)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}System Backups - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}backup{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/backup.css') }}">
+
+<h1 class="sr-only">System Backup Management</h1>
+
+<div class="backup-page" id="backupPageRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="backup-header">
+    <div class="backup-header-left">
+      <p class="backup-kicker">Data Security</p>
+      <h2 class="backup-title">System Backups</h2>
+      <p class="backup-subtitle">Generate manual snapshots of your POS SQLite database and download archive files for offsite storage.</p>
+    </div>
+    <div class="backup-header-actions">
+      <button type="button" class="backup-btn-primary" id="btnCreateBackup">
+        {{ icon('hard-drive', 16) }}
+        <span>+ Create Backup Now</span>
+      </button>
+    </div>
+  </header>
+
+  {# ── Metric Cards ────────────────────────────────────────────────────── #}
+  <section class="backup-stats-row" aria-label="Backup Metrics">
+    <div class="backup-stat-card">
+      <div class="backup-stat-icon">
+        {{ icon('database', 20) }}
+      </div>
+      <div class="backup-stat-meta">
+        <span class="backup-stat-label">Total Backups</span>
+        <span class="backup-stat-val" id="statBackupCount">0</span>
+      </div>
+    </div>
+    <div class="backup-stat-card">
+      <div class="backup-stat-icon">
+        {{ icon('calendar', 20) }}
+      </div>
+      <div class="backup-stat-meta">
+        <span class="backup-stat-label">Latest Snapshot</span>
+        <span class="backup-stat-val" id="statLatestDate" style="font-size: 1.05rem;">—</span>
+      </div>
+    </div>
+  </section>
+
+  {# ── Backups Table ───────────────────────────────────────────────────── #}
+  <section class="backup-table-wrap" aria-label="Backup Archive Table">
+    <table class="backup-table" id="backupTable">
+      <thead>
+        <tr>
+          <th>Backup Filename</th>
+          <th>File Size</th>
+          <th>Created Timestamp</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="backupTableBody">
+        <tr>
+          <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+            Loading backup files...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  {# ── Empty State ────────────────────────────────────────────────────── #}
+  <div class="backup-empty" id="backupEmpty" style="display: none; text-align: center; padding: 3.5rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+    <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--bg-elev); color: var(--text-muted); margin-bottom: 0.85rem;">
+      {{ icon('hard-drive', 28) }}
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.35rem 0;">No backups found</h3>
+    <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">Click "+ Create Backup Now" above to generate your first database backup.</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{# ============================================================================
+   cancelled_orders_report.html — Cancelled Orders Report (Phase 6, Milestone 6.4)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Cancelled Orders Report - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}audit_reports{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/audit_reports.css') }}">
+
+<h1 class="sr-only">Cancelled Orders Report</h1>
+
+<div class="ar-page" id="auditReportRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="ar-header">
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 1rem; margin-bottom: 0.25rem;">
+      <h2 class="ar-title" style="margin: 0;">Cancelled Orders Report</h2>
+      <a href="/misc" class="btn ar-back-btn">
+        {{ icon('arrow-left', 15) }}
+        <span>Back</span>
+      </a>
+    </div>
+
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; width: 100%;">
+      <p class="ar-subtitle" style="margin: 0;">Comprehensive register of cancelled ticket orders, cancellation timestamps, and reasons.</p>
+
+      <div class="ar-header-actions">
+        <div class="ar-date-group">
+          <input type="date" id="arFromDate" class="ar-date-input" value="{{ from_date.strftime('%Y-%m-%d') }}">
+          <span class="ar-date-sep">to</span>
+          <input type="date" id="arToDate" class="ar-date-input" value="{{ to_date.strftime('%Y-%m-%d') }}">
+          <button type="button" class="btn ar-btn-filter" id="btnFilterDates">Filter</button>
+        </div>
+
+        <a href="/export_cancelled_orders_report?from_date={{ from_date.strftime('%Y-%m-%d') }}&to_date={{ to_date.strftime('%Y-%m-%d') }}" class="btn ar-btn-export" hx-boost="false">
+          {{ icon('download', 15) }}
+          <span>Export Excel</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  {# ── KPI Metrics ─────────────────────────────────────────────────────── #}
+  <section class="ar-kpi-grid" aria-label="Cancelled Orders Metrics">
+    <div class="ar-kpi-card card-cancelled">
+      <div class="ar-kpi-top">
+        <span class="ar-kpi-label">Total Cancelled Tickets</span>
+        <span class="ar-badge badge-cancelled">{{ total_cancelled_count or 0 }} orders</span>
+      </div>
+      <span class="ar-kpi-val text-red">₱{{ "%.2f"|format(total_cancelled_amount or 0.0) }}</span>
+      <span class="ar-kpi-sub">Total lost revenue from cancellations</span>
+    </div>
+  </section>
+
+  {# ── Table Section ───────────────────────────────────────────────────── #}
+  <section class="ar-table-card">
+    <div class="ar-card-head">
+      <h3 class="ar-section-title">
+        <span class="ar-icon-badge badge-cancelled">{{ icon('x-circle', 16) }}</span>
+        <span>Cancelled Orders Register</span>
+      </h3>
+      <span class="ar-count-pill">{{ cancelled_orders|length }} records</span>
+    </div>
+
+    <div class="ar-table-wrap">
+      <table class="ar-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Order #</th>
+            <th>Table / Type</th>
+            <th class="text-right">Order Amount</th>
+            <th>Cancellation Reason</th>
+            <th>Cashier</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if cancelled_orders %}
+            {% for order in cancelled_orders %}
+            <tr>
+              <td class="font-mono">{{ order.timestamp.strftime('%Y-%m-%d %I:%M %p') }}</td>
+              <td class="font-mono font-bold">#{{ order.id }}</td>
+              <td>{{ order.table_number or order.order_type or 'Dine-in' }}</td>
+              <td class="text-right font-mono text-red">₱{{ "%.2f"|format(order.total or 0.0) }}</td>
+              <td><span class="ar-reason-text">{{ order.cancellation_reason or 'No reason provided' }}</span></td>
+              <td>{{ order.cashier.username if order.cashier else 'Staff' }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="ar-empty-cell">No cancelled orders recorded in this date range.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

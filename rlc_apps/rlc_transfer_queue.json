@@ -1,0 +1,118 @@
+{
+  "pending": [],
+  "failed": [],
+  "completed": [
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20251221\\20251221.011",
+      "date": "2025-12-21",
+      "added_at": "2025-12-22T13:11:12.445027",
+      "priority": "high",
+      "retry_count": 1,
+      "last_error": "SSH connection timeout - transfer may have completed: Error reading SSH protocol banner",
+      "failed_at": "2025-12-22T13:11:31.205116",
+      "completed_at": "2025-12-22T13:11:55.051593"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20250109.012",
+      "date": "2026-01-09",
+      "added_at": "2026-01-09T16:35:24.247221",
+      "priority": "high",
+      "retry_count": 0,
+      "completed_at": "2026-01-09T16:35:45.666833"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260414\\20260414.011",
+      "date": "2026-04-14",
+      "added_at": "2026-04-20T11:12:57.327767",
+      "priority": "high",
+      "retry_count": 1,
+      "last_error": "SSH connection timeout - transfer may have completed: Error reading SSH protocol banner",
+      "failed_at": "2026-04-20T11:13:14.314225",
+      "completed_at": "2026-04-20T11:13:35.350196"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260416\\20260416.011",
+      "date": "2026-04-16",
+      "added_at": "2026-04-20T11:22:37.063388",
+      "priority": "high",
+      "retry_count": 0,
+      "completed_at": "2026-04-20T11:23:51.599863"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260415\\20260415.011",
+      "date": "2026-04-15",
+      "added_at": "2026-04-20T11:19:56.612367",
+      "priority": "high",
+      "retry_count": 0,
+      "last_error": "SSH connection timeout - transfer may have completed: Error reading SSH protocol banner",
+      "failed_at": "2026-04-20T11:24:43.462816",
+      "completed_at": "2026-04-20T11:36:01.775574"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260419\\20260419.011",
+      "date": "2026-04-19",
+      "added_at": "2026-04-20T11:43:38.814304",
+      "priority": "high",
+      "retry_count": 1,
+      "last_error": "SSH connection timeout - transfer may have completed: Error reading SSH protocol banner",
+      "failed_at": "2026-04-20T11:51:24.997211",
+      "completed_at": "2026-04-20T11:51:50.028308"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260419\\20260419.011",
+      "date": "2026-04-19",
+      "added_at": "2026-04-20T11:54:53.259869",
+      "priority": "high",
+      "retry_count": 0,
+      "completed_at": "2026-04-20T11:55:33.334984"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260422\\20260422.011",
+      "date": "2026-04-22",
+      "added_at": "2026-04-23T18:04:44.660808",
+      "priority": "high",
+      "retry_count": 0,
+      "completed_at": "2026-04-23T18:04:59.568699"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260421\\20260421.011",
+      "date": "2026-04-21",
+      "added_at": "2026-04-23T18:03:28.815642",
+      "priority": "high",
+      "retry_count": 1,
+      "last_error": "SSH connection timeout - transfer may have completed: Error reading SSH protocol banner",
+      "failed_at": "2026-04-23T18:03:35.418348",
+      "completed_at": "2026-04-23T18:04:59.583575"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260425\\20260425.011",
+      "date": "2026-04-25",
+      "added_at": "2026-04-26T15:52:32.188214",
+      "priority": "high",
+      "retry_count": 1,
+      "last_error": "SSH connection timeout - transfer may have completed: Error reading SSH protocol banner",
+      "failed_at": "2026-04-26T15:52:40.788678",
+      "completed_at": "2026-04-26T15:53:18.296449"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260424\\20260424.011",
+      "date": "2026-04-24",
+      "added_at": "2026-04-26T15:51:22.198472",
+      "priority": "high",
+      "retry_count": 2,
+      "last_error": "SSH connection timeout - transfer may have completed: Error reading SSH protocol banner",
+      "failed_at": "2026-04-26T15:52:56.662054",
+      "completed_at": "2026-04-26T15:53:19.447492"
+    },
+    {
+      "file_path": "C:\\Users\\Marketing Head\\Desktop\\POS\\rlc_files\\20260515\\20260515.012",
+      "date": "2026-05-15",
+      "added_at": "2026-05-16T21:15:05.612670",
+      "priority": "high",
+      "retry_count": 2,
+      "last_error": "Error transferring file: [Errno 2] No such file",
+      "failed_at": "2026-05-17T13:47:02.041932",
+      "completed_at": "2026-05-17T13:47:24.712576"
+    }
+  ]
+}

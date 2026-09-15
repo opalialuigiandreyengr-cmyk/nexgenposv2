@@ -1,0 +1,367 @@
+/* =============================================================================
+   tokens.css — brand -> njX token mapping (Phase 1 structural tokens)
+   -----------------------------------------------------------------------------
+   Load order (base.html <head>): njx.min.css, then tokens.css, then page CSS.
+   This file ONLY maps tokens; no layout rules live here.
+
+   Theme hook
+   ----------
+   <html data-theme="light|dark"> is set by core/theme.js before first paint.
+   The key is localStorage['posTheme'], shared with V1 Settings > Theme:
+       'light' -> data-theme="light"    'dark' -> data-theme="dark"
+       unset   -> "light"  (the classic default: light POS screens)
+
+   Area hook (backoffice / POS separation)
+   ---------------------------------------
+   <html data-area="admin|pos"> is set by the shell (base.html on full
+   loads, core/spa.js after every htmx swap) and switches typography roles:
+       admin  backoffice — clean & analytical (Space Grotesk)
+       pos    tactical   — numerical (JetBrains Mono UI, Space Mono display)
+   Both areas share the single light/dark theme switch.
+
+   Brand palette (V1 --dk-* system, slate + teal family):
+       teal #14B8A6  slate-900 #0F172A  slate-800 #1E293B
+       text #F8FAFC/#CBD5E1/#94A3B8  accent amber #F59E0B  error #EF4444
+
+   Layer 1 (always on): surfaces, text, forms, navbar, fonts.
+   Layer 2 (theme gated): hue tokens. Colored njX themes (red/blue/...)
+   keep their own --color-primary but inherit the brand surfaces.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Fonts — vendored woff2 for offline use (Space Grotesk + JetBrains Mono +
+   Space Mono from @fontsource). Family names match the njX font stacks where
+   they exist (--font-jetbrains), and the brand stacks defined below, so the
+   per-area --font-sans / --font-heading swap with zero component changes:
+   body text follows --font-sans, headings follow --font-heading.
+   ------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/space-grotesk-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/assets/fonts/space-grotesk-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/assets/fonts/space-grotesk-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/space-grotesk-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/assets/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/assets/fonts/jetbrains-mono-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/space-mono-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/space-mono-latin-700-normal.woff2') format('woff2');
+}
+
+/* ===========================================================================
+   LAYER 1 — brand structure (dark surfaces are the default; light overrides)
+   =========================================================================== */
+:root {
+  /* Page + panel surfaces (V1: --dk-bg / --dk-card) */
+  --bg-main: #0F172A;
+  --bg-secondary: #1E293B;
+  --bg-card: #1E293B;
+  /* Inverted utility colors njX derives components from (--color-dark is the
+     body background; --color-dark-secondary is the surface above it) */
+  --color-dark: #0F172A;
+  --color-dark-secondary: #1E293B;
+  /* Text roles (V1: --dk-text / --dk-text-sec / --dk-text-muted) */
+  --color-light: #F8FAFC;
+  --color-light-secondary: #CBD5E1;
+  --color-muted: #94A3B8;
+  --text-main: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-light: #F8FAFC;
+  --font-color: #F8FAFC;
+  --font-color-secondary: #CBD5E1;
+  /* Neutral scale (V1 slate family) */
+  --color-grey: #64748B;
+  --color-lightGrey: #CBD5E1;
+  --color-darkGrey: #475569;
+  /* Navbar — dark slate in BOTH themes (design invariant, cashier flow) */
+  --nav-bg: #0F172A;
+  --nav-border: rgba(148, 163, 184, 0.12);
+  --nav-text: #94A3B8;
+  --nav-text-hover: #F8FAFC;
+  --nav-active: #2DD4BF;
+  /* Form controls */
+  --form-bg-input: #0F172A;
+  --form-border: rgba(148, 163, 184, 0.18);
+  --form-border-hover: rgba(20, 184, 166, 0.45);
+  --form-focus-ring: rgba(20, 184, 166, 0.22);
+  --form-text: #F8FAFC;
+  --form-placeholder: #64748B;
+  /* Typography roles — one shared theme, two type areas:
+     admin/backoffice = Space Grotesk (clean & analytical)
+     pos              = JetBrains Mono UI + Space Mono display (tactical & numerical)
+     njX defaults (--font-sans: Inter, --font-heading: Poppins) are overridden
+     here; --font-jetbrains comes from the njX stack. */
+  --font-space-grotesk: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-space-mono: "Space Mono", ui-monospace, "Consolas", monospace;
+  --font-sans: var(--font-space-grotesk);
+  --font-heading: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains);
+  /* Native controls match the app surface */
+  color-scheme: dark;
+}
+
+/* POS area — tactical & numerical: JetBrains Mono for UI text, Space Mono
+   for display/headings (price tiles, order tickets, keypad digits). */
+:root[data-area="pos"] {
+  --font-sans: var(--font-jetbrains);
+  --font-heading: var(--font-space-mono);
+}
+
+/* Light theme (V1: --dk-bg #EEF1F6 page, --dk-card #FFFFFF panels) */
+[data-theme="light"] {
+  --bg-main: #EEF1F6;
+  --bg-secondary: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --color-dark: #EEF1F6;
+  --color-dark-secondary: #FFFFFF;
+  --color-light: #0F172A;
+  --color-light-secondary: #334155;
+  --color-muted: #64748B;
+  --text-main: #0F172A;
+  --text-secondary: #334155;
+  --text-light: #F8FAFC;
+  --font-color: #0F172A;
+  --font-color-secondary: #334155;
+  --color-grey: #64748B;
+  --color-lightGrey: #E2E8F0;
+  --color-darkGrey: #334155;
+  /* Navbar stays dark in light mode */
+  --nav-bg: #0F172A;
+  --nav-border: rgba(148, 163, 184, 0.12);
+  --nav-text: #94A3B8;
+  --nav-text-hover: #F8FAFC;
+  --nav-active: #2DD4BF;
+  --form-bg-input: #FFFFFF;
+  --form-border: rgba(15, 23, 42, 0.12);
+  --form-border-hover: rgba(13, 148, 136, 0.5);
+  --form-focus-ring: rgba(13, 148, 136, 0.2);
+  --form-text: #0F172A;
+  --form-placeholder: #94A3B8;
+  color-scheme: light;
+}
+
+/* ===========================================================================
+   LAYER 1.5 — ported-name aliases + gap roles (2026-08-28 design audit)
+   ---------------------------------------------------------------------------
+   The early POS ports (order_details, settlement, orders board) were written
+   against a vocabulary tokens.css never defined, so their surfaces, borders
+   and text colors silently resolved to nothing. These aliases map the ported
+   names onto the locked roles instead of rewriting every ported file; new
+   screens must use the canonical names directly (DESIGN.md +
+   .ulpi/design/pos-cashier-core.md). --bg-inset and --color-info are NEW
+   canonical roles the locked language defines that Layer 1 lacked.
+   =========================================================================== */
+:root {
+  /* Text aliases */
+  --text-primary: var(--text-main);
+  --text-muted: var(--color-muted);
+  /* Dark text on teal/amber fills in BOTH themes (DESIGN.md rule 4) */
+  --text-inverse: #1F2937;
+  /* Surface + border aliases */
+  --bg-elev: var(--bg-card);
+  --bg-page: var(--bg-main);
+  --bg-subtle: var(--bg-inset);
+  --bg-hover: color-mix(in srgb, var(--color-grey) 12%, transparent);
+  --border-color: var(--form-border);
+  --border-default: var(--form-border);
+  --border-subtle: var(--form-border);
+  --border-hover: var(--form-border-hover);
+  --border-strong: var(--color-grey);
+  /* Hue aliases */
+  --color-danger: var(--color-error);
+  --accent-primary: var(--color-primary);
+  --accent-primary-hover: var(--color-link-hover);
+  --accent-primary-alpha: var(--color-primary-opacity);
+  --accent-success: var(--color-success);
+  --accent-warning: var(--color-warning);
+  --accent-info: var(--color-info);
+  --accent-info-alpha: color-mix(in srgb, var(--color-info) 14%, transparent);
+  --accent-warning-alpha: color-mix(in srgb, var(--color-warning) 16%, transparent);
+  /* Motion alias (ported files predate the dur tokens) */
+  --transition-fast: var(--dur-fast);
+  /* Typography aliases (ported files used a scale that never existed) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.35rem;
+  --text-2xl: 1.6rem;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+/* Inset well (behind cards): deeper than the card in dark, quieter in light */
+:root:not([data-theme]),
+[data-theme="dark"] {
+  --bg-inset: #0F172A;
+}
+
+[data-theme="light"] {
+  --bg-inset: #F1F5F9;
+}
+
+/* njX .nav-dark component — remapped to the brand slate so the navbar
+   stays dark in BOTH themes (design invariant). Literals mirror the
+   --nav-* tokens above; theme-flipping tokens like --color-dark must
+   NOT be used here (they invert in light mode). tokens.css loads after
+   njx.min.css, so this overrides njX's own #0f0f0f default. */
+.nav-dark {
+  --nav-bg: #0F172A;
+  --nav-border: rgba(148, 163, 184, 0.12);
+  --nav-text: #94A3B8;
+  --nav-text-hover: #F8FAFC;
+  --nav-active: #2DD4BF;
+}
+
+/* ===========================================================================
+   LAYER 2 — brand hue tokens, gated per theme. :root:not([data-theme])
+   covers the pre-boot flash window; [data-theme="dark"] the dark theme.
+   =========================================================================== */
+:root:not([data-theme]),
+[data-theme="dark"] {
+  /* Brand primary = teal (V1 --dk-teal); accent = amber (V1 --dk-orange) */
+  --color-primary: #14B8A6;
+  --color-accent: #F59E0B;
+  /* Status (V1 --dk-green / chip-accent / --dk-red) */
+  --color-success: #10B981;
+  --color-warning: #FACC15;
+  --color-error: #EF4444;
+  --color-info: #38BDF8;
+  --color-primary-opacity: rgba(20, 184, 166, 0.12);
+  --color-primary-shadow: rgba(20, 184, 166, 0.55);
+  --color-link: #2DD4BF;
+  --color-link-hover: #5EEAD4;
+}
+
+[data-theme="light"] {
+  /* AA-contrast steps of the same hues on white */
+  --color-primary: #0D9488;
+  --color-accent: #D97706;
+  --color-success: #15803D;
+  --color-warning: #B45309;
+  --color-error: #DC2626;
+  --color-info: #0369A1;
+  --color-primary-opacity: rgba(13, 148, 136, 0.1);
+  --color-primary-shadow: rgba(13, 148, 136, 0.45);
+  --color-link: #0D9488;
+  --color-link-hover: #0F766E;
+}
+
+/* Text selection follows the brand tint */
+::selection {
+  background: var(--color-primary);
+  color: var(--color-light);
+}
+
+/* ===========================================================================
+   LAYER 3 — elevation + motion tokens (locked design language, see
+   .ulpi/design/DESIGN.md). Soft low-opacity shadows + one easing curve;
+   used by page CSS for cards, chips and focus rings.
+   =========================================================================== */
+:root:not([data-theme]),
+[data-theme="dark"] {
+  --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.24);
+  --shadow-md: 0 4px 14px rgba(2, 6, 23, 0.28);
+  --shadow-lg: 0 10px 28px rgba(2, 6, 23, 0.34);
+}
+
+[data-theme="light"] {
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 28px rgba(15, 23, 42, 0.12);
+}
+
+:root {
+  --ring-focus: 0 0 0 3px var(--form-focus-ring);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur-base: 280ms;
+  --dur-emphasis: 500ms;
+}
+
+/* Clean scrollbars — hide native browser scrollbars globally */
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Global utility classes */
+.d-none {
+  display: none !important;
+}
+
+html,
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+

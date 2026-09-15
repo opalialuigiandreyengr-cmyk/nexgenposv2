@@ -1,0 +1,76 @@
+{#
+  table_management.html — V2 admin table/floor-plan CRUD (shell child).
+  Design language: .ulpi/design/DESIGN.md.
+  Backend: same V1 endpoints (get_restaurant_tables, add_restaurant_table,
+  update_table_position, update_table_rotation, delete_table,
+  get_table_zones, add_table_zone, update_table_zone, delete_table_zone,
+  get_floor_boxes, add_floor_box, update_floor_box, delete_floor_box,
+  get_occupied_tables, set_table_reservation).
+  No Bootstrap JS — modals & confirms via core/modal.js + inline overlays.
+#}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+
+{% block title %}Table Management - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}table_management{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/table_management.css') }}">
+
+<h1 class="sr-only">Table Management</h1>
+
+{# ── Main layout: canvas + sidebar ──────────────────────────────────── #}
+<div class="tm-layout">
+  <div class="tm-main">
+    <section class="tm-board">
+      <div class="tm-board-head">
+        <nav class="tm-tabs" id="sectionTabs" aria-label="Floor sections"></nav>
+      </div>
+      <div class="tm-floor-plan" id="floorPlan">
+        <div class="tm-empty" id="emptyState">
+          <div class="tm-empty-icon">{{ icon('table', 24) }}</div>
+          <h4>No Tables Yet</h4>
+          <p>Click <strong>"Add Table"</strong> to start building your floor plan.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="tm-sidebar">
+    {# ── Actions card ──────────────────────────────────────────────── #}
+    <div class="tm-sidebar-card">
+      <div class="tm-sidebar-title">{{ icon('tool', 14) }} Actions</div>
+      <button type="button" class="tm-sidebar-btn tm-sidebar-btn-primary" id="sidebarAddTableBtn">
+        {{ icon('plus', 14) }}<span>Add Table</span>
+      </button>
+
+      <div class="tm-zone-note">
+        {{ icon('keyboard', 12) }} Ctrl+C copy · Ctrl+V paste · Backspace / Delete delete · Esc clear
+      </div>
+    </div>
+
+    {# ── Zones / Sections card ─────────────────────────────────────── #}
+    <div class="tm-sidebar-card">
+      <div class="tm-sidebar-title">{{ icon('layers', 14) }} Zones / Sections</div>
+      <div class="tm-zone-list" id="zoneList"></div>
+      <div class="tm-zone-add">
+        <input type="text" class="tm-zone-input" id="newZoneName" placeholder="New floor, e.g. 3F" maxlength="60">
+        <button type="button" class="tm-zone-add-btn" id="addZoneBtn" title="Add floor">{{ icon('plus', 14) }}</button>
+      </div>
+      <div class="tm-zone-note">
+        {{ icon('info', 12) }}
+        <div class="tm-zone-note-body">
+          <span>Takeout, Pickup &amp; Delivery zones appear automatically when enabled in:</span>
+          <a href="/settings#store-settings" class="tm-zone-note-link">Store Settings &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+
+
+
+
+{% endblock %}

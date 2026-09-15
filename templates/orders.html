@@ -1,0 +1,87 @@
+{# ============================================================================
+   orders.html — live order board (Phase 3, p3a5)
+   ----------------------------------------------------------------------------
+   SPA shell page (extends shell.html). Ports the legacy templates/orders.html
+   board: order type picker gated by service_types_str, always-dark dine-in
+   floor plan canvas, room-section sidebar, transfer/reserve/join modes, and
+   the admin drag layout. All modals (server select, split-bill picker, new
+   order received) are built at runtime by pages/orders.js using the njX
+   inline-overlay idiom, so no Bootstrap classes appear in this markup.
+   The success banner renders from the /orders?order_success=… redirect params
+   produced by the register and settlement screens.
+   ============================================================================ #}
+{% extends 'pos_shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Orders - NEXGEN POS{% endblock %}
+{% block area %}pos{% endblock %}
+{% block page_module %}orders{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pos/orders.css') }}">
+{# Screen-reader-only title for a11y (spa.js focuses h1 after swap) #}
+<h1 class="sr-only">Orders Board</h1>
+
+{# Board layout: toolbar+floorplan on left, sidebar on right #}
+<div class="orders-layout">
+  <div class="orders-layout-main">
+    {# Toolbar: order type picker #}
+    <div class="orders-toolbar" id="ordersToolbar">
+      <div class="order-type-picker" id="orderTypePicker" aria-label="Order type">
+        <button class="order-type-box active" data-type="dinein" aria-pressed="true">
+          {{ icon('table', 16) }}
+          <span class="order-type-label">Dine In</span>
+          <span class="order-type-count" id="count-dinein">0</span>
+        </button>
+      {% if 'takeout' in service_types_str|default('dinein takeout pickup delivery') %}
+        <button class="order-type-box" data-type="takeout" aria-pressed="false">
+          {{ icon('bag', 16) }}
+          <span class="order-type-label">Takeout</span>
+          <span class="order-type-count" id="count-takeout">0</span>
+        </button>
+      {% endif %}
+      {% if 'pickup' in service_types_str|default('dinein takeout pickup delivery') %}
+        <button class="order-type-box" data-type="pickup" aria-pressed="false">
+          {{ icon('package', 16) }}
+          <span class="order-type-label">Pickup</span>
+          <span class="order-type-count" id="count-pickup">0</span>
+        </button>
+      {% endif %}
+      {% if 'delivery' in service_types_str|default('dinein takeout pickup delivery') %}
+        <button class="order-type-box" data-type="delivery" aria-pressed="false">
+          {{ icon('bike', 16) }}
+          <span class="order-type-label">Delivery</span>
+          <span class="order-type-count" id="count-delivery">0</span>
+        </button>
+      {% endif %}
+      </div>
+    </div>
+
+    {# Floor plan #}
+    <section class="dinein-table-board" id="dineInTableBoard" aria-label="Dine-in tables">
+      <button class="table-actions-toggle" id="tableActionsToggle" title="Show table actions" aria-expanded="false" aria-controls="tableActionsStack">{{ icon('wrench', 18) }}</button>
+      <div class="table-actions-stack" id="tableActionsStack">
+        <button class="btn-transfer-tables-inline" id="btnTransferTables" title="Transfer Tables">{{ icon('exchange', 16) }}<span>Transfer</span></button>
+        <button class="btn-reserve-tables-inline" id="btnReserveTables" title="Reserve Table">{{ icon('calendar-check', 16) }}<span>Reserve</span></button>
+        <button class="btn-join-tables-inline" id="btnJoinTables" title="Join Tables">{{ icon('object-group', 16) }}<span>Join</span></button>
+    {% if current_user.role != 'crew' %}
+        <button class="btn-manual-drawer-inline" id="btnManualDrawer" title="Open Cash Drawer">{{ icon('cash-register', 16) }}<span>Manual</span></button>
+    {% endif %}
+      </div>
+      <div class="dinein-floor-plan" id="dineInTableGrid">
+        <div class="dinein-floor-plan-canvas" id="dineInFloorPlanCanvas"></div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="orders-room-sidebar" aria-label="Room Sections">
+    <div class="orders-room-sidebar-label">Floor / Section</div>
+    <div class="orders-room-list" id="ordersRoomList"></div>
+    <a href="/logout" class="orders-sidebar-logout js-logout-link" hx-boost="false">
+      {{ icon('log-out', 16) }}
+      <span>Sign Out</span>
+    </a>
+  </aside>
+</div>
+
+{% set users = users|default([]) %}
+<script type="application/json" id="ordersUsersData">[{% for u in users %}{"id": {{ u.id|tojson }}, "username": {{ u.username|tojson }}, "role": {{ u.role|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}]</script>
+{% endblock %}

@@ -1,0 +1,163 @@
+{# ============================================================================
+   users.html — Staff & Access Control (Phase 5, Milestone 5.2)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Users - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}users{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/users.css') }}">
+
+<h1 class="sr-only">User Management</h1>
+
+<div class="user-page" id="userPageRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="user-header">
+    <div class="user-header-left">
+      <p class="user-kicker">Access Control</p>
+      <h2 class="user-title">Staff &amp; Users</h2>
+      <p class="user-subtitle">Manage terminal operator accounts, configure role permissions, and assign magstripe cards.</p>
+    </div>
+    <div class="user-header-actions">
+      <button type="button" class="user-btn-primary" id="btnAddUser">
+        {{ icon('plus', 16) }}
+        <span>Add User</span>
+      </button>
+    </div>
+  </header>
+
+  {# ── Metric Cards ────────────────────────────────────────────────────── #}
+  {% set total_staff = users|length %}
+  {% set active_staff = users|selectattr('status', 'equalto', 'active')|list|length %}
+  {% set admin_count = users|selectattr('role', 'in', ['admin', 'manager'])|list|length %}
+  {% set cashier_count = users|selectattr('role', 'in', ['cashier', 'crew'])|list|length %}
+
+  <section class="user-stats-row" aria-label="Staff Metrics">
+    <div class="user-stat-card">
+      <div class="user-stat-icon">
+        {{ icon('users', 20) }}
+      </div>
+      <div class="user-stat-meta">
+        <span class="user-stat-label">Total Users</span>
+        <span class="user-stat-val" id="statTotalUsers">{{ total_staff }}</span>
+      </div>
+    </div>
+    <div class="user-stat-card">
+      <div class="user-stat-icon cashier-icon">
+        {{ icon('check', 20) }}
+      </div>
+      <div class="user-stat-meta">
+        <span class="user-stat-label">Active Staff</span>
+        <span class="user-stat-val" id="statActiveUsers">{{ active_staff }}</span>
+      </div>
+    </div>
+    <div class="user-stat-card">
+      <div class="user-stat-icon admin-icon">
+        {{ icon('shield', 20) }}
+      </div>
+      <div class="user-stat-meta">
+        <span class="user-stat-label">Admins &amp; Managers</span>
+        <span class="user-stat-val" id="statAdminUsers">{{ admin_count }}</span>
+      </div>
+    </div>
+  </section>
+
+  {# ── Filter Toolbar ─────────────────────────────────────────────────── #}
+  <section class="user-toolbar" aria-label="User Filters">
+    <div class="user-filters-left">
+      <div class="user-search-wrap">
+        {{ icon('search', 16) }}
+        <input type="text" class="user-input" id="userSearchInput" placeholder="Search by username..." autocomplete="off">
+      </div>
+      <select class="user-select" id="userRoleFilter" aria-label="Role Filter">
+        <option value="">All Roles</option>
+        <option value="admin">Administrator</option>
+        <option value="manager">Manager</option>
+        <option value="cashier">Cashier</option>
+        <option value="crew">Crew</option>
+        <option value="bir_guest">BIR Guest</option>
+      </select>
+      <select class="user-select" id="userStatusFilter" aria-label="Status Filter">
+        <option value="">All Statuses</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="locked">Locked</option>
+      </select>
+    </div>
+  </section>
+
+  {# ── Users Table ─────────────────────────────────────────────────────── #}
+  <section class="user-table-wrap" aria-label="Users Directory">
+    <table class="user-table" id="userTable">
+      <thead>
+        <tr>
+          <th>User Account</th>
+          <th>Role Permission</th>
+          <th>Account Status</th>
+          <th>Hardware &amp; Card ID</th>
+          <th>Terminal MAC</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody">
+        {% for u in users %}
+        {% set role_class = 'user-role-admin' if u.role == 'admin' else ('user-role-manager' if u.role == 'manager' else ('user-role-cashier' if u.role == 'cashier' else ('user-role-crew' if u.role == 'crew' else 'user-role-bir'))) %}
+        {% set status_class = 'status-active' if u.status == 'active' else 'status-inactive' %}
+        <tr data-user-id="{{ u.id }}" data-username="{{ u.username|lower }}" data-role="{{ u.role }}" data-status="{{ u.status }}">
+          <td>
+            <div class="user-cell-main">
+              <span class="user-avatar">{{ u.username[0]|upper }}</span>
+              <div class="user-name-box">
+                <span class="user-name">{{ u.username }}</span>
+                <span class="user-badge-id">ID: #{{ '%04d'|format(u.id) }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="user-role-badge {{ role_class }}">{{ u.role|replace('_', ' ')|title }}</span>
+          </td>
+          <td>
+            <span class="user-status-pill {{ status_class }}">{{ u.status|upper }}</span>
+          </td>
+          <td>
+            {% if u.card_number %}
+            <span class="user-hw-badge has-card">
+              {{ icon('credit-card', 14) }}
+              <span>•••• {{ u.card_number[-4:] if u.card_number|length >= 4 else u.card_number }}</span>
+            </span>
+            {% else %}
+            <span class="user-hw-badge" style="color: var(--text-muted);">None</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="user-hw-badge">{{ u.mac_id or '—' }}</span>
+          </td>
+          <td>
+            <div class="user-actions">
+              <button type="button" class="user-action-btn user-btn-edit" title="Edit User" data-action="edit" data-id="{{ u.id }}" data-username="{{ u.name or u.username }}" data-role="{{ u.role }}" data-status="{{ u.status }}" data-mac="{{ u.mac_id or '' }}" data-card="{{ u.card_number or '' }}">
+                {{ icon('edit', 14) }}
+              </button>
+              {% if u.id != current_user.id %}
+              <button type="button" class="user-action-btn user-btn-delete" title="Delete User" data-action="delete" data-id="{{ u.id }}" data-username="{{ u.username }}">
+                {{ icon('trash', 14) }}
+              </button>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  {# ── Empty State ────────────────────────────────────────────────────── #}
+  <div class="user-empty" id="userEmpty" style="display: {% if users|length == 0 %}block{% else %}none{% endif %}; text-align: center; padding: 3.5rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+    <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--bg-elev); color: var(--text-muted); margin-bottom: 0.85rem;">
+      {{ icon('users', 28) }}
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.35rem 0;">No matching users found</h3>
+    <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">Try adjusting your search query or role filter.</p>
+  </div>
+</div>
+{% endblock %}

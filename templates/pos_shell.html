@@ -1,0 +1,77 @@
+{# ============================================================================
+   pos_shell.html — POS-only SPA shell (no sidebar, no footer)
+   ----------------------------------------------------------------------------
+   POS pages extend this instead of shell.html. The POS shell is purpose-built
+   for shift-critical cashier work: a slim top bar with role-based POS nav
+   links, theme toggle and user menu. No sidebar, no footer — maximum
+   viewport for POS content (register, order board, settlement, etc.).
+
+   Architecture note: admin pages extend shell.html (sidebar + topbar +
+   footer). POS pages extend pos_shell.html (top bar only). Cross-shell
+   navigation triggers a full page load (spa.js detects the area change).
+
+   Blocks (identical contract to shell.html):
+     area         always 'pos' for POS pages
+     page_module  page-module name (lazy-imported by core/spa.js)
+     title        <title> text
+     styles       <head> extras (rare)
+     content      the child view
+     page_js      body-end extras (rare)
+   ========================================================================== #}
+{% from 'partials/_icons.html' import icon %}
+<!-- {% block area %}pos{% endblock %} {% block page_module %}{% endblock %} -->
+{%- set _fragment = request.headers.get('HX-Request') -%}
+{%- if not _fragment %}
+<!DOCTYPE html>
+<html lang="en" data-area="{{ self.area() }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}NEXGEN POS{% endblock %}</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/nexgen_pos_icon.ico') }}">
+  <link rel="preload" href="{{ asset('fonts/space-grotesk-latin-400-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset('fonts/jetbrains-mono-latin-400-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset('fonts/space-mono-latin-400-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ vendor('njx/njx.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/pos/shell.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/core/modal.css') }}">
+  {% block styles %}{% endblock %}
+  <script src="{{ asset('js/core/theme.js') }}"></script>
+</head>
+<body class="page-{{ (request.endpoint or 'unknown')|replace('.', '-') }}" data-user-role="{{ current_user.role if current_user.is_authenticated else '' }}" hx-boost="true" hx-target="#view-root" hx-swap="innerHTML">
+  <a class="skip-link" href="#view-root" hx-boost="false">Skip to main content</a>
+  <div class="pos-shell-frame">
+    {% if current_user.is_authenticated %}
+    <header class="pos-topbar">
+      {% include 'partials/_pos_topbar.html' %}
+    </header>
+    {% endif %}
+    <main id="view-root" tabindex="-1" role="main">
+{%- endif %}
+{% block content %}{% endblock %}
+<template data-view-meta data-title="{{ self.title()|striptags|trim }}" data-area="{{ self.area() }}" data-version="{{ asset_version }}"{% if self.page_module() %} data-page="{{ self.page_module() }}"{% endif %}></template>
+{%- if not _fragment %}
+    </main>
+  </div>
+  <div id="toast-host"></div>
+  <div id="modal-host"></div>
+  <script type="application/json" id="flash-data">{{ get_flashed_messages(with_categories=true)|tojson }}</script>
+  <script src="{{ vendor('njx/njx.js') }}"></script>
+  <script src="{{ vendor('htmx/htmx.min.js') }}"></script>
+  <script type="module" src="{{ asset('js/core/flash.js') }}"></script>
+  <script type="module" src="{{ asset('js/core/spa.js') }}"></script>
+  <script type="module">
+    import { connect } from "{{ asset('js/core/sse.js') }}";
+    import { checkEodRequired } from "{{ asset('js/core/eod_guard.js') }}";
+    connect();
+    checkEodRequired();
+    document.addEventListener('htmx:afterSwap', () => {
+      checkEodRequired();
+    });
+  </script>
+  {% block page_js %}{% endblock %}
+</body>
+</html>
+{%- endif %}

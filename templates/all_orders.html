@@ -1,0 +1,130 @@
+{# ============================================================================
+   all_orders.html — order history (Phase 3, p3a9)
+   ----------------------------------------------------------------------------
+   SPA shell page (extends shell.html). Ports the legacy templates/
+   all_orders.html: filter toolbar (date range picker, status, search,
+   order type), data table loaded page-by-page from /api/all_orders,
+   pagination with page-size selector, and row actions (view, reprint
+   invoice, refund). Void/cancel/refund modals are built at runtime by
+   pages/all_orders.js using the njX inline-overlay idiom — no Bootstrap
+   classes in this markup. The admin-auth modal supports both card swipe
+   and username/password credentials (V1 parity).
+   ============================================================================ #}
+{% extends 'pos_shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}All Orders - NEXGEN POS{% endblock %}
+{% block area %}pos{% endblock %}
+{% block page_module %}all_orders{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pos/all_orders.css') }}">
+
+<div class="ao-page">
+  <header class="ao-header">
+    <div class="ao-header-left">
+      <p class="ao-kicker">Order History</p>
+      <h1 class="ao-title">All Orders</h1>
+      <p class="ao-subtitle">Track completed transactions, review order details, and process refunds from one page.</p>
+    </div>
+    <div class="ao-header-right">
+      {% if current_user.role != 'cashier' %}
+      <a href="/home" class="ao-back-btn">{{ icon('arrow-left', 14) }}<span>Back</span></a>
+      {% endif %}
+    </div>
+  </header>
+
+  <section class="ao-toolbar">
+    <form id="aoFilterForm" method="GET" action="/all_orders" class="ao-filter-form">
+      <div class="ao-filter-group ao-filter-group-wide">
+        <label class="ao-filter-label">Date Range</label>
+        <div class="ao-range-picker" id="aoRangePicker">
+          <button type="button" class="ao-input ao-range-btn" id="aoRangeBtn" aria-haspopup="true" aria-expanded="false">
+            {{ icon('calendar', 14) }}
+            <span class="ao-range-label" id="aoRangeLabel">Select date range</span>
+            {{ icon('chevron-down', 12) }}
+          </button>
+          <input type="hidden" name="start_date" id="aoStartDate" value="{{ start_date }}">
+          <input type="hidden" name="end_date" id="aoEndDate" value="{{ end_date }}">
+          <div class="ao-range-pop" id="aoRangePop" hidden></div>
+        </div>
+      </div>
+      <div class="ao-filter-group">
+        <label class="ao-filter-label">Status</label>
+        <select class="ao-input" name="status">
+          <option value="" {% if not status_filter %}selected{% endif %}>All Status</option>
+          <option value="completed" {% if status_filter=='completed' %}selected{% endif %}>Completed</option>
+          <option value="cancelled" {% if status_filter=='cancelled' %}selected{% endif %}>Cancelled</option>
+          <option value="refunded" {% if status_filter=='refunded' %}selected{% endif %}>Refunded</option>
+          <option value="void" {% if status_filter=='void' %}selected{% endif %}>Void</option>
+        </select>
+      </div>
+      <div class="ao-filter-group ao-filter-search">
+        <label class="ao-filter-label">Search</label>
+        <div class="ao-search-wrap">
+          {{ icon('search', 14) }}
+          <input type="text" class="ao-input" name="search" value="{{ search_query }}"
+            placeholder="Order #, invoice, customer">
+        </div>
+      </div>
+      <div class="ao-filter-group">
+        <label class="ao-filter-label" for="aoOrderType">Order Type</label>
+        <select class="ao-input" id="aoOrderType" name="order_type">
+          <option value=""{% if not order_type_filter %} selected{% endif %}>All Types</option>
+          <option value="dinein"{% if order_type_filter == 'dinein' %} selected{% endif %}>Dine-in</option>
+          <option value="takeout"{% if order_type_filter == 'takeout' %} selected{% endif %}>Takeout</option>
+          <option value="pickup"{% if order_type_filter == 'pickup' %} selected{% endif %}>Pickup</option>
+          <option value="delivery"{% if order_type_filter == 'delivery' %} selected{% endif %}>Delivery</option>
+        </select>
+      </div>
+      <a href="/all_orders" class="ao-reset-btn">
+        {{ icon('undo', 14) }}<span>Reset</span>
+      </a>
+    </form>
+  </section>
+
+  <section class="ao-table-wrap" id="aoTableWrap">
+    <div class="ao-table-head">
+      <span>Order Details</span>
+      <span>Date &amp; Time</span>
+      <span>Customer</span>
+      <span>Amount</span>
+      <span>Status</span>
+      <span>Actions</span>
+    </div>
+    <div class="ao-table-body" id="aoTableBody">
+      <div class="ao-loading">{{ icon('spinner', 16) }} Loading orders…</div>
+    </div>
+  </section>
+
+  <section class="ao-empty" id="aoEmpty" hidden>
+    {{ icon('inbox', 32) }}
+    <h4>No orders found</h4>
+    <p>Try adjusting your filters or search criteria.</p>
+  </section>
+
+  <section class="ao-pagination" id="aoPagination">
+    <span class="ao-pagination-info" id="aoPaginationInfo"></span>
+    <div class="ao-pagination-controls" id="aoPaginationControls"></div>
+    <label class="ao-page-size" title="Orders per page">
+      <select id="aoPageSize" class="ao-page-size-select" aria-label="Orders per page">
+        <option value="10"{% if per_page == 10 %} selected{% endif %}>10 / page</option>
+        <option value="24"{% if per_page == 24 %} selected{% endif %}>24 / page</option>
+        <option value="48"{% if per_page == 48 %} selected{% endif %}>48 / page</option>
+        <option value="96"{% if per_page == 96 %} selected{% endif %}>96 / page</option>
+      </select>
+      {{ icon('chevron-down', 12) }}
+    </label>
+  </section>
+</div>
+
+<script type="application/json" id="aoInitialState">
+{{ {
+  "start_date": start_date,
+  "end_date": end_date,
+  "search_query": search_query,
+  "status_filter": status_filter,
+  "order_type_filter": order_type_filter,
+  "current_page": current_page,
+  "per_page": per_page
+} | tojson }}
+</script>
+{% endblock %}

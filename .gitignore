@@ -1,0 +1,28 @@
+# Environment & Secrets
+.env
+*.env
+
+# Local Databases & Backups
+instance/
+*.db
+*.sqlite
+*.sqlite3
+rlc_files/
+uploads/
+
+# Build & Packaging
+build/
+dist/
+*.exe
+
+# Logs & Temp Files
+logs/
+*.log
+.freebuff/
+
+# Python Cache & Virtual Environments
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/

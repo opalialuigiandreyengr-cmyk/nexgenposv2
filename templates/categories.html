@@ -1,0 +1,77 @@
+{# ============================================================================
+   categories.html — Category Management (Phase 5, Milestone 5.1)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Categories - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}categories{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/categories.css') }}">
+
+<h1 class="sr-only">Category Management</h1>
+
+<div class="cat-page" id="catPageRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="cat-header">
+    <div class="cat-header-left">
+      <p class="cat-kicker">Menu Structure</p>
+      <h2 class="cat-title">Categories</h2>
+      <p class="cat-subtitle">Organize your menu into structured departments and track item counts per category.</p>
+    </div>
+    <div class="cat-header-actions">
+      <button type="button" class="cat-btn-primary" id="btnAddCategory">
+        {{ icon('plus', 16) }}
+        <span>Add Category</span>
+      </button>
+    </div>
+  </header>
+
+  {# ── Toolbar ─────────────────────────────────────────────────────────── #}
+  <section class="cat-toolbar" aria-label="Category Filters">
+    <div class="cat-search-wrap">
+      {{ icon('search', 16) }}
+      <input type="text" class="cat-input" id="catSearchInput" placeholder="Filter categories by name..." autocomplete="off">
+    </div>
+    <span class="cat-count-badge" id="catCountBadge">
+      {{ category_data|length }} Categories Total
+    </span>
+  </section>
+
+  {# ── Category Cards Grid ─────────────────────────────────────────────── #}
+  <section class="cat-grid" id="catGrid" aria-label="Category List">
+    {% for cat in category_data %}
+    <article class="cat-card" data-category-name="{{ cat.name }}">
+      <div class="cat-card-hero">
+        {% if cat.image %}
+        <img src="{{ url_for('main.uploaded_file', filename=cat.image) }}" alt="{{ cat.name }}" loading="lazy">
+        {% else %}
+        <div class="cat-placeholder-icon">
+          {{ icon('tag', 36) }}
+        </div>
+        {% endif %}
+      </div>
+      <div class="cat-card-body">
+        <h3 class="cat-card-name">{{ cat.name }}</h3>
+        <div class="cat-card-meta">
+          <span class="cat-card-count">{{ cat.product_count }} {{ 'item' if cat.product_count == 1 else 'items' }}</span>
+          <a href="/products?category={{ cat.name|urlencode }}" class="cat-card-link">
+            <span>View Items</span>
+            {{ icon('chevron-right', 14) }}
+          </a>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </section>
+
+  {# ── Empty State ────────────────────────────────────────────────────── #}
+  <div class="cat-empty" id="catEmpty" style="display: {% if category_data|length == 0 %}block{% else %}none{% endif %}; text-align: center; padding: 3.5rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+    <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--bg-elev); color: var(--text-muted); margin-bottom: 0.85rem;">
+      {{ icon('tag', 28) }}
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.35rem 0;">No categories found</h3>
+    <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">Click "+ Add Category" above to create your first menu category.</p>
+  </div>
+</div>
+{% endblock %}

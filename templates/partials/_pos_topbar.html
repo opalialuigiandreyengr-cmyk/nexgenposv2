@@ -1,0 +1,73 @@
+{# ============================================================================
+   partials/_pos_topbar.html — POS shell top bar (no sidebar, compact nav)
+   ----------------------------------------------------------------------------
+   Role-based POS navigation links rendered directly in the slim top bar.
+   No sidebar, no footer — the POS shell is focused entirely on shift-critical
+   cashier work. The CASHIER row is the kiosk invariant: exactly Orders /
+   All Orders / End of Day.
+
+   Active state: path match (same as the sidebar). Links use title tooltips
+   for accessible names when labels are hidden on narrow viewports.
+   ========================================================================== #}
+{% from 'partials/_icons.html' import icon %}
+
+{% set POS_NAV_ROLES = {
+  'admin': [
+    ('Orders', '/orders', '/orders', 'cart'),
+    ('All Orders', '/all_orders', '/all_orders', 'history'),
+    ('End of Day', '/end_of_day', '/end_of_day', 'calendar-check'),
+  ],
+  'manager': [
+    ('Orders', '/orders', '/orders', 'cart'),
+    ('All Orders', '/all_orders', '/all_orders', 'history'),
+    ('End of Day', '/end_of_day', '/end_of_day', 'calendar-check'),
+  ],
+  'cashier': [
+    ('Orders', '/orders', '/orders', 'cart'),
+    ('All Orders', '/all_orders', '/all_orders', 'history'),
+    ('End of Day', '/end_of_day', '/end_of_day', 'calendar-check'),
+  ],
+  'crew': [
+    ('Orders', '/orders', '/orders', 'cart'),
+  ],
+  'bir_guest': [
+    ('Orders', '/orders', '/orders', 'cart'),
+    ('All Orders', '/all_orders', '/all_orders', 'history'),
+    ('End of Day', '/end_of_day', '/end_of_day', 'calendar-check'),
+  ],
+  '_default': [
+    ('Orders', '/orders', '/orders', 'cart'),
+    ('All Orders', '/all_orders', '/all_orders', 'history'),
+  ],
+} %}
+
+{% set pos_nav_links = POS_NAV_ROLES.get(current_user.role, POS_NAV_ROLES['_default']) %}
+
+<a class="pos-topbar-brand" href="{{ url_for('main.home') }}">
+  <img class="pos-topbar-logo" src="{{ url_for('static', filename='box_logo.png') }}" alt="" width="26" height="26">
+  <span class="pos-topbar-word">NEXGEN</span>
+</a>
+
+<nav class="pos-topbar-nav" aria-label="POS navigation">
+{% for label, href, match, ico in pos_nav_links %}
+  {% set active = request.path == match %}
+  <a class="pos-nav-link{% if active %} is-active{% endif %}" href="{{ href }}" title="{{ label }}" aria-label="{{ label }}"{% if active %} aria-current="page"{% endif %}>{{ icon(ico, 18) }}<span class="pos-nav-label">{{ label }}</span></a>
+{% endfor %}
+</nav>
+
+<div class="pos-topbar-actions">
+  <button type="button" class="pos-topbar-btn" data-theme-toggle title="Toggle light/dark theme" aria-label="Toggle light/dark theme">
+    {{ icon('sun', 18) }}{{ icon('moon', 18) }}
+  </button>
+  <details class="dropdown dropdown-right pos-user-chip" id="user-menu">
+    <summary class="dropdown-trigger">
+      <span class="pos-topbar-avatar" aria-hidden="true">{{ current_user.username[0]|upper }}</span>
+      <span class="pos-topbar-username">{{ current_user.username }}</span>
+      <span class="dropdown-arrow" aria-hidden="true"></span>
+    </summary>
+    <div class="dropdown-menu">
+      <div class="pos-topbar-role">{{ current_user.role|replace('_', ' ')|title }}</div>
+      <a class="dropdown-item js-logout-link" href="/logout" hx-boost="false">{{ icon('log-out', 16) }}<span>Log out</span></a>
+    </div>
+  </details>
+</div>

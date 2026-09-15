@@ -1,0 +1,480 @@
+/* =============================================================================
+   login.css — V2 sign-in re-skin (design language: .ulpi/design/DESIGN.md)
+   -----------------------------------------------------------------------------
+   Split instrument panel: dark brand rail (--nav-* family, dark in BOTH
+   themes) + theme-following form panel. Signature: amber brand rail, mono
+   build tag, one orchestrated reveal. Tokens only; page-locked literals are
+   declared once per theme block below.
+   =========================================================================== */
+
+/* --- Layout ---------------------------------------------------------------- */
+.login-screen {
+  margin: 0;
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+}
+
+/* Grid wrapper: single 1fr row so both panels ALWAYS fill the viewport height
+   (the previous body-level grid stopped at content height on tall windows). */
+.login-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  grid-template-rows: 1fr;
+  min-height: 100vh;
+}
+
+/* Pre-rendered toast host: must be out-of-flow fixed or it becomes a phantom
+   grid item (and toasts render inline). Mirrors core/toast.js host cssText. */
+#toast-host {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 9500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+#toast-host .toast,
+.toast {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  padding: 0.65rem 1rem !important;
+  border-radius: 8px !important;
+  font-family: inherit !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  max-width: 420px !important;
+}
+
+#toast-host .toast .toast-message,
+.toast .toast-message {
+  color: #ffffff !important;
+}
+
+#toast-host .toast-success,
+.toast-success {
+  background: #064e3b !important;
+  border: 1px solid #059669 !important;
+  color: #ffffff !important;
+}
+
+#toast-host .toast-error,
+.toast-error {
+  background: #7f1d1d !important;
+  border: 1px solid #dc2626 !important;
+  color: #ffffff !important;
+}
+
+#toast-host .toast-warning,
+.toast-warning {
+  background: #78350f !important;
+  border: 1px solid #d97706 !important;
+  color: #ffffff !important;
+}
+
+#toast-host .toast-primary,
+.toast-primary,
+#toast-host .toast-info,
+.toast-info {
+  background: #1e293b !important;
+  border: 1px solid #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+/* --- Brand instrument panel (dark in both themes) -------------------------- */
+.login-sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 48px 40px 28px;
+  background:
+    radial-gradient(120% 70% at 12% 0%, rgba(20, 184, 166, 0.14), transparent 60%),
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    var(--nav-bg);
+  background-size: auto, 28px 28px, 28px 28px, auto;
+  border-right: 1px solid var(--nav-border);
+  overflow: hidden;
+}
+
+/* Signature entry: 3px amber rail on the inner edge */
+.login-sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-accent);
+}
+
+.login-brand-block {
+  margin-bottom: 40px;
+}
+
+.login-logo {
+  width: 140px;
+  height: 140px;
+  display: grid;
+  place-items: center;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--nav-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+}
+
+.login-logo img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+}
+
+.login-brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  color: var(--nav-text-hover);
+  line-height: 1.1;
+}
+
+.login-brand-accent {
+  color: var(--color-accent);
+}
+
+.login-powered {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--nav-text);
+}
+
+.login-powered strong {
+  color: var(--nav-text-hover);
+  font-weight: 500;
+}
+
+/* --- Operational facts ------------------------------------------------------ */
+.login-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--nav-border);
+}
+
+.login-fact {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--nav-border);
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--nav-text);
+}
+
+.login-fact-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-top: -2px;
+  border-radius: var(--radius-md);
+  background: rgba(20, 184, 166, 0.14);
+  color: var(--color-link);
+}
+
+/* Mono build tag, pinned to the bottom (support detail, not decoration) */
+.login-build {
+  margin-top: auto;
+  padding-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--nav-text);
+  opacity: 0.85;
+}
+
+/* --- Form panel ------------------------------------------------------------- */
+.login-main {
+  display: grid;
+  place-items: center;
+  padding: 48px 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-card h1 {
+  margin: 0 0 4px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.login-subtitle {
+  margin: 0 0 32px;
+  font-size: 14.5px;
+  color: var(--color-muted);
+}
+
+.login-card .form-group + .form-group {
+  margin-top: 20px;
+}
+
+.login-card .form-label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* --- Fields with leading icons --------------------------------------------- */
+.login-field {
+  position: relative;
+  margin-top: 8px;
+}
+
+.login-field-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: var(--color-muted);
+  pointer-events: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.login-field:focus-within .login-field-icon {
+  color: var(--color-primary);
+}
+
+.login-field .form-input {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 2.75rem;
+  height: 48px;
+  font-size: 15px;
+}
+
+.login-field--secret .form-input {
+  padding-right: 3rem;
+}
+
+/* Password visibility toggle: eye / eye-off swap via aria-pressed */
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+
+.password-toggle:hover {
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--text-main) 8%, transparent);
+}
+
+.password-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+}
+
+.password-toggle .icon-eye-off {
+  display: none;
+}
+
+.password-toggle[aria-pressed="true"] .icon-eye {
+  display: none;
+}
+
+.password-toggle[aria-pressed="true"] .icon-eye-off {
+  display: block;
+}
+
+/* Autofill keeps the token palette (Chrome/Safari/Edge) */
+.login-field .form-input:-webkit-autofill,
+.login-field .form-input:-webkit-autofill:hover,
+.login-field .form-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--form-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--form-bg-input) inset;
+  transition: background-color 600000s 0s;
+}
+
+/* --- Primary CTA: amber, dark text (AA), motivated hover lift ---------------- */
+/* .btn prefix: njX .btn-accent paints white text; tie-break by source order. */
+.btn.login-submit {
+  margin-top: 28px;
+  height: 48px;
+  color: #1F2937;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out),
+    filter var(--dur-base) var(--ease-out);
+}
+
+.login-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.04);
+}
+
+.login-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* --- Swipe status line (shown only by login.js on card detection) ----------- */
+.login-swipe-status {
+  display: none;
+  margin: 20px 0 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-opacity);
+  color: var(--color-link);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.login-swipe-status .icon {
+  flex: none;
+}
+
+/* --- Note -------------------------------------------------------------------- */
+.login-note {
+  margin: 28px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+  font-size: 13px;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.login-note strong {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* --- One orchestrated reveal (motivated: arrival moment only) ---------------- */
+@keyframes login-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-sidebar > *,
+.login-card > * {
+  animation: login-rise var(--dur-emphasis) var(--ease-out) backwards;
+}
+
+.login-sidebar > *:nth-child(1) { animation-delay: 40ms; }
+.login-sidebar > *:nth-child(2) { animation-delay: 140ms; }
+.login-sidebar > *:nth-child(3) { animation-delay: 240ms; }
+.login-card > *:nth-child(1) { animation-delay: 80ms; }
+.login-card > *:nth-child(2) { animation-delay: 160ms; }
+.login-card > *:nth-child(3) { animation-delay: 240ms; }
+.login-card > *:nth-child(4) { animation-delay: 320ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .login-sidebar > *,
+  .login-card > * {
+    animation: none;
+  }
+}
+
+/* --- Responsive -------------------------------------------------------------- */
+/* Stack only below 900px: POS hardware runs 1024x678 panels and must keep
+   the side-by-side split (420px rail + centered form) at that size. */
+@media (max-width: 900px) {
+  .login-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .login-sidebar {
+    padding: 32px 32px 24px;
+    border-right: 0;
+    border-bottom: 1px solid var(--nav-border);
+  }
+
+  /* Rail moves to the top edge on the stacked layout */
+  .login-sidebar::after {
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: auto;
+    width: auto;
+    height: 3px;
+  }
+
+  .login-brand-block {
+    margin-bottom: 24px;
+  }
+
+  .login-logo {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 16px;
+  }
+
+  .login-logo img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .login-facts {
+    display: none;
+  }
+
+  .login-build {
+    margin-top: 24px;
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-main {
+    padding: 32px 20px;
+  }
+
+  .login-card h1 {
+    font-size: 26px;
+  }
+}

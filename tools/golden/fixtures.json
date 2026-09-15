@@ -1,0 +1,186 @@
+{
+  "version": "1.0",
+  "description": "Golden fixtures for Phase 3 money-math parity validation. Each fixture defines an order scenario (total, pax, discounts) and the expected computed results (discount_amount, tax_exempt, final_total). V1 and V2 settlement calculations must produce results within 0.01 tolerance.",
+  "fixtures": [
+    {
+      "id": "GF01",
+      "label": "No discount — simple cash",
+      "order_total": 500.00,
+      "pax": 1,
+      "discounts": {},
+      "payment": "cash",
+      "expected": { "discount_amount": 0.00, "tax_exempt_amount": 0.00, "final_total": 500.00 }
+    },
+    {
+      "id": "GF02",
+      "label": "Senior 1 pax VAT-exempt + 20%",
+      "order_total": 1120.00,
+      "pax": 2,
+      "discounts": { "senior": 1 },
+      "payment": "cash",
+      "expected": { "discount_amount": 100.00, "tax_exempt_amount": 60.00, "final_total": 960.00 }
+    },
+    {
+      "id": "GF03",
+      "label": "PWD 1 pax VAT-exempt + 20%",
+      "order_total": 1120.00,
+      "pax": 4,
+      "discounts": { "pwd": 1 },
+      "payment": "card",
+      "expected": { "discount_amount": 50.00, "tax_exempt_amount": 30.00, "final_total": 1040.00 }
+    },
+    {
+      "id": "GF04",
+      "label": "Solo Parent 1 pax VAT-exempt + 10%",
+      "order_total": 1120.00,
+      "pax": 2,
+      "discounts": { "solo_parent": 1 },
+      "payment": "cash",
+      "expected": { "discount_amount": 50.00, "tax_exempt_amount": 60.00, "final_total": 1010.00 }
+    },
+    {
+      "id": "GF05",
+      "label": "Athlete 1 pax 20% + VAT add-back",
+      "order_total": 1120.00,
+      "pax": 2,
+      "discounts": { "athlete": 1 },
+      "payment": "cash",
+      "expected": { "discount_amount": 100.00, "tax_exempt_amount": 0.00, "final_total": 1020.00 }
+    },
+    {
+      "id": "GF06",
+      "label": "Medal of Valor 1 pax 20% + VAT add-back",
+      "order_total": 1120.00,
+      "pax": 4,
+      "discounts": { "medal_of_valor": 1 },
+      "payment": "cash",
+      "expected": { "discount_amount": 50.00, "tax_exempt_amount": 0.00, "final_total": 1070.00 }
+    },
+    {
+      "id": "GF07",
+      "label": "Regular 10% discount (1 pax)",
+      "order_total": 1000.00,
+      "pax": 1,
+      "discounts": { "regular": 10 },
+      "payment": "cash",
+      "expected": { "discount_amount": 100.00, "tax_exempt_amount": 0.00, "final_total": 900.00 }
+    },
+    {
+      "id": "GF08",
+      "label": "Regular 20% discount (4 pax)",
+      "order_total": 2000.00,
+      "pax": 4,
+      "discounts": { "regular": 20 },
+      "payment": "card",
+      "expected": { "discount_amount": 100.00, "tax_exempt_amount": 0.00, "final_total": 1900.00 }
+    },
+    {
+      "id": "GF09",
+      "label": "OTH fixed peso discount",
+      "order_total": 800.00,
+      "pax": 2,
+      "discounts": { "oth": 150 },
+      "payment": "cash",
+      "expected": { "discount_amount": 150.00, "tax_exempt_amount": 0.00, "final_total": 650.00 }
+    },
+    {
+      "id": "GF10",
+      "label": "OTH exceeds total — clamp to 0",
+      "order_total": 200.00,
+      "pax": 1,
+      "discounts": { "oth": 500 },
+      "payment": "cash",
+      "expected": { "discount_amount": 200.00, "tax_exempt_amount": 0.00, "final_total": 0.00 }
+    },
+    {
+      "id": "GF11",
+      "label": "Mixed: Senior(1) + PWD(1) out of 4 pax",
+      "order_total": 4480.00,
+      "pax": 4,
+      "discounts": { "senior": 1, "pwd": 1 },
+      "payment": "cash",
+      "expected": { "discount_amount": 400.00, "tax_exempt_amount": 240.00, "final_total": 3840.00 }
+    },
+    {
+      "id": "GF12",
+      "label": "Mixed: Senior(2) + Solo(1) out of 5 pax",
+      "order_total": 5600.00,
+      "pax": 5,
+      "discounts": { "senior": 2, "solo_parent": 1 },
+      "payment": "cash",
+      "expected": { "discount_amount": 500.00, "tax_exempt_amount": 360.00, "final_total": 4740.00 }
+    },
+    {
+      "id": "GF13",
+      "label": "Mixed: Athlete(1) + Regular(10%) out of 3 pax",
+      "order_total": 3360.00,
+      "pax": 3,
+      "discounts": { "athlete": 1, "regular": 10 },
+      "payment": "card",
+      "expected": { "discount_amount": 312.00, "tax_exempt_amount": 0.00, "final_total": 3048.00 }
+    },
+    {
+      "id": "GF14",
+      "label": "Senior 2 pax out of 4",
+      "order_total": 2240.00,
+      "pax": 4,
+      "discounts": { "senior": 2 },
+      "payment": "cash",
+      "expected": { "discount_amount": 200.00, "tax_exempt_amount": 120.00, "final_total": 1920.00 }
+    },
+    {
+      "id": "GF15",
+      "label": "Gift check payment, no discount",
+      "order_total": 750.00,
+      "pax": 1,
+      "discounts": {},
+      "payment": "gift_check",
+      "expected": { "discount_amount": 0.00, "tax_exempt_amount": 0.00, "final_total": 750.00 }
+    },
+    {
+      "id": "GF16",
+      "label": "Cheque payment, regular 15%",
+      "order_total": 3000.00,
+      "pax": 2,
+      "discounts": { "regular": 15 },
+      "payment": "cheque",
+      "expected": { "discount_amount": 225.00, "tax_exempt_amount": 0.00, "final_total": 2775.00 }
+    },
+    {
+      "id": "GF17",
+      "label": "All senior/pwd solo mixed (5 pax: 2SC + 1PWD + 1Solo + 1reg20%)",
+      "order_total": 5600.00,
+      "pax": 5,
+      "discounts": { "senior": 2, "pwd": 1, "solo_parent": 1, "regular": 20 },
+      "payment": "cash",
+      "expected": { "discount_amount": 924.00, "tax_exempt_amount": 480.00, "final_total": 4196.00 }
+    },
+    {
+      "id": "GF18",
+      "label": "Mixed: MOV(1) + Athlete(1) out of 4 pax",
+      "order_total": 4480.00,
+      "pax": 4,
+      "discounts": { "medal_of_valor": 1, "athlete": 1 },
+      "payment": "cash",
+      "expected": { "discount_amount": 400.00, "tax_exempt_amount": 0.00, "final_total": 4080.00 }
+    },
+    {
+      "id": "GF19",
+      "label": "Small order: 1 pax senior, total 112",
+      "order_total": 112.00,
+      "pax": 1,
+      "discounts": { "senior": 1 },
+      "payment": "cash",
+      "expected": { "discount_amount": 20.00, "tax_exempt_amount": 12.00, "final_total": 80.00 }
+    },
+    {
+      "id": "GF20",
+      "label": "Large mixed: 10 pax, 3SC + 2PWD + 1Solo + 1Athlete + 1REG(10%)",
+      "order_total": 11200.00,
+      "pax": 10,
+      "discounts": { "senior": 3, "pwd": 2, "solo_parent": 1, "athlete": 1, "regular": 10 },
+      "payment": "card",
+      "expected": { "discount_amount": 1412.00, "tax_exempt_amount": 720.00, "final_total": 9068.00 }
+    }
+  ]
+}

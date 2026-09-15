@@ -1,0 +1,113 @@
+{# ============================================================================
+   activity_logs.html — Activity Logs (Phase 5, Milestone 5.5)
+   ============================================================================ #}
+{% extends 'shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+{% block title %}Activity Logs - NEXGEN POS{% endblock %}
+{% block area %}admin{% endblock %}
+{% block page_module %}activity_logs{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/activity_logs.css') }}">
+
+<h1 class="sr-only">System Activity Logs</h1>
+
+<div class="act-page" id="actPageRoot">
+  {# ── Header ─────────────────────────────────────────────────────────── #}
+  <header class="act-header">
+    <div class="act-header-left">
+      <p class="act-kicker">Security &amp; Auditing</p>
+      <h2 class="act-title">Activity Logs</h2>
+      <p class="act-subtitle">Track operational events, operator authentications, price updates, and administrative modifications.</p>
+    </div>
+    <div class="act-header-actions">
+      <a href="/export_activity_logs_excel" class="act-btn-export" id="btnExportLogs" hx-boost="false" download>
+        {{ icon('file-text', 16) }}
+        <span>Export to Excel</span>
+      </a>
+    </div>
+  </header>
+
+  {# ── Filter Toolbar ─────────────────────────────────────────────────── #}
+  <section class="act-toolbar" aria-label="Activity Log Filters">
+    <div class="act-filters-left">
+      <div class="act-range-picker" id="actRangePicker" style="position: relative;">
+        <button type="button" class="act-input act-range-btn" id="actRangeBtn" aria-haspopup="true" aria-expanded="false" style="display: flex; align-items: center; gap: 0.45rem; cursor: pointer; min-width: 210px; height: 38px; color: var(--text-main); font-size: 0.85rem;">
+          {{ icon('calendar', 14) }}
+          <span class="act-range-label" id="actRangeLabel" style="flex: 1; text-align: left;">All Dates</span>
+          {{ icon('chevron-down', 12) }}
+        </button>
+        <input type="hidden" id="actStartDate" value="">
+        <input type="hidden" id="actEndDate" value="">
+        <div class="act-range-pop" id="actRangePop" hidden></div>
+      </div>
+
+      <div class="act-search-wrap">
+        {{ icon('search', 16) }}
+        <input type="text" class="act-input" id="actSearchInput" placeholder="Search event description..." autocomplete="off">
+      </div>
+
+      <select class="act-select" id="actEventSelect" aria-label="Event Type Filter">
+        <option value="">All Event Types</option>
+        {% for et in event_types %}
+        <option value="{{ et }}">{{ et }}</option>
+        {% endfor %}
+      </select>
+
+      <select class="act-select" id="actUserSelect" aria-label="User Filter">
+        <option value="">All Users</option>
+        {% for u in users %}
+        <option value="{{ u.id }}">{{ u.username }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="button" class="act-btn-reset" id="actBtnReset" title="Reset all filters">
+        {{ icon('undo', 14) }}
+      </button>
+    </div>
+  </section>
+
+  {# ── Logs Table ──────────────────────────────────────────────────────── #}
+  <section class="act-table-wrap" aria-label="Activity Logs Table">
+    <table class="act-table" id="actTable">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Event Type</th>
+          <th>User</th>
+          <th>Description &amp; Action Details</th>
+        </tr>
+      </thead>
+      <tbody id="actTableBody">
+        <tr>
+          <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+            Loading activity stream...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  {# ── Integrated Sticky Table Pagination Footer ─────────────────────────── #}
+  <footer class="act-pagination" id="actPagination">
+    <span class="act-pagination-info" id="actPaginationInfo">Showing 0 logs</span>
+    <div class="prod-pagination-controls" id="actPaginationControls"></div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Per page:</span>
+      <select class="act-select" id="actPerPageSelect" style="height: 32px; padding-top: 0; padding-bottom: 0; font-size: 0.8rem;">
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  </footer>
+
+  {# ── Empty State ────────────────────────────────────────────────────── #}
+  <div class="act-empty" id="actEmpty" style="display: none; text-align: center; padding: 3.5rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+    <div style="display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--bg-elev); color: var(--text-muted); margin-bottom: 0.85rem;">
+      {{ icon('clipboard', 28) }}
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.35rem 0;">No logs found</h3>
+    <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">Try adjusting your search query, event filter, or date range.</p>
+  </div>
+</div>
+{% endblock %}

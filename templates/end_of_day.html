@@ -1,0 +1,211 @@
+{# ============================================================================
+   end_of_day.html — POS EOD Shift Closing Dashboard (POS_V2, Phase 7)
+   ============================================================================ #}
+{% extends 'pos_shell.html' %}
+{% from 'partials/_icons.html' import icon %}
+
+{% block title %}End of Day - NEXGEN POS{% endblock %}
+{% block area %}pos{% endblock %}
+{% block page_module %}end_of_day{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ asset('css/pages/end_of_day.css') }}">
+
+<script>const RLC_ENABLED = {{ 'true' if rlc_enabled else 'false' }};</script>
+
+<h1 class="sr-only">End of Day Shift Close</h1>
+
+<div class="eod-spacious-container" id="eodRoot" data-rlc-enabled="{{ 'true' if rlc_enabled else 'false' }}">
+  {# ── Header Bar ────────────────────────────────────────────────────── #}
+  <header class="eod-spacious-header">
+    <div>
+      <span class="eod-spacious-kicker">Shift Closing Hub</span>
+      <h2 class="eod-spacious-title">End of Day</h2>
+    </div>
+
+    <div class="eod-spacious-meta">
+      <div class="eod-meta-badge">
+        <span class="eod-pulse-dot"></span>
+        <span>Terminal #01</span>
+        <span style="opacity: 0.4;">|</span>
+        <span>{{ current_user.username if current_user.is_authenticated else 'Cashier' }}</span>
+      </div>
+    </div>
+  </header>
+
+  {# ── 2-Column Main Layout ─────────────────────────────────────────── #}
+  <div class="eod-spacious-grid">
+    {# ── Left Column: Day Readiness & Quick Print Slips ───────────────── #}
+    <div class="eod-col-stack">
+      {# Readiness Card #}
+      <div class="eod-clean-card">
+        <div class="eod-card-head-row">
+          <h3 class="eod-card-head-title">Shift Readiness</h3>
+          <span class="eod-pill pill-ready" id="eodStatusBadge">READY</span>
+        </div>
+
+        <div class="eod-metric-row" id="pendingSummaryCard">
+          <div>
+            <span class="eod-metric-label">Pending Orders</span>
+            <div class="eod-metric-num" id="pendingOrdersCountSummary">0</div>
+          </div>
+          <p class="eod-metric-caption" id="pendingOrdersSummaryText">All active orders settled.</p>
+        </div>
+
+        <div class="eod-metric-row" id="printerSummaryCard">
+          <div>
+            <span class="eod-metric-label">Cashier Printer</span>
+            <div class="eod-metric-num" id="printerStatusSummary" style="font-size: 1.15rem;">Checking...</div>
+          </div>
+          <p class="eod-metric-caption" id="printerSummaryText">Checking printer connection...</p>
+        </div>
+
+        <div class="eod-metric-row" id="rlcSummaryCard">
+          <div>
+            <span class="eod-metric-label">RLC SFTP Transfer</span>
+            <div class="eod-metric-num" id="rlcStatusSummary" style="font-size: 1.15rem; color: {{ '#10b981' if rlc_enabled else '#94a3b8' }};">{{ 'ACTIVE' if rlc_enabled else 'NOT SET' }}</div>
+          </div>
+          <p class="eod-metric-caption" id="rlcSummaryText" style="color: #94a3b8;">{{ 'Robinsons SFTP transmission will run upon close.' if rlc_enabled else 'RLC SFTP transmission disabled (not set in Settings).' }}</p>
+        </div>
+
+        <div class="eod-metric-row d-none" id="missingDatesCard">
+          <div>
+            <span class="eod-metric-label" style="color: #ef4444;">Unclosed Prior Dates</span>
+            <div class="eod-metric-num" id="missingDatesCount" style="color: #ef4444;">0</div>
+          </div>
+          <p class="eod-metric-caption" id="missingDatesText" style="color: #ef4444;">Prior days require Z-Reading.</p>
+        </div>
+
+        <a href="/orders" class="eod-btn-outline d-none mt-2" id="pendingOrdersSummaryBtn">
+          {{ icon('external-link', 14) }}
+          <span>Review Pending Orders</span>
+        </a>
+
+        <button type="button" class="eod-btn-outline d-none mt-2" id="btnProcessMissingDates" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.4);">
+          {{ icon('calendar', 14) }}
+          <span>Process Prior Dates</span>
+        </button>
+      </div>
+
+      {# Quick Print Checkpoints Card #}
+      <div class="eod-clean-card">
+        <div class="eod-card-head-row">
+          <h3 class="eod-card-head-title">Quick Print Slips</h3>
+        </div>
+
+        <div class="eod-quick-print-stack">
+          {# Print X-Reading #}
+          <button type="button" class="eod-print-row-btn" id="print-xreading-btn">
+            <div class="eod-print-icon icon-amber">{{ icon('printer', 18) }}</div>
+            <div class="eod-print-text">
+              <span class="eod-print-title">Print X-Reading Report</span>
+              <span class="eod-print-desc">Mid-day operational check</span>
+            </div>
+          </button>
+
+          {# Cashier Accountability #}
+          {% if current_user.role == 'cashier' or current_user.role == 'admin' %}
+          <button type="button" class="eod-print-row-btn" id="print-cashier-accountability-btn">
+            <div class="eod-print-icon icon-teal">{{ icon('file-text', 18) }}</div>
+            <div class="eod-print-text">
+              <span class="eod-print-title">Cashier Accountability</span>
+              <span class="eod-print-desc">Shift collections slip</span>
+            </div>
+          </button>
+
+          {# Today Item Sales #}
+          <button type="button" class="eod-print-row-btn" id="print-today-item-sales-btn">
+            <div class="eod-print-icon icon-emerald">{{ icon('shopping-bag', 18) }}</div>
+            <div class="eod-print-text">
+              <span class="eod-print-title">Print Today Item Sales</span>
+              <span class="eod-print-desc">Itemized volume slip</span>
+            </div>
+          </button>
+
+          {# Takeout & Delivery #}
+          <button type="button" class="eod-print-row-btn" id="print-today-service-sales-btn">
+            <div class="eod-print-icon icon-slate">{{ icon('truck', 18) }}</div>
+            <div class="eod-print-text">
+              <span class="eod-print-title">Takeout & Delivery Sales</span>
+              <span class="eod-print-desc">Service channel totals</span>
+            </div>
+          </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# ── Right Column: Final Shift Closeout & Z-Reading Archive ───────── #}
+    <div class="eod-col-stack">
+      {# Primary Final Shift Closeout Card #}
+      {% if current_user.role != 'bir_guest' %}
+      <div class="eod-clean-card card-primary-action">
+        <div class="eod-card-head-row">
+          <div>
+            <h3 class="eod-card-head-title">Final Shift Closeout</h3>
+            <p class="eod-card-head-sub">Finalize sales, generate Z-Reading, and submit daily SFTP files.</p>
+          </div>
+        </div>
+
+        <div class="eod-primary-buttons-grid">
+          {# Perform Z-Reading Button #}
+          <button type="button" class="eod-big-action-btn btn-danger-action" id="btnOpenConfirmEodModal">
+            <span class="eod-btn-icon-box">{{ icon('calendar-check', 20) }}</span>
+            <div class="eod-big-btn-content">
+              <span class="eod-big-btn-title">Perform Z-Reading (Final Close)</span>
+              <span class="eod-big-btn-sub">Finalize sales & lock register</span>
+            </div>
+          </button>
+
+          {# Generate & Send Daily Reports Button #}
+          <button type="button" class="eod-big-action-btn btn-success-action" id="openDailyBundleModalBtn">
+            <span class="eod-btn-icon-box">{{ icon('send', 20) }}</span>
+            <div class="eod-big-btn-content">
+              <span class="eod-big-btn-title">Generate & Send Reports</span>
+              <span class="eod-big-btn-sub">Transmit RLC SFTP & e-journal</span>
+            </div>
+          </button>
+        </div>
+      </div>
+      {% endif %}
+
+      {# Z-Reading Archive & Viewer Card #}
+      <div class="eod-clean-card">
+        <div class="eod-card-head-row">
+          <h3 class="eod-card-head-title">Z-Reading Archive</h3>
+        </div>
+
+        <div class="eod-archive-controls">
+          <div class="eod-date-field">
+            <label for="zreading-from-date">From</label>
+            <input type="date" id="zreading-from-date" class="eod-date-input">
+          </div>
+          <div class="eod-date-field">
+            <label for="zreading-to-date">To</label>
+            <input type="date" id="zreading-to-date" class="eod-date-input">
+          </div>
+          <button type="button" class="eod-btn-load" id="load-zreading-btn">
+            {{ icon('refresh-cw', 15) }}
+            <span>Load Report</span>
+          </button>
+        </div>
+
+        <div class="eod-archive-display" id="zreading-report-content">
+          Select date range and click "Load Report" to inspect Z-Reading.
+        </div>
+
+        <div class="eod-archive-footer">
+          <button type="button" class="eod-btn-outline" id="print-zreading-btn">
+            {{ icon('printer', 15) }}
+            <span>Reprint Z-Reading Slip</span>
+          </button>
+          <a id="download-zreading-btn" href="#" class="eod-btn-outline" download style="text-decoration: none;">
+            {{ icon('download', 15) }}
+            <span>Download TXT</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,142 @@
+{# ============================================================================
+   partials/_sidebar.html — role-matrix sidebar + brand + build tag (V1 parity)
+   ----------------------------------------------------------------------------
+   The NAV_ROLES matrix below is the V1 ground truth (templates/base.html
+   role menu). Every role sees exactly its own link set and nothing else.
+   The CASHIER row is the kiosk invariant — exactly Orders / All Orders /
+   End of Day; it must never grow.
+
+   Links are grouped under mono captions (OPERATIONS / MENU / REPORTS /
+   SYSTEM); groups are skipped for roles that have no link in them.
+   SIDE_GROUPS matches RENDERED hrefs, so the manager/default 'Dashboard'
+   row (href '/') lands in REPORTS with the admin '/dashboard' row.
+
+   Active state mirrors V1: endpoint match for the two admin home/dashboard
+   links, request.path match for everything else. The sidebar is always
+   dark in both themes (design invariant — shell.css --side-* family).
+
+   Collapse: the shell topbar toggle sets body[data-side-nav]="expanded|rail"
+   (core/spa.js); CSS applies the 64px rail. aria-label on every link keeps
+   the accessible name when the rail hides the visible label.
+   ========================================================================== #}
+{% from 'partials/_icons.html' import icon %}
+
+{% set NAV_ROLES = {
+  'admin': [
+    ('Home', url_for('main.home'), 'endpoint', 'main.home', 'home'),
+    ('Dashboard', url_for('main.dashboard'), 'endpoint', 'main.dashboard', 'grid'),
+    ('Users', '/users', 'path', '/users', 'users'),
+    ('Products', '/products', 'path', '/products', 'box'),
+    ('Categories', '/categories', 'path', '/categories', 'tag'),
+    ('Inventory', '/inventory', 'path', '/inventory', 'package'),
+    ('Table Management', '/table_management', 'path', '/table_management', 'table'),
+    ('Orders', '/orders', 'path', '/orders', 'cart'),
+    ('All Orders', '/all_orders', 'path', '/all_orders', 'history'),
+    ('Activity Logs', '/activity_logs', 'path', '/activity_logs', 'clipboard'),
+    ('Misc Reports', '/misc', 'path', '/misc', 'file-text'),
+    ('Transfer History', '/transfer_history', 'path', '/transfer_history', 'repeat'),
+    ('End of Day', '/end_of_day', 'path', '/end_of_day', 'calendar-check'),
+    ('System Backup', '/backup_system', 'path', '/backup_system', 'hard-drive'),
+    ('Data Retention', '/data_retention', 'path', '/data_retention', 'database'),
+    ('Settings', '/settings', 'path', '/settings', 'settings'),
+  ],
+  'manager': [
+    ('Dashboard', '/', 'path', '/', 'grid'),
+    ('Products', '/products', 'path', '/products', 'box'),
+    ('Categories', '/categories', 'path', '/categories', 'tag'),
+    ('Inventory', '/inventory', 'path', '/inventory', 'package'),
+    ('Table Management', '/table_management', 'path', '/table_management', 'table'),
+    ('Orders', '/orders', 'path', '/orders', 'cart'),
+    ('All Orders', '/all_orders', 'path', '/all_orders', 'history'),
+    ('Misc Reports', '/misc', 'path', '/misc', 'file-text'),
+    ('Transfer History', '/transfer_history', 'path', '/transfer_history', 'repeat'),
+    ('End of Day', '/end_of_day', 'path', '/end_of_day', 'calendar-check'),
+  ],
+  'cashier': [
+    ('Orders', '/orders', 'path', '/orders', 'cart'),
+    ('All Orders', '/all_orders', 'path', '/all_orders', 'history'),
+    ('End of Day', '/end_of_day', 'path', '/end_of_day', 'calendar-check'),
+  ],
+  'crew': [
+    ('Orders', '/orders', 'path', '/orders', 'cart'),
+  ],
+  'bir_guest': [
+    ('Misc Reports', '/misc', 'path', '/misc', 'file-text'),
+    ('Orders', '/orders', 'path', '/orders', 'cart'),
+    ('All Orders', '/all_orders', 'path', '/all_orders', 'history'),
+    ('End of Day', '/end_of_day', 'path', '/end_of_day', 'calendar-check'),
+    ('Activity Logs', '/activity_logs', 'path', '/activity_logs', 'clipboard'),
+    ('System Backup', '/backup_system', 'path', '/backup_system', 'hard-drive'),
+  ],
+  '_default': [
+    ('Dashboard', '/', 'path', '/', 'grid'),
+    ('Products', '/products', 'path', '/products', 'box'),
+    ('Categories', '/categories', 'path', '/categories', 'tag'),
+    ('Inventory', '/inventory', 'path', '/inventory', 'package'),
+    ('Table Management', '/table_management', 'path', '/table_management', 'table'),
+    ('Orders', '/orders', 'path', '/orders', 'cart'),
+    ('All Orders', '/all_orders', 'path', '/all_orders', 'history'),
+  ],
+} %}
+
+{% set SIDE_GROUPS = [
+  ('OPERATIONS', ['/home', '/orders', '/all_orders', '/end_of_day']),
+  ('MENU', ['/products', '/categories', '/inventory', '/table_management']),
+  ('REPORTS', ['/dashboard', '/', '/misc', '/transfer_history']),
+  ('SYSTEM', ['/users', '/activity_logs', '/backup_system', '/data_retention', '/settings']),
+] %}
+{% set side_links = NAV_ROLES.get(current_user.role, NAV_ROLES['_default']) %}
+
+<a class="side-brand" href="{{ url_for('main.home') }}">
+  <img class="side-brand-logo" src="{{ url_for('static', filename='box_logo.png') }}" alt="" width="32" height="32">
+  <span class="side-brand-word">NEXGEN&nbsp;POS</span>
+</a>
+
+<nav class="side-nav" aria-label="Primary">
+{% for caption, group_hrefs in SIDE_GROUPS %}
+  {%- set ns = namespace(emitted=false) -%}
+  {%- for label, href, kind, match, ico in side_links -%}
+    {%- if href in group_hrefs -%}
+      {%- if not ns.emitted -%}
+        {%- set ns.emitted = true -%}
+  <span class="side-caption">{{ caption }}</span>
+      {%- endif -%}
+      {%- set active = (request.endpoint == match) if kind == 'endpoint' else (request.path == match) -%}
+      {%- if href == '/settings' -%}
+        {%- set is_settings_path = (request.path == '/settings') -%}
+  <div class="side-dropdown{% if is_settings_path %} is-open is-active{% endif %}" data-side-dropdown="settings">
+    <button type="button" class="side-link side-dropdown-toggle{% if is_settings_path %} is-active{% endif %}" aria-expanded="{% if is_settings_path %}true{% else %}false{% endif %}" title="Settings" aria-label="Settings">
+      {{ icon('settings', 18) }}
+      <span class="side-link-label">Settings</span>
+      <span class="side-dropdown-chevron">{{ icon('chevron-down', 14) }}</span>
+    </button>
+    <div class="side-dropdown-menu">
+      <a class="side-dropdown-item" href="/settings#receipt" data-tab="receipt" hx-boost="false" title="General">
+        {{ icon('receipt', 16) }}
+        <span class="side-link-label">General</span>
+      </a>
+      <a class="side-dropdown-item" href="/settings#store" data-tab="store" hx-boost="false" title="Store Settings">
+        {{ icon('box', 16) }}
+        <span class="side-link-label">Store Settings</span>
+      </a>
+      <a class="side-dropdown-item" href="/settings#printers" data-tab="printers" hx-boost="false" title="Printers & Hardware">
+        {{ icon('printer', 16) }}
+        <span class="side-link-label">Printers &amp; Hardware</span>
+      </a>
+      <a class="side-dropdown-item" href="/settings#theme" data-tab="theme" hx-boost="false" title="Theme">
+        {{ icon('sun', 16) }}
+        <span class="side-link-label">Theme</span>
+      </a>
+      <a class="side-dropdown-item" href="/settings#rlc" data-tab="rlc" hx-boost="false" title="RLC SFTP">
+        {{ icon('cloud-upload', 16) }}
+        <span class="side-link-label">RLC SFTP</span>
+      </a>
+    </div>
+  </div>
+      {%- else -%}
+  <a class="side-link{% if active %} is-active{% endif %}" href="{{ href }}" title="{{ label }}" aria-label="{{ label }}"{% if active %} aria-current="page"{% endif %}>{{ icon(ico, 18) }}<span class="side-link-label">{{ label }}</span></a>
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endfor %}
+</nav>
