@@ -263,8 +263,8 @@ function fetchOverview() {
       renderRecent(data.recent || []);
     })
     .catch((error) => {
-      if (error.name === 'AbortError') return;
-      console.error('Error loading overview:', error);
+      if (controller.signal.aborted || (error && (error.name === 'AbortError' || error.message?.includes('Failed to fetch')))) return;
+      console.warn('Overview fetch notice:', error);
     })
     .finally(() => {
       const idx = inFlight.indexOf(controller);
