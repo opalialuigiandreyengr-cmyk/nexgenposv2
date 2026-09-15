@@ -839,16 +839,6 @@ def create_app():
             
             # Configure RLC files directory for rlc_apps module
             try:
-            except Exception as e:
-                logger.error(f"Error creating database tables: {e}")
-    
-    # Initialize the app
-    try:
-        with app.app_context():
-            init_db()
-            
-            # Configure RLC files directory for rlc_apps module
-            try:
                 from rlc_apps import set_rlc_files_directory
                 set_rlc_files_directory(app.config['RLC_FILES_FOLDER'])
                 logger.info(f"RLC files directory configured: {app.config['RLC_FILES_FOLDER']}")
