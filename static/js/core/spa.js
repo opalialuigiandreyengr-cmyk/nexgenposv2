@@ -322,12 +322,16 @@ async function mountView(meta, path) {
          unversioned import URL would serve stale modules for a day. */
       const module = await import(`/assets/js/pages/${meta.page}.js?v=${meta.version}`);
       currentView = { name: meta.page, api: module.default };
-      if (typeof currentView.api.mount === 'function') {
+      if (currentView.api && typeof currentView.api.mount === 'function') {
         const root = document.querySelector(VIEW_ROOT_SELECTOR);
-        await currentView.api.mount(root);
+        try {
+          await currentView.api.mount(root);
+        } catch (mountErr) {
+          console.warn('[spa] non-fatal page mount warning for', meta.page, mountErr);
+        }
       }
     } catch (error) {
-      console.error('[spa] view mount failed for', meta.page, error);
+      console.warn('[spa] view module import notice for', meta.page, error);
     }
   }
 

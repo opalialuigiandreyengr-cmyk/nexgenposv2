@@ -98,7 +98,13 @@ function pollPrinter(role) {
   state.checking = true;
   state.lastCheckedAt = now;
 
-  // Kitchen probes need the network; the cashier probe may be USB-local.
+  // Kitchen probes need the network; cashier probe is USB-local. Skip on cloud web server.
+  if (window.location.hostname.includes('pythonanywhere') || window.location.hostname.includes('.app')) {
+    state.checking = false;
+    setPrinterState(role, 'disconnected', `${role === 'kitchen' ? 'Kitchen' : 'Cashier'} Printer: Cloud Mode`);
+    return;
+  }
+
   if (!navigator.onLine && role !== 'cashier') {
     state.checking = false;
     setPrinterState(role, 'disconnected', 'Kitchen Printer: Network offline');
